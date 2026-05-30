@@ -1,0 +1,192 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getGames } from '../../api/products'
+import { logout } from '../../api/auth'
+import { useAuthStore } from '../../store/authStore'
+import { useCartStore } from '../../store/cartStore'
+
+export function Header() {
+  const { user, clearAuth } = useAuthStore()
+  const { items, openCart } = useCartStore()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [activeGame, setActiveGame] = useState(null)
+  const navigate = useNavigate()
+
+  const count = items.reduce((s, i) => s + i.quantity, 0)
+
+  const { data: gamesData } = useQuery({
+    queryKey: ['games-nav'],
+    queryFn: () => getGames(true),
+  })
+  const games = gamesData?.data ?? []
+
+  const handleLogout = async () => {
+    await logout()
+    clearAuth()
+    navigate('/')
+  }
+
+  return (
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="text-2xl font-extrabold text-indigo-700 tracking-tight">
+            Yocigaci
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {games.map((game) => (
+              <div
+                key={game.id}
+                className="relative"
+                onMouseEnter={() => setActiveGame(game.id)}
+                onMouseLeave={() => setActiveGame(null)}
+              >
+                <Link
+                  to={`/catalogo?game=${game.slug}`}
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
+                >
+                  {game.name}
+                </Link>
+                {activeGame === game.id && game.categories?.length > 0 && (
+                  <div
+                    className={`absolute top-full left-0 bg-white border border-gray-200 shadow-lg rounded-lg p-4 min-w-48 grid gap-1`}
+                    style={{ gridTemplateColumns: `repeat(${game.navbar_columns}, 1fr)` }}
+                  >
+                    {game.categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                        className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded whitespace-nowrap"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <a
+              href="https://www.cardtrader.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
+            >
+              Carte Singole ↗
+            </a>
+          </nav>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            {user ? (
+              <div className="hidden md:flex items-center gap-1">
+                {user.role === 'admin' && (
+                  <Link to="/admin/prodotti" className="px-3 py-2 text-xs font-medium text-indigo-600 hover:underline">
+                    Admin
+                  </Link>
+                )}
+                <Link to="/account/ordini" className="px-3 py-2 text-sm text-gray-700 hover:text-indigo-600">
+                  I miei ordini
+                </Link>
+                <button onClick={handleLogout} className="px-3 py-2 text-sm text-gray-500 hover:text-red-500">
+                  Esci
+                </button>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-1">
+                <Link to="/login" className="px-3 py-2 text-sm text-gray-700 hover:text-indigo-600">
+                  Accedi
+                </Link>
+                <Link
+                  to="/registrati"
+                  className="px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Registrati
+                </Link>
+              </div>
+            )}
+
+            {/* Cart button */}
+            <button
+              onClick={openCart}
+              className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {count}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-2 text-gray-700"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileOpen
+                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                }
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="md:hidden py-4 border-t border-gray-100 space-y-1">
+            {games.map((game) => (
+              <div key={game.id}>
+                <Link
+                  to={`/catalogo?game=${game.slug}`}
+                  className="block px-3 py-2 font-medium text-gray-800"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {game.name}
+                </Link>
+                {game.categories?.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                    className="block px-6 py-1.5 text-sm text-gray-600"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            ))}
+            <a
+              href="https://www.cardtrader.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block px-3 py-2 text-gray-800"
+            >
+              Carte Singole ↗
+            </a>
+            <div className="pt-2 border-t border-gray-100">
+              {user ? (
+                <>
+                  <Link to="/account/ordini" className="block px-3 py-2 text-gray-700" onClick={() => setMobileOpen(false)}>I miei ordini</Link>
+                  <button onClick={() => { handleLogout(); setMobileOpen(false) }} className="block w-full text-left px-3 py-2 text-red-500">Esci</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block px-3 py-2 text-gray-700" onClick={() => setMobileOpen(false)}>Accedi</Link>
+                  <Link to="/registrati" className="block px-3 py-2 text-indigo-600 font-medium" onClick={() => setMobileOpen(false)}>Registrati</Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
+  )
+}
