@@ -38,7 +38,7 @@
             @foreach($order->items as $item)
             <tr>
                 <td>{{ $item->product_snapshot['name'] }}</td>
-                <td>{{ isset($item->product_snapshot['preorder_release_date']) ? \Carbon\Carbon::parse($item->product_snapshot['preorder_release_date'])->format('d/m/Y') : '—' }}</td>
+                <td>{{ isset($item->product_snapshot['preorder_release_date']) ? \Carbon\Carbon::parse($item->product_snapshot['preorder_release_date'])->format('d/m/Y') : '-' }}</td>
                 <td>{{ $item->quantity }}</td>
                 <td>€ {{ number_format($item->total_price, 2, ',', '.') }}</td>
             </tr>

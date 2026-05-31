@@ -17,7 +17,7 @@ class PreorderReady extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Il tuo preordine è pronto — ' . $this->order->order_number);
+        return new Envelope(subject: 'Il tuo preordine è pronto - ' . $this->order->order_number);
     }
 
     public function content(): Content

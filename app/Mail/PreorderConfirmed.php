@@ -17,7 +17,7 @@ class PreorderConfirmed extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Preordine confermato — ' . $this->order->order_number);
+        return new Envelope(subject: 'Preordine confermato - ' . $this->order->order_number);
     }
 
     public function content(): Content

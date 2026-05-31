@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Pencil, Trash2, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   adminGetHomepageSections,
@@ -236,12 +237,12 @@ export default function AdminHomepageSections() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => { setEditing(editing === section.id ? null : section.id); setCreating(false) }}>
-                    {editing === section.id ? 'Chiudi' : 'Modifica'}
+                  <Button variant="ghost" size="sm" aria-label={editing === section.id ? 'Chiudi' : 'Modifica'} title={editing === section.id ? 'Chiudi' : 'Modifica'} className="!px-2" onClick={() => { setEditing(editing === section.id ? null : section.id); setCreating(false) }}>
+                    {editing === section.id ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
                   </Button>
-                  <Button variant="danger" size="sm"
+                  <Button variant="danger" size="sm" aria-label="Elimina" title="Elimina" className="!px-2"
                     onClick={() => window.confirm('Eliminare questa sezione?') && del.mutate(section.id)}>
-                    Elimina
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

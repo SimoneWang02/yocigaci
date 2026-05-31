@@ -9,7 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
-// Pubbliche — catalogo e giochi
+// Pubbliche - catalogo e giochi
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/games', [ProductController::class, 'games']);
@@ -19,11 +19,11 @@ Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
-// Checkout (pubblico — funziona anche per guest)
+// Checkout (pubblico - funziona anche per guest)
 Route::post('/checkout/create-intent', [CheckoutController::class, 'createIntent']);
 Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']);
 
-// Stripe webhook — escluso da CSRF e auth
+// Stripe webhook - escluso da CSRF e auth
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 // Autenticate

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGetCategories, adminCreateCategory, adminUpdateCategory, adminDeleteCategory } from '../../api/admin'
 import { adminGetGames } from '../../api/admin'
@@ -20,7 +21,7 @@ function CategoryForm({ category, games, onSave, onCancel }) {
 
   return (
     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <Select
           label="Gioco"
           value={form.game_id}
@@ -32,11 +33,6 @@ function CategoryForm({ category, games, onSave, onCancel }) {
           label="Nome"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value, slug: autoSlug(e.target.value) })}
-        />
-        <Input
-          label="Slug"
-          value={form.slug}
-          onChange={(e) => setForm({ ...form, slug: e.target.value })}
         />
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -144,8 +140,12 @@ export default function AdminCategories() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2 justify-end">
-                        <Button variant="ghost" size="sm" onClick={() => setEditing(cat.id)}>Modifica</Button>
-                        <Button variant="danger" size="sm" onClick={() => window.confirm('Eliminare?') && del.mutate(cat.id)}>Elimina</Button>
+                        <Button variant="ghost" size="sm" aria-label="Modifica" title="Modifica" className="!px-2" onClick={() => setEditing(cat.id)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="danger" size="sm" aria-label="Elimina" title="Elimina" className="!px-2" onClick={() => window.confirm('Eliminare?') && del.mutate(cat.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGetGames, adminCreateGame, adminUpdateGame, adminDeleteGame } from '../../api/admin'
 import { Button } from '../../components/ui/Button'
@@ -18,17 +19,11 @@ function GameForm({ game, onSave, onCancel }) {
 
   return (
     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <Input
           label="Nome"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value, slug: autoSlug(e.target.value) })}
-          required
-        />
-        <Input
-          label="Slug"
-          value={form.slug}
-          onChange={(e) => setForm({ ...form, slug: e.target.value })}
           required
         />
       </div>
@@ -112,7 +107,6 @@ export default function AdminGames() {
           <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
             <tr>
               <th className="text-left px-4 py-3">Nome</th>
-              <th className="text-left px-4 py-3">Slug</th>
               <th className="text-center px-4 py-3">Colonne</th>
               <th className="text-center px-4 py-3">Ordine</th>
               <th className="text-center px-4 py-3">Stato</th>
@@ -124,7 +118,6 @@ export default function AdminGames() {
               <>
                 <tr key={game.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-800">{game.name}</td>
-                  <td className="px-4 py-3 text-gray-500 font-mono text-xs">{game.slug}</td>
                   <td className="px-4 py-3 text-center">{game.navbar_columns}</td>
                   <td className="px-4 py-3 text-center">{game.sort_order}</td>
                   <td className="px-4 py-3 text-center">
@@ -134,20 +127,25 @@ export default function AdminGames() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(game.id)}>Modifica</Button>
+                      <Button variant="ghost" size="sm" aria-label="Modifica" title="Modifica" className="!px-2" onClick={() => setEditing(game.id)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="danger"
                         size="sm"
+                        aria-label="Elimina"
+                        title="Elimina"
+                        className="!px-2"
                         onClick={() => window.confirm('Eliminare questo gioco?') && del.mutate(game.id)}
                       >
-                        Elimina
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </td>
                 </tr>
                 {editing === game.id && (
                   <tr key={`edit-${game.id}`}>
-                    <td colSpan={6} className="px-4 pb-4">
+                    <td colSpan={5} className="px-4 pb-4">
                       <GameForm
                         game={game}
                         onSave={(d) => update.mutate({ id: game.id, data: d })}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Search, User, ShoppingCart, Menu, X } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { getGames } from '../../api/products'
 import { logout } from '../../api/auth'
@@ -121,9 +122,7 @@ export function Header() {
                 aria-label="Cerca"
                 className="p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
-                </svg>
+                <Search className="w-6 h-6" />
               </button>
               {searchOpen && (
                 <>
@@ -141,9 +140,7 @@ export function Header() {
                       className="flex-1 px-3 py-1.5 text-sm focus:outline-none"
                     />
                     <button type="submit" className="p-2 text-gray-500 hover:text-indigo-600 cursor-pointer" aria-label="Cerca">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
-                      </svg>
+                      <Search className="w-5 h-5" />
                     </button>
                   </form>
                 </>
@@ -158,9 +155,7 @@ export function Header() {
                   aria-label="Account"
                   className="p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+                  <User className="w-6 h-6" />
                 </button>
                 {userMenuOpen && (
                   <>
@@ -190,9 +185,7 @@ export function Header() {
                 aria-label="Accedi o registrati"
                 className="p-2 text-gray-700 hover:text-indigo-600 transition-colors hidden md:block"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <User className="w-6 h-6" />
               </Link>
             )}
 
@@ -202,9 +195,7 @@ export function Header() {
               aria-label="Carrello"
               className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <ShoppingCart className="w-6 h-6" />
               {count > 0 && (
                 <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                   {count}
@@ -218,12 +209,7 @@ export function Header() {
               aria-label="Menu"
               className="md:hidden p-2 text-gray-700 cursor-pointer"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileOpen
-                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                }
-              </svg>
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>

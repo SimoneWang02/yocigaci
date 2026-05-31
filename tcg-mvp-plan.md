@@ -1,4 +1,4 @@
-# TCG Ecommerce MVP — Piano per Claude Code
+# TCG Ecommerce MVP - Piano per Claude Code
 
 > Riferimento visivo: [jpycollectibles.com](https://jpycollectibles.com/)
 > Stack: **React (Vite + TailwindCSS)** + **Laravel 11 (API REST)** + **Stripe** + **MySQL**
@@ -12,13 +12,13 @@ Il negozio vende prodotti TCG (Trading Card Game) fisici:
 
 - **Giochi supportati**: Pokémon, Magic: The Gathering, One Piece, Riftbound
 - **Tipologie prodotto**: Booster Box, Display, Collezioni speciali, Accessori
-- **Carte singole**: non vendute direttamente — link esterno a CardTrader (si apre in nuova tab)
-- **Feature critica**: i preordini — prodotti annunciati non ancora disponibili, pagati in anticipo
+- **Carte singole**: non vendute direttamente - link esterno a CardTrader (si apre in nuova tab)
+- **Feature critica**: i preordini - prodotti annunciati non ancora disponibili, pagati in anticipo
 - **Volumi**: 1–5 ordini/giorno, catalogo stimato 50–200 prodotti attivi
 
 ---
 
-## FASE 1 — Backend Laravel
+## FASE 1 - Backend Laravel
 
 ### 1.1 Setup iniziale
 
@@ -151,18 +151,18 @@ Usare la migration default di Laravel + aggiungere:
 
 **Status ordine:**
 
-- `pending` — creato, pagamento non confermato
-- `paid` — pagamento confermato
-- `processing` — in preparazione
-- `shipped` — spedito
-- `delivered` — consegnato
-- `cancelled` — annullato
-- `refunded` — rimborsato
+- `pending` - creato, pagamento non confermato
+- `paid` - pagamento confermato
+- `processing` - in preparazione
+- `shipped` - spedito
+- `delivered` - consegnato
+- `cancelled` - annullato
+- `refunded` - rimborsato
 
 **Status extra per preordini:**
 
-- `preorder_confirmed` — preordine confermato, in attesa merce
-- `preorder_ready` — merce arrivata, pronto per la spedizione
+- `preorder_confirmed` - preordine confermato, in attesa merce
+- `preorder_ready` - merce arrivata, pronto per la spedizione
 
 ---
 
@@ -281,7 +281,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 
 ---
 
-### 1.5 ProductController — logica di listing
+### 1.5 ProductController - logica di listing
 
 ```php
 public function index(Request $request) {
@@ -346,7 +346,7 @@ public function confirm(Request $request) {
 }
 ```
 
-**Webhook Stripe** — gestire almeno questi eventi:
+**Webhook Stripe** - gestire almeno questi eventi:
 
 - `payment_intent.succeeded` → aggiornare ordine a `paid`
 - `payment_intent.payment_failed` → aggiornare ordine a `pending` + notifica
@@ -372,7 +372,7 @@ public function uploadImage(Request $request, Product $product) {
 
 ---
 
-## FASE 2 — Frontend React
+## FASE 2 - Frontend React
 
 ### 2.1 Setup
 
@@ -434,50 +434,50 @@ src/
 ```jsx
 // App.jsx
 <Routes>
-	{/* Pubbliche */}
-	<Route path="/" element={<Home />} />
-	<Route path="/catalogo" element={<Catalog />} />
-	<Route path="/prodotti/:slug" element={<ProductDetail />} />
-	<Route path="/carrello" element={<Cart />} />
-	<Route path="/checkout" element={<Checkout />} />
-	<Route
-		path="/ordine-confermato/:orderNumber"
-		element={<OrderConfirmation />}
-	/>
+    {/* Pubbliche */}
+    <Route path="/" element={<Home />} />
+    <Route path="/catalogo" element={<Catalog />} />
+    <Route path="/prodotti/:slug" element={<ProductDetail />} />
+    <Route path="/carrello" element={<Cart />} />
+    <Route path="/checkout" element={<Checkout />} />
+    <Route
+        path="/ordine-confermato/:orderNumber"
+        element={<OrderConfirmation />}
+    />
 
-	{/* Auth */}
-	<Route path="/login" element={<Login />} />
-	<Route path="/registrati" element={<Register />} />
+    {/* Auth */}
+    <Route path="/login" element={<Login />} />
+    <Route path="/registrati" element={<Register />} />
 
-	{/* Area cliente (protetta) */}
-	<Route
-		path="/account"
-		element={
-			<ProtectedRoute>
-				<AccountLayout />
-			</ProtectedRoute>
-		}
-	>
-		<Route path="ordini" element={<Orders />} />
-		<Route path="ordini/:orderNumber" element={<OrderDetail />} />
-	</Route>
+    {/* Area cliente (protetta) */}
+    <Route
+        path="/account"
+        element={
+            <ProtectedRoute>
+                <AccountLayout />
+            </ProtectedRoute>
+        }
+    >
+        <Route path="ordini" element={<Orders />} />
+        <Route path="ordini/:orderNumber" element={<OrderDetail />} />
+    </Route>
 
-	{/* Admin (protetta + ruolo admin) */}
-	<Route
-		path="/admin"
-		element={
-			<AdminRoute>
-				<AdminLayout />
-			</AdminRoute>
-		}
-	>
-		<Route path="giochi" element={<AdminGames />} />
-		<Route path="categorie" element={<AdminCategories />} />
-		<Route path="prodotti" element={<AdminProducts />} />
-		<Route path="prodotti/nuovo" element={<ProductForm />} />
-		<Route path="prodotti/:id/modifica" element={<ProductForm />} />
-		<Route path="ordini" element={<AdminOrders />} />
-	</Route>
+    {/* Admin (protetta + ruolo admin) */}
+    <Route
+        path="/admin"
+        element={
+            <AdminRoute>
+                <AdminLayout />
+            </AdminRoute>
+        }
+    >
+        <Route path="giochi" element={<AdminGames />} />
+        <Route path="categorie" element={<AdminCategories />} />
+        <Route path="prodotti" element={<AdminProducts />} />
+        <Route path="prodotti/nuovo" element={<ProductForm />} />
+        <Route path="prodotti/:id/modifica" element={<ProductForm />} />
+        <Route path="ordini" element={<AdminOrders />} />
+    </Route>
 </Routes>
 ```
 
@@ -485,7 +485,7 @@ src/
 
 ---
 
-### 2.4 Carrello — Zustand store
+### 2.4 Carrello - Zustand store
 
 ```js
 // store/cartStore.js
@@ -493,50 +493,50 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export const useCartStore = create(
-	persist(
-		(set, get) => ({
-			items: [],
+    persist(
+        (set, get) => ({
+            items: [],
 
-			addItem: (product, quantity = 1) => {
-				const items = get().items;
-				const existing = items.find((i) => i.id === product.id);
-				if (existing) {
-					set({
-						items: items.map((i) =>
-							i.id === product.id
-								? { ...i, quantity: i.quantity + quantity }
-								: i,
-						),
-					});
-				} else {
-					set({ items: [...items, { ...product, quantity }] });
-				}
-			},
+            addItem: (product, quantity = 1) => {
+                const items = get().items;
+                const existing = items.find((i) => i.id === product.id);
+                if (existing) {
+                    set({
+                        items: items.map((i) =>
+                            i.id === product.id
+                                ? { ...i, quantity: i.quantity + quantity }
+                                : i,
+                        ),
+                    });
+                } else {
+                    set({ items: [...items, { ...product, quantity }] });
+                }
+            },
 
-			removeItem: (productId) =>
-				set({ items: get().items.filter((i) => i.id !== productId) }),
+            removeItem: (productId) =>
+                set({ items: get().items.filter((i) => i.id !== productId) }),
 
-			updateQuantity: (productId, quantity) =>
-				set({
-					items: get().items.map((i) =>
-						i.id === productId ? { ...i, quantity } : i,
-					),
-				}),
+            updateQuantity: (productId, quantity) =>
+                set({
+                    items: get().items.map((i) =>
+                        i.id === productId ? { ...i, quantity } : i,
+                    ),
+                }),
 
-			clear: () => set({ items: [] }),
+            clear: () => set({ items: [] }),
 
-			get total() {
-				return get().items.reduce(
-					(sum, i) => sum + i.price * i.quantity,
-					0,
-				);
-			},
-			get count() {
-				return get().items.reduce((sum, i) => sum + i.quantity, 0);
-			},
-		}),
-		{ name: "cart-storage" }, // persiste in localStorage
-	),
+            get total() {
+                return get().items.reduce(
+                    (sum, i) => sum + i.price * i.quantity,
+                    0,
+                );
+            },
+            get count() {
+                return get().items.reduce((sum, i) => sum + i.quantity, 0);
+            },
+        }),
+        { name: "cart-storage" }, // persiste in localStorage
+    ),
 );
 ```
 
@@ -572,23 +572,23 @@ export const useCartStore = create(
 
 - Step 1: indirizzo di spedizione (con autocompile se loggato)
 - Step 2: riepilogo + pagamento (Stripe Elements)
-- Nota per i preordini: banner visibile "Questo ordine contiene preordini — spedizione prevista [data]"
+- Nota per i preordini: banner visibile "Questo ordine contiene preordini - spedizione prevista [data]"
 
 ---
 
-### 2.6 Pagina Home — sezioni
+### 2.6 Pagina Home - sezioni
 
 Ispirata a jpycollectibles, nell'ordine:
 
-1. **Hero slider** — banner promozionali (editabile dal backoffice)
-2. **Ultime uscite** — grid orizzontale scrollabile, prodotti con `sort_order` più alto
-3. **Preordini aperti** — sezione dedicata, card con countdown alla release date
-4. **Per gioco** — sezione Pokémon / One Piece / MTG / Riftbound con link alla collection
-5. **Carte singole** — banner/sezione con CTA "Trova le tue carte su CardTrader →" (link esterno, `target="_blank"`)
+1. **Hero slider** - banner promozionali (editabile dal backoffice)
+2. **Ultime uscite** - grid orizzontale scrollabile, prodotti con `sort_order` più alto
+3. **Preordini aperti** - sezione dedicata, card con countdown alla release date
+4. **Per gioco** - sezione Pokémon / One Piece / MTG / Riftbound con link alla collection
+5. **Carte singole** - banner/sezione con CTA "Trova le tue carte su CardTrader →" (link esterno, `target="_blank"`)
 
 ---
 
-## FASE 3 — Backoffice Admin
+## FASE 3 - Backoffice Admin
 
 ### Pagina Giochi (`/admin/giochi`)
 
@@ -631,20 +631,20 @@ Ispirata a jpycollectibles, nell'ordine:
 
 ---
 
-## FASE 4 — Email transazionali
+## FASE 4 - Email transazionali
 
 Usare **Laravel Mailable** con template Blade. Per il MVP, Mailtrap in sviluppo, Resend o Mailgun in produzione.
 
 Email da implementare:
 
-- `OrderConfirmed` — conferma ordine standard
-- `PreorderConfirmed` — conferma preordine con data prevista
-- `OrderShipped` — ordine spedito con codice tracking
-- `PreorderReady` — preordine pronto, verrà spedito a breve
+- `OrderConfirmed` - conferma ordine standard
+- `PreorderConfirmed` - conferma preordine con data prevista
+- `OrderShipped` - ordine spedito con codice tracking
+- `PreorderReady` - preordine pronto, verrà spedito a breve
 
 ---
 
-## FASE 5 — Deploy MVP
+## FASE 5 - Deploy MVP
 
 ### Backend (Laravel)
 
@@ -673,7 +673,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 
 ---
 
-## Checklist MVP — cosa è incluso / escluso
+## Checklist MVP - cosa è incluso / escluso
 
 ### ✅ Incluso nel MVP
 
@@ -705,35 +705,35 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 
 | Modulo                           | Attività                                                                                               | Ore     |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ | ------- |
-| **Backend — Setup**              | Progetto Laravel, Sanctum, .env, CORS, middleware ruoli                                                | 6       |
-| **Backend — DB**                 | 8 migration (games, categories, products, product_images, users, addresses, orders, order_items)       | 6       |
-| **Backend — Catalogo**           | Model + relazioni + scope, GameController, CategoryController, ProductController (listing + dettaglio) | 12      |
-| **Backend — Immagini**           | Upload, reorder, delete immagini prodotto; storage link                                                | 6       |
-| **Backend — Auth**               | Register, login, logout, me; Form Requests validazione                                                 | 6       |
-| **Backend — Indirizzi**          | CRUD indirizzi utente                                                                                  | 4       |
-| **Backend — Checkout**           | createIntent, confirm, decremento stock                                                                | 10      |
-| **Backend — Webhook Stripe**     | payment_intent.succeeded/failed, charge.refunded                                                       | 6       |
-| **Backend — Ordini utente**      | Lista ordini, dettaglio ordine per l'utente                                                            | 4       |
-| **Backend — Admin prodotti**     | CRUD prodotti + upload immagini + reorder                                                              | 10      |
-| **Backend — Admin giochi/cat.**  | CRUD games + categories, reorder sort_order                                                            | 6       |
-| **Backend — Admin ordini**       | Lista ordini, cambio stato, aggiunta tracking                                                          | 6       |
-| **Backend — Email**              | 4 Mailable (OrderConfirmed, PreorderConfirmed, OrderShipped, PreorderReady) + template Blade           | 8       |
-| **Backend — Resources**          | Laravel Resources per tutti i response (Product, Order, Game, Category…)                               | 5       |
+| **Backend - Setup**              | Progetto Laravel, Sanctum, .env, CORS, middleware ruoli                                                | 6       |
+| **Backend - DB**                 | 8 migration (games, categories, products, product_images, users, addresses, orders, order_items)       | 6       |
+| **Backend - Catalogo**           | Model + relazioni + scope, GameController, CategoryController, ProductController (listing + dettaglio) | 12      |
+| **Backend - Immagini**           | Upload, reorder, delete immagini prodotto; storage link                                                | 6       |
+| **Backend - Auth**               | Register, login, logout, me; Form Requests validazione                                                 | 6       |
+| **Backend - Indirizzi**          | CRUD indirizzi utente                                                                                  | 4       |
+| **Backend - Checkout**           | createIntent, confirm, decremento stock                                                                | 10      |
+| **Backend - Webhook Stripe**     | payment_intent.succeeded/failed, charge.refunded                                                       | 6       |
+| **Backend - Ordini utente**      | Lista ordini, dettaglio ordine per l'utente                                                            | 4       |
+| **Backend - Admin prodotti**     | CRUD prodotti + upload immagini + reorder                                                              | 10      |
+| **Backend - Admin giochi/cat.**  | CRUD games + categories, reorder sort_order                                                            | 6       |
+| **Backend - Admin ordini**       | Lista ordini, cambio stato, aggiunta tracking                                                          | 6       |
+| **Backend - Email**              | 4 Mailable (OrderConfirmed, PreorderConfirmed, OrderShipped, PreorderReady) + template Blade           | 8       |
+| **Backend - Resources**          | Laravel Resources per tutti i response (Product, Order, Game, Category…)                               | 5       |
 | **Subtotale backend**            |                                                                                                        | **95**  |
 |                                  |                                                                                                        |         |
-| **Frontend — Setup**             | Vite + Tailwind + React Router + Zustand + React Query + Axios + Stripe.js                             | 4       |
-| **Frontend — Layout**            | Header (navbar dinamica da API), Footer, CartDrawer                                                    | 10      |
-| **Frontend — Home**              | Hero slider, ultime uscite, sezione preordini, sezioni per gioco, banner CardTrader                    | 12      |
-| **Frontend — Catalogo**          | Grid prodotti, filtri (gioco/categoria/preordine), ordinamento, URL params, paginazione                | 12      |
-| **Frontend — Scheda prodotto**   | Galleria immagini, info prodotto, badge preordine/esaurito, CTA                                        | 8       |
-| **Frontend — Carrello**          | Zustand store + persist, CartDrawer, aggiorna quantità, rimuovi                                        | 6       |
-| **Frontend — Checkout**          | Form indirizzo, Stripe Elements, riepilogo ordine, banner preordine, submit                            | 14      |
-| **Frontend — Conferma ordine**   | Pagina post-pagamento con numero ordine e riepilogo                                                    | 3       |
-| **Frontend — Auth**              | Login, Register, ProtectedRoute, AdminRoute                                                            | 6       |
-| **Frontend — Area cliente**      | Lista ordini, dettaglio ordine con stato e tracking                                                    | 6       |
-| **Frontend — Admin giochi/cat.** | Tabelle CRUD + form giochi, tabella CRUD + form categorie                                              | 8       |
-| **Frontend — Admin prodotti**    | Tabella prodotti, form prodotto (select gioco→categoria dinamica, upload immagini drag&drop, reorder)  | 16      |
-| **Frontend — Admin ordini**      | Tabella ordini con filtri, dettaglio ordine, cambio stato, tracking                                    | 8       |
+| **Frontend - Setup**             | Vite + Tailwind + React Router + Zustand + React Query + Axios + Stripe.js                             | 4       |
+| **Frontend - Layout**            | Header (navbar dinamica da API), Footer, CartDrawer                                                    | 10      |
+| **Frontend - Home**              | Hero slider, ultime uscite, sezione preordini, sezioni per gioco, banner CardTrader                    | 12      |
+| **Frontend - Catalogo**          | Grid prodotti, filtri (gioco/categoria/preordine), ordinamento, URL params, paginazione                | 12      |
+| **Frontend - Scheda prodotto**   | Galleria immagini, info prodotto, badge preordine/esaurito, CTA                                        | 8       |
+| **Frontend - Carrello**          | Zustand store + persist, CartDrawer, aggiorna quantità, rimuovi                                        | 6       |
+| **Frontend - Checkout**          | Form indirizzo, Stripe Elements, riepilogo ordine, banner preordine, submit                            | 14      |
+| **Frontend - Conferma ordine**   | Pagina post-pagamento con numero ordine e riepilogo                                                    | 3       |
+| **Frontend - Auth**              | Login, Register, ProtectedRoute, AdminRoute                                                            | 6       |
+| **Frontend - Area cliente**      | Lista ordini, dettaglio ordine con stato e tracking                                                    | 6       |
+| **Frontend - Admin giochi/cat.** | Tabelle CRUD + form giochi, tabella CRUD + form categorie                                              | 8       |
+| **Frontend - Admin prodotti**    | Tabella prodotti, form prodotto (select gioco→categoria dinamica, upload immagini drag&drop, reorder)  | 16      |
+| **Frontend - Admin ordini**      | Tabella ordini con filtri, dettaglio ordine, cambio stato, tracking                                    | 8       |
 | **Subtotale frontend**           |                                                                                                        | **113** |
 |                                  |                                                                                                        |         |
 | **Deploy**                       | VPS setup (Nginx, PHP, MySQL, SSL), CI base, .env produzione, Stripe webhook registrazione             | 10      |
@@ -751,12 +751,12 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 
 - Usare **Laravel Resources** per tutte le risposte API (mai esporre direttamente i model)
 - Usare **Form Requests** per tutta la validazione backend
-- Il carrello vive **solo nel frontend** (localStorage via Zustand) — il backend non ha una tabella `carts`
+- Il carrello vive **solo nel frontend** (localStorage via Zustand) - il backend non ha una tabella `carts`
 - Lo **stock viene decrementato** solo al `payment_intent.succeeded` webhook di Stripe, non al `createIntent`
-- Il campo `product_snapshot` in `order_items` salva nome, prezzo e immagine al momento dell'acquisto — se il prodotto viene modificato o eliminato, l'ordine storico resta corretto
+- Il campo `product_snapshot` in `order_items` salva nome, prezzo e immagine al momento dell'acquisto - se il prodotto viene modificato o eliminato, l'ordine storico resta corretto
 - Tutta l'autenticazione usa **Laravel Sanctum** con token (non sessioni, perché frontend e backend sono separati)
-- I **preordini si pagano subito** al checkout — non c'è pagamento differito nel MVP
-- La **navbar è generata dinamicamente** da `/api/games?with=categories` — non è hardcoded nel frontend. Al cambio di un gioco o categoria dal backoffice, la navbar si aggiorna senza deploy
+- I **preordini si pagano subito** al checkout - non c'è pagamento differito nel MVP
+- La **navbar è generata dinamicamente** da `/api/games?with=categories` - non è hardcoded nel frontend. Al cambio di un gioco o categoria dal backoffice, la navbar si aggiorna senza deploy
 - L'**immagine principale** di un prodotto è sempre quella con `sort_order` più basso nella tabella `product_images`
 - Il **ruolo admin** è gestito con un campo `role` stringa su `users` (`"admin"` / `"customer"`). Creare un middleware `CheckRole` che verifica `auth()->user()->role === 'admin'`
 - La select **categoria nel form prodotto** dipende dal gioco selezionato: al cambio del gioco, fare una chiamata a `/api/admin/categories?game_id=X` per ricaricare le opzioni

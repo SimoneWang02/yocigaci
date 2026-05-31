@@ -14,7 +14,7 @@ const HERO_BANNERS = [
     {
         id: "one-piece",
         image: "/images/banners/banner-2.svg",
-        alt: "One Piece Card Game — preordini",
+        alt: "One Piece Card Game - preordini",
         href: "/catalogo?preorder=true",
     },
     {
@@ -35,7 +35,7 @@ export default function Home() {
 
     return (
         <div>
-            {/* Hero — carousel di banner */}
+            {/* Hero - carousel di banner */}
             <HeroCarousel slides={HERO_BANNERS} />
 
             {/* Sezioni gestite dall'admin */}
@@ -47,7 +47,7 @@ export default function Home() {
                 sections.map((section, idx) => (
                     <div
                         key={section.id}
-                        className={idx % 2 === 1 ? "bg-gray-50" : ""}
+                        className={idx % 2 === 1 ? "bg-gray-100" : "bg-white"}
                     >
                         <ProductCarousel
                             title={section.title}

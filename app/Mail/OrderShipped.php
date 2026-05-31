@@ -17,7 +17,7 @@ class OrderShipped extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Il tuo ordine è in arrivo — ' . $this->order->order_number);
+        return new Envelope(subject: 'Il tuo ordine è in arrivo - ' . $this->order->order_number);
     }
 
     public function content(): Content
