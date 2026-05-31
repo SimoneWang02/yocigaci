@@ -4,6 +4,25 @@
   box-sizing: border-box;
 }
 
+/*
+ * Tailwind v4 ha rimosso il `cursor: pointer` di default dai bottoni
+ * (in v3 era incluso nel preflight). Lo ripristiniamo qui per tutti gli
+ * elementi interattivi: vale automaticamente anche per i bottoni/link futuri.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  select,
+  summary,
+  [type="button"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  [type="submit"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
