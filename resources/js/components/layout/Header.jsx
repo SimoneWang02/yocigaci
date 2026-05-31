@@ -50,8 +50,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-extrabold text-indigo-700 tracking-tight">
-            Yocigaci
+          <Link to="/" className="flex items-center">
+            <img src="/images/logo.svg" alt="Yocigaci" className="h-7 w-auto" />
           </Link>
 
           {/* Desktop nav */}

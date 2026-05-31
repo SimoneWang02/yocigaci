@@ -103,7 +103,7 @@ export function Footer() {
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-800 text-xs text-center">
-                    © {new Date().getFullYear()} Yocigaci. Tutti i diritti
+                    © {new Date().getFullYear()} Yocigaci - Tutti i diritti
                     riservati.
                 </div>
             </div>
