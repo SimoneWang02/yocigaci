@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getGames } from '../../api/products'
@@ -11,6 +11,10 @@ export function Header() {
   const { items, openCart } = useCartStore()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const searchInputRef = useRef(null)
   const navigate = useNavigate()
 
   const count = items.reduce((s, i) => s + i.quantity, 0)
@@ -21,10 +25,24 @@ export function Header() {
   })
   const games = gamesData?.data ?? []
 
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus()
+  }, [searchOpen])
+
   const handleLogout = async () => {
     await logout()
     clearAuth()
+    setUserMenuOpen(false)
     navigate('/')
+  }
+
+  const submitSearch = (e) => {
+    e.preventDefault()
+    const val = searchValue.trim()
+    navigate(val ? `/catalogo?search=${encodeURIComponent(val)}` : '/catalogo')
+    setSearchOpen(false)
+    setMobileOpen(false)
+    setSearchValue('')
   }
 
   return (
@@ -37,34 +55,49 @@ export function Header() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1 h-16">
             {games.map((game) => (
               <div
                 key={game.id}
-                className="relative"
+                className="static self-stretch flex items-center"
                 onMouseEnter={() => setActiveGame(game.id)}
                 onMouseLeave={() => setActiveGame(null)}
               >
                 <Link
                   to={`/catalogo?game=${game.slug}`}
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeGame === game.id ? 'text-indigo-600' : 'text-gray-700 hover:text-indigo-600'
+                  }`}
                 >
                   {game.name}
                 </Link>
                 {activeGame === game.id && game.categories?.length > 0 && (
-                  <div
-                    className={`absolute top-full left-0 bg-white border border-gray-200 shadow-lg rounded-lg p-4 min-w-48 grid gap-1`}
-                    style={{ gridTemplateColumns: `repeat(${game.navbar_columns}, 1fr)` }}
-                  >
-                    {game.categories.map((cat) => (
-                      <Link
-                        key={cat.id}
-                        to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
-                        className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded whitespace-nowrap"
+                  /* Dropdown stile jpycollectibles: pannello a tutta larghezza, accento superiore, colonne */
+                  <div className="absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-xl z-50">
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                      <div className="mb-4">
+                        <Link
+                          to={`/catalogo?game=${game.slug}`}
+                          className="text-sm font-semibold text-indigo-700 hover:underline"
+                        >
+                          Tutti i prodotti {game.name} →
+                        </Link>
+                      </div>
+                      <div
+                        className="grid gap-x-8 gap-y-1"
+                        style={{ gridTemplateColumns: `repeat(${Math.max(game.navbar_columns || 1, 1)}, minmax(0, 1fr))` }}
                       >
-                        {cat.name}
-                      </Link>
-                    ))}
+                        {game.categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                            className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -75,44 +108,99 @@ export function Header() {
               rel="noopener noreferrer"
               className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
             >
-              Carte Singole ↗
+              Carte Singole
             </a>
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative">
+              <button
+                onClick={() => setSearchOpen((o) => !o)}
+                aria-label="Cerca"
+                className="p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
+                </svg>
+              </button>
+              {searchOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setSearchOpen(false)} />
+                  <form
+                    onSubmit={submitSearch}
+                    className="absolute right-0 top-full mt-2 z-50 flex items-center bg-white border border-gray-200 shadow-lg rounded-lg p-2 w-72"
+                  >
+                    <input
+                      ref={searchInputRef}
+                      type="search"
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      placeholder="Cerca tra tutti i prodotti..."
+                      className="flex-1 px-3 py-1.5 text-sm focus:outline-none"
+                    />
+                    <button type="submit" className="p-2 text-gray-500 hover:text-indigo-600 cursor-pointer" aria-label="Cerca">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
+                      </svg>
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+
+            {/* User / account */}
             {user ? (
-              <div className="hidden md:flex items-center gap-1">
-                {user.role === 'admin' && (
-                  <Link to="/admin/prodotti" className="px-3 py-2 text-xs font-medium text-indigo-600 hover:underline">
-                    Admin
-                  </Link>
-                )}
-                <Link to="/account/ordini" className="px-3 py-2 text-sm text-gray-700 hover:text-indigo-600">
-                  I miei ordini
-                </Link>
-                <button onClick={handleLogout} className="px-3 py-2 text-sm text-gray-500 hover:text-red-500">
-                  Esci
+              <div className="relative hidden md:block">
+                <button
+                  onClick={() => setUserMenuOpen((o) => !o)}
+                  aria-label="Account"
+                  className="p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </button>
+                {userMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white border border-gray-200 shadow-lg rounded-lg py-2">
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100">
+                        {user.name || user.email}
+                      </div>
+                      {user.role === 'admin' && (
+                        <Link to="/admin/prodotti" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50">
+                          Admin
+                        </Link>
+                      )}
+                      <Link to="/account/ordini" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        I miei ordini
+                      </Link>
+                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50 cursor-pointer">
+                        Esci
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-1">
-                <Link to="/login" className="px-3 py-2 text-sm text-gray-700 hover:text-indigo-600">
-                  Accedi
-                </Link>
-                <Link
-                  to="/registrati"
-                  className="px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Registrati
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                aria-label="Accedi o registrati"
+                className="p-2 text-gray-700 hover:text-indigo-600 transition-colors hidden md:block"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
             )}
 
             {/* Cart button */}
             <button
               onClick={openCart}
-              className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+              aria-label="Carrello"
+              className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -127,7 +215,8 @@ export function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 text-gray-700"
+              aria-label="Menu"
+              className="md:hidden p-2 text-gray-700 cursor-pointer"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileOpen
@@ -169,11 +258,14 @@ export function Header() {
               rel="noopener noreferrer"
               className="block px-3 py-2 text-gray-800"
             >
-              Carte Singole ↗
+              Carte Singole
             </a>
             <div className="pt-2 border-t border-gray-100">
               {user ? (
                 <>
+                  {user.role === 'admin' && (
+                    <Link to="/admin/prodotti" className="block px-3 py-2 text-indigo-600" onClick={() => setMobileOpen(false)}>Admin</Link>
+                  )}
                   <Link to="/account/ordini" className="block px-3 py-2 text-gray-700" onClick={() => setMobileOpen(false)}>I miei ordini</Link>
                   <button onClick={() => { handleLogout(); setMobileOpen(false) }} className="block w-full text-left px-3 py-2 text-red-500">Esci</button>
                 </>
