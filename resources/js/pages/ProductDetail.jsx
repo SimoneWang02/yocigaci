@@ -153,14 +153,19 @@ export default function ProductDetail() {
                     {product.is_preorder && product.preorder_release_date && (
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                             <p className="text-amber-800 font-semibold text-sm">
-                                Uscita prevista:{" "}
-                                {new Date(
-                                    product.preorder_release_date,
-                                ).toLocaleDateString("it-IT", {
-                                    day: "numeric",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
+                                Uscita Prevista:{" "}
+                                {new Date(product.preorder_release_date)
+                                    .toLocaleDateString("it-IT", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })
+                                    .replace(
+                                        /\p{L}+/u,
+                                        (m) =>
+                                            m.charAt(0).toUpperCase() +
+                                            m.slice(1),
+                                    )}
                             </p>
                             {product.preorder_note && (
                                 <p className="text-amber-700 text-sm mt-1">
