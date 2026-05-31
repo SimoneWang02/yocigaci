@@ -245,9 +245,6 @@ export default function ProductDetail() {
 
                     {product.description && (
                         <div className="mt-8 pt-8 border-t border-gray-200">
-                            <h3 className="font-semibold text-gray-900 mb-3">
-                                Descrizione
-                            </h3>
                             <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
                                 {product.description}
                             </p>

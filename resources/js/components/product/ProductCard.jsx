@@ -75,18 +75,6 @@ export function ProductCard({ product }) {
                             €{" "}
                             {Number(product.price).toFixed(2).replace(".", ",")}
                         </p>
-                        {product.is_preorder &&
-                            product.preorder_release_date && (
-                                <p className="text-xs text-amber-600">
-                                    Uscita:{" "}
-                                    {new Date(
-                                        product.preorder_release_date,
-                                    ).toLocaleDateString("it-IT", {
-                                        month: "short",
-                                        year: "numeric",
-                                    })}
-                                </p>
-                            )}
                     </div>
 
                     {isOutOfStock ? (

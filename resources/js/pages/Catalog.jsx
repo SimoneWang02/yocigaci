@@ -52,7 +52,7 @@ export default function Catalog() {
               setParams(next)
             }
           }}
-          className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -78,7 +78,7 @@ export default function Catalog() {
               <div className="text-sm text-gray-500 mb-4">
                 {meta.total} prodotti trovati
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12 mb-8">
                 {products.map((p) => <ProductCard key={p.id} product={p} />)}
               </div>
 
