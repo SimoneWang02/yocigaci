@@ -19,6 +19,7 @@ const SHIPPING_THRESHOLD = 60;
 function AddressForm({ onSubmit, loading }) {
     const [form, setForm] = useState({
         full_name: "",
+        phone: "",
         address_line1: "",
         address_line2: "",
         city: "",
@@ -31,6 +32,7 @@ function AddressForm({ onSubmit, loading }) {
     const validate = () => {
         const e = {};
         if (!form.full_name) e.full_name = "Campo obbligatorio";
+        if (!form.phone) e.phone = "Campo obbligatorio";
         if (!form.address_line1) e.address_line1 = "Campo obbligatorio";
         if (!form.city) e.city = "Campo obbligatorio";
         if (!form.postal_code) e.postal_code = "Campo obbligatorio";
@@ -47,12 +49,21 @@ function AddressForm({ onSubmit, loading }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-                label="Nome e cognome"
+                label="Nome e Cognome"
                 value={form.full_name}
                 onChange={(e) =>
                     setForm({ ...form, full_name: e.target.value })
                 }
                 error={errors.full_name}
+                required
+            />
+            <Input
+                label="Telefono"
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                error={errors.phone}
+                placeholder="Per eventuali avvisi del corriere"
                 required
             />
             <Input

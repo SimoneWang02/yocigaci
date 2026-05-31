@@ -104,7 +104,7 @@ export function Header() {
               </div>
             ))}
             <a
-              href="https://www.cardtrader.com"
+              href="https://www.cardtrader.com/en/users/yocigaci888"
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
@@ -239,7 +239,7 @@ export function Header() {
               </div>
             ))}
             <a
-              href="https://www.cardtrader.com"
+              href="https://www.cardtrader.com/en/users/yocigaci888"
               target="_blank"
               rel="noopener noreferrer"
               className="block px-3 py-2 text-gray-800"

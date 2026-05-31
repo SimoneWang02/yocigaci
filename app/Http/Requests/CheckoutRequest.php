@@ -19,6 +19,7 @@ class CheckoutRequest extends FormRequest
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'shipping_address' => ['required', 'array'],
             'shipping_address.full_name' => ['required', 'string'],
+            'shipping_address.phone' => ['required', 'string', 'max:20'],
             'shipping_address.address_line1' => ['required', 'string'],
             'shipping_address.address_line2' => ['nullable', 'string'],
             'shipping_address.city' => ['required', 'string'],

@@ -6,7 +6,21 @@ const api = axios.create({
   withCredentials: true,
 })
 
-api.interceptors.request.use((config) => {
+// Sanctum SPA: recupera il cookie XSRF-TOKEN. Memoizzato così la fetch parte una sola volta.
+let csrfPromise = null
+export const getCsrfCookie = () => {
+  if (!csrfPromise) csrfPromise = api.get('/sanctum/csrf-cookie', { baseURL: '/' })
+  return csrfPromise
+}
+
+const MUTATING = ['post', 'put', 'patch', 'delete']
+
+api.interceptors.request.use(async (config) => {
+  // Prima di ogni richiesta mutante assicura il cookie CSRF: senza, Sanctum risponde 419.
+  // Axios invierà poi in automatico l'header X-XSRF-TOKEN leggendo il cookie.
+  if (MUTATING.includes((config.method || 'get').toLowerCase()) && !document.cookie.includes('XSRF-TOKEN=')) {
+    await getCsrfCookie()
+  }
   const token = localStorage.getItem('auth_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config

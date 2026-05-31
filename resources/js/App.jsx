@@ -100,8 +100,8 @@ export default function App() {
           <Route path="/prodotti/:slug" element={<Layout><ProductDetail /></Layout>} />
           <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
           <Route path="/ordine-confermato/:orderNumber" element={<Layout><OrderConfirmation /></Layout>} />
-          <Route path="/login" element={<Layout><Login /></Layout>} />
-          <Route path="/registrati" element={<Layout><Register /></Layout>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/registrati" element={<Register />} />
           <Route path="/account/ordini" element={<ProtectedRoute><Layout><Orders /></Layout></ProtectedRoute>} />
           <Route path="/account/ordini/:orderNumber" element={<ProtectedRoute><Layout><OrderDetail /></Layout></ProtectedRoute>} />
           <Route path="/admin/giochi" element={<AdminRoute><AdminLayout><AdminGames /></AdminLayout></AdminRoute>} />

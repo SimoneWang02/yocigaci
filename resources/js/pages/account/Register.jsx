@@ -1,57 +1,134 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { register } from '../../api/auth'
-import { useAuthStore } from '../../store/authStore'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { register } from "../../api/auth";
+import { useAuthStore } from "../../store/authStore";
+import { Input } from "../../components/ui/Input";
 
 export default function Register() {
-  const navigate = useNavigate()
-  const { setAuth } = useAuthStore()
-  const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '', phone: '' })
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
+    const { setAuth, user } = useAuthStore();
+    const navigate = useNavigate();
+    const [form, setForm] = useState({
+        email: "",
+        password: "",
+        password_confirmation: "",
+    });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (form.password !== form.password_confirmation) {
-      setError('Le password non coincidono.')
-      return
-    }
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await register(form)
-      setAuth(data.user, data.token)
-      navigate('/')
-    } catch (err) {
-      const errors = err.response?.data?.errors
-      setError(errors ? Object.values(errors).flat().join(' ') : 'Errore durante la registrazione.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    // Appena c'è un utente (dopo la registrazione o se già autenticato) → redirect.
+    useEffect(() => {
+        if (user) navigate("/", { replace: true });
+    }, [user, navigate]);
 
-  return (
-    <div className="max-w-md mx-auto px-4 py-16">
-      <div className="bg-white rounded-2xl border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Crea account</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Nome e cognome" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          <Input label="Telefono (opzionale)" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <Input label="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-          <Input label="Conferma password" type="password" value={form.password_confirmation} onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} required />
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" variant="primary" size="lg" className="w-full" disabled={loading}>
-            {loading ? 'Registrazione...' : 'Crea account'}
-          </Button>
-        </form>
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Hai già un account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline font-medium">Accedi</Link>
-        </p>
-      </div>
-    </div>
-  )
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (form.password !== form.password_confirmation) {
+            setError("Le password non coincidono.");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await register(form);
+            setAuth(data.user, data.token);
+        } catch (err) {
+            const errors = err.response?.data?.errors;
+            setError(
+                errors
+                    ? Object.values(errors).flat().join(" ")
+                    : "Errore durante la registrazione.",
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-white">
+            <div className="w-full max-w-sm">
+                <Link
+                    to="/"
+                    aria-label="Torna alla home"
+                    className="inline-flex items-center gap-1 mb-6 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="h-4 w-4"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+                        />
+                    </svg>
+                    <span>Home</span>
+                </Link>
+                <div className="flex justify-center mb-8">
+                    <Link to="/">
+                        <img
+                            src="/images/square_logo.svg"
+                            alt="Yocigaci"
+                            className="h-16 w-auto"
+                        />
+                    </Link>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Input
+                        label="Email"
+                        type="email"
+                        autoComplete="email"
+                        value={form.email}
+                        onChange={(e) =>
+                            setForm({ ...form, email: e.target.value })
+                        }
+                        required
+                    />
+                    <Input
+                        label="Password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={form.password}
+                        onChange={(e) =>
+                            setForm({ ...form, password: e.target.value })
+                        }
+                        required
+                    />
+                    <Input
+                        label="Conferma Password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={form.password_confirmation}
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                password_confirmation: e.target.value,
+                            })
+                        }
+                        required
+                    />
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-gray-900 text-white rounded-lg py-3 text-sm font-medium transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                        {loading ? "Registrazione..." : "Crea Account"}
+                    </button>
+                </form>
+                <p className="text-center text-sm text-gray-500 mt-6">
+                    Hai già un Account?{" "}
+                    <Link
+                        to="/login"
+                        className="text-gray-900 hover:underline font-medium"
+                    >
+                        Accedi
+                    </Link>
+                </p>
+            </div>
+        </div>
+    );
 }

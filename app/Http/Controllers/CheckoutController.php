@@ -68,6 +68,11 @@ class CheckoutController extends Controller
         $hasPreorder = collect($cartItems)->contains(fn ($i) => $i['is_preorder']);
 
         $order = DB::transaction(function () use ($cartItems, $validated, $subtotal, $shipping, $total, $hasPreorder, $intent, $request) {
+            $user = $request->user();
+            if ($user && ! $user->name && ! empty($validated['shipping_address']['full_name'])) {
+                $user->update(['name' => $validated['shipping_address']['full_name']]);
+            }
+
             $order = Order::create([
                 'user_id' => $request->user()?->id,
                 'status' => $hasPreorder ? 'preorder_confirmed' : 'paid',
