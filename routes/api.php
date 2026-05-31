@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 // Pubbliche - catalogo e giochi
 Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{slug}/related', [ProductController::class, 'related']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);

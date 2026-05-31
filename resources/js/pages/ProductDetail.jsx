@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getProduct } from "../api/products";
+import { getProduct, getRelatedProducts } from "../api/products";
 import { useCartStore } from "../store/cartStore";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { PageSpinner } from "../components/ui/Spinner";
+import ProductCarousel from "../components/home/ProductCarousel";
 
 export default function ProductDetail() {
     const { slug } = useParams();
-    const { addItem, openCart } = useCartStore();
+    const { addItem, openCart, items } = useCartStore();
     const [selectedImage, setSelectedImage] = useState(0);
     const [qty, setQty] = useState(1);
     const [added, setAdded] = useState(false);
@@ -20,7 +21,13 @@ export default function ProductDetail() {
         queryFn: () => getProduct(slug),
     });
 
+    const { data: relatedData } = useQuery({
+        queryKey: ["product-related", slug],
+        queryFn: () => getRelatedProducts(slug),
+    });
+
     const product = data?.data;
+    const related = relatedData?.data ?? [];
 
     if (isLoading) return <PageSpinner />;
     if (isError || !product)
@@ -40,7 +47,15 @@ export default function ProductDetail() {
     const images = product.images ?? [];
     const isOutOfStock = !product.is_preorder && product.stock === 0;
 
+    // Quantità già presente nel carrello e massimo ancora aggiungibile
+    const inCart = items.find((i) => i.id === product.id)?.quantity ?? 0;
+    const maxAddable = product.is_preorder
+        ? Infinity
+        : Math.max(0, product.stock - inCart);
+    const reachedMax = !product.is_preorder && maxAddable <= 0;
+
     const handleAdd = () => {
+        if (reachedMax) return;
         addItem(product, qty);
         openCart();
         setAdded(true);
@@ -75,16 +90,16 @@ export default function ProductDetail() {
 
             <div className="grid md:grid-cols-2 gap-10">
                 {/* Gallery */}
-                <div>
-                    <div className="relative aspect-[3/4] mb-3 flex items-start justify-center">
+                <div className="md:sticky md:top-20 md:self-start">
+                    <div className="relative mb-3 flex justify-center">
                         {images[selectedImage]?.url ? (
                             <img
                                 src={images[selectedImage].url}
                                 alt={product.name}
-                                className="max-h-full w-auto object-contain drop-shadow-xl"
+                                className="max-h-[70vh] max-w-full w-auto object-contain drop-shadow-xl"
                             />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center rounded-2xl bg-gray-100 text-gray-300">
+                            <div className="aspect-[3/4] w-full flex items-center justify-center rounded-2xl bg-gray-100 text-gray-300">
                                 <ImageIcon
                                     className="w-24 h-24"
                                     strokeWidth={1}
@@ -130,9 +145,10 @@ export default function ProductDetail() {
                         {product.name}
                     </h1>
 
-                    <p className="text-4xl font-extrabold text-indigo-700 mb-4">
+                    <p className="text-4xl font-extrabold text-indigo-700 mb-1">
                         € {Number(product.price).toFixed(2).replace(".", ",")}
                     </p>
+                    <p className="text-xs text-gray-500 mb-4">IVA inclusa</p>
 
                     {product.is_preorder && product.preorder_release_date && (
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
@@ -155,8 +171,12 @@ export default function ProductDetail() {
                     )}
 
                     {!isOutOfStock && !product.is_preorder && (
-                        <p className="text-sm text-green-600 mb-4">
-                            ✓ Disponibile - {product.stock} in magazzino
+                        <p className="text-sm text-green-600 mb-4 flex items-center gap-1.5">
+                            <Check className="w-4 h-4" strokeWidth={2.5} />
+                            {product.stock}{" "}
+                            {product.stock === 1
+                                ? "Disponibile"
+                                : "Disponibili"}
                         </p>
                     )}
 
@@ -173,12 +193,20 @@ export default function ProductDetail() {
                                     {qty}
                                 </span>
                                 <button
-                                    onClick={() => setQty(qty + 1)}
-                                    className="px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-r-lg"
+                                    onClick={() =>
+                                        setQty(Math.min(maxAddable, qty + 1))
+                                    }
+                                    disabled={qty >= maxAddable}
+                                    className="px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-r-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                 >
                                     +
                                 </button>
                             </div>
+                            {!product.is_preorder && inCart > 0 && (
+                                <span className="text-xs text-gray-500">
+                                    {inCart} già nel carrello
+                                </span>
+                            )}
                         </div>
                     )}
 
@@ -192,24 +220,27 @@ export default function ProductDetail() {
                             Esaurito
                         </Button>
                     ) : (
-                        <Button
-                            onClick={handleAdd}
-                            variant={
-                                added
-                                    ? "secondary"
+                        <>
+                            <Button
+                                onClick={handleAdd}
+                                disabled={reachedMax}
+                                variant={added ? "secondary" : "primary"}
+                                size="lg"
+                                className="w-full"
+                            >
+                                {added
+                                    ? "✓ Aggiunto al carrello"
                                     : product.is_preorder
-                                      ? "primary"
-                                      : "primary"
-                            }
-                            size="lg"
-                            className="w-full"
-                        >
-                            {added
-                                ? "✓ Aggiunto al carrello"
-                                : product.is_preorder
-                                  ? "Preordina ora"
-                                  : "Aggiungi al carrello"}
-                        </Button>
+                                      ? "Preordina ora"
+                                      : "Aggiungi al carrello"}
+                            </Button>
+                            {reachedMax && (
+                                <p className="text-xs text-amber-600 mt-2 text-center">
+                                    Hai già la quantità massima disponibile nel
+                                    carrello
+                                </p>
+                            )}
+                        </>
                     )}
 
                     {product.description && (
@@ -224,6 +255,17 @@ export default function ProductDetail() {
                     )}
                 </div>
             </div>
+
+            {/* Prodotti correlati: riga piena su desktop, carosello quando non ci stanno */}
+            {related.length > 0 && (
+                <div className="mt-12 pt-6 border-t border-gray-200">
+                    <ProductCarousel
+                        title="Prodotti Correlati"
+                        products={related}
+                        itemClassName="snap-start shrink-0 w-[55%] sm:w-[42%] md:w-[31%] lg:w-[calc(25%-0.75rem)]"
+                    />
+                </div>
+            )}
         </div>
     );
 }

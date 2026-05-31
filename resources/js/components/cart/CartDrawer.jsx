@@ -67,7 +67,8 @@ export function CartDrawer() {
                     <span className="text-sm w-6 text-center">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-7 h-7 border rounded flex items-center justify-center text-gray-600 hover:bg-gray-50"
+                      disabled={!item.is_preorder && item.quantity >= item.stock}
+                      className="w-7 h-7 border rounded flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
                       +
                     </button>

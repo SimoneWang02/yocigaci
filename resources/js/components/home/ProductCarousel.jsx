@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { ProductCard } from '../product/ProductCard'
 
-export default function ProductCarousel({ title, products = [], ctaLink }) {
+export default function ProductCarousel({ title, products = [], ctaLink, itemClassName }) {
+  const itemClass =
+    itemClassName ?? 'snap-start shrink-0 w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18.5%]'
   const scrollRef = useRef(null)
   const dragRef = useRef({ down: false, startX: 0, startLeft: 0, moved: false })
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -192,10 +194,7 @@ export default function ProductCarousel({ title, products = [], ctaLink }) {
                    ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab snap-x snap-proximity scroll-smooth'}`}
       >
         {products.map((p) => (
-          <div
-            key={p.id}
-            className="snap-start shrink-0 w-[45%] sm:w-[30%] md:w-[23%] lg:w-[18.5%]"
-          >
+          <div key={p.id} className={itemClass}>
             <ProductCard product={p} />
           </div>
         ))}

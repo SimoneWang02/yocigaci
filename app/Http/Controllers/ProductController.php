@@ -52,6 +52,23 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
+    public function related(string $slug): AnonymousResourceCollection
+    {
+        $product = Product::active()->where('slug', $slug)->firstOrFail();
+
+        $related = Product::active()
+            ->with(['primaryImage', 'game', 'category'])
+            ->where('id', '!=', $product->id)
+            ->where('game_id', $product->game_id)
+            // Prima i prodotti della stessa categoria, poi gli altri dello stesso gioco
+            ->orderByRaw('category_id = ? desc', [$product->category_id])
+            ->orderBy('sort_order')
+            ->limit(4)
+            ->get();
+
+        return ProductResource::collection($related);
+    }
+
     public function games(Request $request): AnonymousResourceCollection
     {
         $query = Game::where('is_active', true)->orderBy('sort_order');

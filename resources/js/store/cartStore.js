@@ -11,16 +11,21 @@ export const useCartStore = create(
       closeCart: () => set({ isOpen: false }),
 
       addItem: (product, quantity = 1) => {
+        // Per i prodotti non in preordine la quantità non può superare lo stock
+        const cap = (qty) =>
+          product.is_preorder ? qty : Math.min(qty, product.stock)
         const items = get().items
         const existing = items.find((i) => i.id === product.id)
         if (existing) {
           set({
             items: items.map((i) =>
-              i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
+              i.id === product.id
+                ? { ...i, quantity: cap(i.quantity + quantity) }
+                : i
             ),
           })
         } else {
-          set({ items: [...items, { ...product, quantity }] })
+          set({ items: [...items, { ...product, quantity: cap(quantity) }] })
         }
       },
 
@@ -33,7 +38,14 @@ export const useCartStore = create(
         } else {
           set({
             items: get().items.map((i) =>
-              i.id === productId ? { ...i, quantity } : i
+              i.id === productId
+                ? {
+                    ...i,
+                    quantity: i.is_preorder
+                      ? quantity
+                      : Math.min(quantity, i.stock),
+                  }
+                : i
             ),
           })
         }
