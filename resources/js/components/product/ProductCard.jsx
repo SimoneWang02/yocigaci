@@ -21,71 +21,79 @@ export function ProductCard({ product }) {
   const isOutOfStock = !product.is_preorder && product.stock === 0
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
-      {/* Image */}
+    <div className="group relative flex h-full flex-col">
+      {/* Immagine prodotto — PNG che galleggia, senza sfondo */}
       <Link
         to={`/prodotti/${product.slug}`}
-        className="block relative overflow-hidden aspect-[3/4]"
+        className="relative z-10 block px-4"
         onMouseEnter={() => images.length > 1 && setImageIdx(1)}
         onMouseLeave={() => setImageIdx(0)}
       >
-        {currentImage?.url ? (
-          <img
-            src={currentImage.url}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-            <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+        <div className="relative flex h-48 items-end justify-center">
+          {/* Ombra/pedana morbida sotto il prodotto */}
+          <div className="absolute bottom-2 left-1/2 h-5 w-2/3 -translate-x-1/2 rounded-[50%] bg-black/25 blur-lg transition-all duration-300 group-hover:w-3/4 group-hover:bg-black/30" />
+
+          {currentImage?.url ? (
+            <img
+              src={currentImage.url}
+              alt={product.name}
+              className="relative max-h-48 w-auto object-contain drop-shadow-xl transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-40 w-32 items-center justify-center rounded-lg bg-gray-100">
+              <svg className="h-14 w-14 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+
+          {/* Badge */}
+          <div className="absolute left-0 top-0 flex flex-col gap-1">
+            {product.is_preorder && <Badge variant="preorder">Preordine</Badge>}
+            {isOutOfStock && <Badge variant="sold_out">Esaurito</Badge>}
           </div>
-        )}
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.is_preorder && <Badge variant="preorder">Preordine</Badge>}
-          {isOutOfStock && <Badge variant="sold_out">Esaurito</Badge>}
         </div>
       </Link>
 
-      {/* Info */}
-      <div className="p-3">
+      {/* Titolo, prezzo, CTA — senza riquadro */}
+      <div className="flex flex-1 flex-col px-2 pt-4">
         <Link to={`/prodotti/${product.slug}`}>
-          <h3 className="text-sm font-semibold text-gray-800 hover:text-indigo-600 transition-colors line-clamp-2 leading-tight mb-1">
+          <h3 className="mb-2 line-clamp-2 text-center text-sm font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-base font-bold text-indigo-700">
-            € {Number(product.price).toFixed(2).replace('.', ',')}
-          </p>
-          {product.is_preorder && product.preorder_release_date && (
-            <p className="text-xs text-amber-600">
-              Uscita: {new Date(product.preorder_release_date).toLocaleDateString('it-IT', { month: 'short', year: 'numeric' })}
+        <div className="mt-auto">
+          <div className="mb-3 flex flex-col items-center gap-0.5">
+            <p className="text-sm font-bold text-indigo-700">
+              € {Number(product.price).toFixed(2).replace('.', ',')}
             </p>
+            {product.is_preorder && product.preorder_release_date && (
+              <p className="text-xs text-amber-600">
+                Uscita: {new Date(product.preorder_release_date).toLocaleDateString('it-IT', { month: 'short', year: 'numeric' })}
+              </p>
+            )}
+          </div>
+
+          {isOutOfStock ? (
+            <button disabled className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-2 text-sm text-gray-400">
+              Esaurito
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className={`w-full rounded-lg py-2 text-sm font-medium transition-colors ${
+                added
+                  ? 'bg-green-100 text-green-700'
+                  : product.is_preorder
+                    ? 'bg-amber-600 text-white hover:bg-amber-700'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              {added ? '✓ Aggiunto' : product.is_preorder ? 'Preordina' : 'Aggiungi al carrello'}
+            </button>
           )}
         </div>
-
-        {isOutOfStock ? (
-          <button disabled className="w-full py-2 text-sm text-gray-400 border border-gray-200 rounded-lg cursor-not-allowed">
-            Esaurito
-          </button>
-        ) : (
-          <button
-            onClick={handleAddToCart}
-            className={`w-full py-2 text-sm font-medium rounded-lg transition-colors ${
-              added
-                ? 'bg-green-100 text-green-700'
-                : product.is_preorder
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-            }`}
-          >
-            {added ? '✓ Aggiunto' : product.is_preorder ? 'Preordina' : 'Aggiungi al carrello'}
-          </button>
-        )}
       </div>
     </div>
   )

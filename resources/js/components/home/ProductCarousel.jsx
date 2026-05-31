@@ -69,7 +69,7 @@ export default function ProductCarousel({ title, products = [], ctaLink }) {
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 -mx-1 px-1
+        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pt-3 pb-4 -mx-1 px-1
                    [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {products.map((p) => (
