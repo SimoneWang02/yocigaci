@@ -3,6 +3,28 @@ import { useQuery } from "@tanstack/react-query";
 import { getProducts, getGames } from "../api/products";
 import { ProductCard } from "../components/product/ProductCard";
 import { PageSpinner } from "../components/ui/Spinner";
+import HeroCarousel from "../components/home/HeroCarousel";
+
+const HERO_BANNERS = [
+    {
+        id: "pokemon",
+        image: "/images/banners/banner-1.svg",
+        alt: "Nuove uscite Pokémon",
+        href: "/catalogo?game=pokemon",
+    },
+    {
+        id: "one-piece",
+        image: "/images/banners/banner-2.svg",
+        alt: "One Piece Card Game — preordini",
+        href: "/catalogo?preorder=true",
+    },
+    {
+        id: "magic-riftbound",
+        image: "/images/banners/banner-3.svg",
+        alt: "Magic e Riftbound",
+        href: "/catalogo",
+    },
+];
 
 function CountdownTimer({ targetDate }) {
     const diff = new Date(targetDate) - new Date();
@@ -36,32 +58,8 @@ export default function Home() {
 
     return (
         <div>
-            {/* Hero */}
-            <section className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 text-white py-20 px-4">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
-                        Yocigaci
-                    </h1>
-                    <p className="text-xl text-indigo-200 mb-8">
-                        Il tuo negozio TCG — Pokémon, One Piece, Magic e
-                        Riftbound
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            to="/catalogo"
-                            className="px-8 py-4 bg-white text-indigo-800 font-bold rounded-xl hover:bg-indigo-50 transition-colors text-lg"
-                        >
-                            Vai al catalogo
-                        </Link>
-                        <Link
-                            to="/catalogo?preorder=true"
-                            className="px-8 py-4 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors text-lg"
-                        >
-                            Preordini aperti
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            {/* Hero — carousel di banner */}
+            <HeroCarousel slides={HERO_BANNERS} />
 
             {/* Ultime uscite */}
             <section className="max-w-7xl mx-auto px-4 py-14">
