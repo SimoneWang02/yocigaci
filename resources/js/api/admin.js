@@ -30,6 +30,12 @@ export const adminReorderImages = (id, order) =>
 export const adminDeleteImage = (productId, imageId) =>
   api.delete(`/admin/products/${productId}/images/${imageId}`).then((r) => r.data)
 
+// Homepage sections
+export const adminGetHomepageSections = () => api.get('/admin/homepage-sections').then((r) => r.data)
+export const adminCreateHomepageSection = (data) => api.post('/admin/homepage-sections', data).then((r) => r.data)
+export const adminUpdateHomepageSection = (id, data) => api.put(`/admin/homepage-sections/${id}`, data).then((r) => r.data)
+export const adminDeleteHomepageSection = (id) => api.delete(`/admin/homepage-sections/${id}`).then((r) => r.data)
+
 // Orders
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)
 export const adminGetOrder = (id) => api.get(`/admin/orders/${id}`).then((r) => r.data)

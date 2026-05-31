@@ -24,6 +24,9 @@ class ProductController extends Controller
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
 
         return ProductResource::collection($query->paginate(50));
     }
