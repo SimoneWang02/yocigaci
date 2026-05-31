@@ -59,7 +59,9 @@ export default function Catalog() {
       <div className="flex gap-6">
         {/* Sidebar */}
         <aside className="hidden md:block w-60 flex-shrink-0">
-          <ProductFilters />
+          <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+            <ProductFilters />
+          </div>
         </aside>
 
         {/* Grid */}
