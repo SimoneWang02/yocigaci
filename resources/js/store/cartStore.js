@@ -52,16 +52,6 @@ export const useCartStore = create(
       },
 
       clear: () => set({ items: [] }),
-
-      get total() {
-        return get().items.reduce((sum, i) => sum + i.price * i.quantity, 0)
-      },
-      get count() {
-        return get().items.reduce((sum, i) => sum + i.quantity, 0)
-      },
-      get hasPreorder() {
-        return get().items.some((i) => i.is_preorder)
-      },
     }),
     { name: 'yocigaci-cart', partialize: (state) => ({ items: state.items }) }
   )
