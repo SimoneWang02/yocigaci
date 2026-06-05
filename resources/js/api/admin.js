@@ -11,7 +11,7 @@ export const adminGetCategories = (params) => api.get('/admin/categories', { par
 export const adminCreateCategory = (data) => api.post('/admin/categories', data).then((r) => r.data)
 export const adminUpdateCategory = (id, data) => api.put(`/admin/categories/${id}`, data).then((r) => r.data)
 export const adminDeleteCategory = (id) => api.delete(`/admin/categories/${id}`).then((r) => r.data)
-export const adminReorderCategories = (ids) => api.post('/admin/categories/reorder', { ids }).then((r) => r.data)
+export const adminReorderCategories = (columns) => api.post('/admin/categories/reorder', { columns }).then((r) => r.data)
 
 // Products
 export const adminGetProducts = (params) => api.get('/admin/products', { params }).then((r) => r.data)

@@ -49,10 +49,13 @@ class CategoryController extends Controller
 
     public function reorder(Request $request): JsonResponse
     {
-        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+        // columns: { "1": [id, id], "2": [id] }
+        $data = $request->validate(['columns' => 'required|array', 'columns.*' => 'array', 'columns.*.*' => 'integer']);
 
-        foreach ($ids as $index => $id) {
-            Category::where('id', $id)->update(['sort_order' => $index]);
+        foreach ($data['columns'] as $column => $ids) {
+            foreach ($ids as $index => $id) {
+                Category::where('id', $id)->update(['nav_column' => (int) $column, 'sort_order' => $index]);
+            }
         }
 
         return response()->json(['message' => 'Ordine aggiornato.']);

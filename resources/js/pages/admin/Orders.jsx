@@ -7,6 +7,8 @@ import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
 import { X } from 'lucide-react'
+import { useTableSort } from '../../hooks/useTableSort'
+import { SortTh } from '../../components/ui/SortTh'
 
 const STATUS_LABELS = {
   pending: { label: 'In attesa', variant: 'default' },
@@ -176,7 +178,7 @@ export default function AdminOrders() {
     }),
   })
 
-  const orders = (data?.data ?? []).filter((o) => {
+  const filteredOrders = (data?.data ?? []).filter((o) => {
     if (!search) return true
     const q = search.toLowerCase()
     return (
@@ -185,6 +187,7 @@ export default function AdminOrders() {
       o.user?.email?.toLowerCase().includes(q)
     )
   })
+  const { sort, sorted: orders, onSort } = useTableSort(filteredOrders, 'created_at', 'desc')
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -213,12 +216,12 @@ export default function AdminOrders() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
               <tr>
-                <th className="text-left px-4 py-3">Numero</th>
-                <th className="text-left px-4 py-3">Cliente</th>
-                <th className="text-left px-4 py-3">Data</th>
-                <th className="text-right px-4 py-3">Totale</th>
-                <th className="text-center px-4 py-3">Tipo</th>
-                <th className="text-center px-4 py-3">Stato</th>
+                <SortTh column="order_number" sort={sort} onSort={onSort}>Numero</SortTh>
+                <SortTh column="user.name" sort={sort} onSort={onSort}>Cliente</SortTh>
+                <SortTh column="created_at" sort={sort} onSort={onSort}>Data</SortTh>
+                <SortTh column="total" sort={sort} onSort={onSort} align="right">Totale</SortTh>
+                <SortTh column="type" sort={sort} onSort={onSort} align="center">Tipo</SortTh>
+                <SortTh column="status" sort={sort} onSort={onSort} align="center">Stato</SortTh>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

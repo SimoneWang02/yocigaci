@@ -9,7 +9,10 @@ import { Package } from 'lucide-react'
 export default function Catalog() {
   const [params, setParams] = useSearchParams()
 
+  const sectionId = params.get('sezione') || undefined
+
   const filters = {
+    section_id: sectionId,
     game: params.get('game') || undefined,
     category: params.get('category') || undefined,
     preorder: params.get('preorder') || undefined,
@@ -59,11 +62,13 @@ export default function Catalog() {
 
       <div className="flex gap-6">
         {/* Sidebar */}
-        <aside className="hidden md:block w-60 flex-shrink-0">
-          <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
-            <ProductFilters />
-          </div>
-        </aside>
+        {!sectionId && (
+          <aside className="hidden md:block w-60 flex-shrink-0">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+              <ProductFilters />
+            </div>
+          </aside>
+        )}
 
         {/* Grid */}
         <div className="flex-1">

@@ -13,7 +13,7 @@ class Game extends Model
 
     public function categories(): HasMany
     {
-        return $this->hasMany(Category::class)->orderBy('sort_order');
+        return $this->hasMany(Category::class)->orderBy('nav_column')->orderBy('sort_order');
     }
 
     public function products(): HasMany

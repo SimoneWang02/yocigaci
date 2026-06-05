@@ -52,7 +52,7 @@ export default function Home() {
                         <ProductCarousel
                             title={section.title}
                             products={section.products ?? []}
-                            ctaLink={section.cta_link}
+                            ctaLink={`/catalogo?sezione=${section.id}`}
                         />
                     </div>
                 ))

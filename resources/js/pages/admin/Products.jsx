@@ -9,6 +9,8 @@ import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { adminGetGames } from "../../api/admin";
+import { useTableSort } from "../../hooks/useTableSort";
+import { SortTh } from "../../components/ui/SortTh";
 
 export default function AdminProducts() {
     const qc = useQueryClient();
@@ -32,7 +34,8 @@ export default function AdminProducts() {
     });
 
     const games = gamesData?.data ?? [];
-    const products = data?.data ?? [];
+    const rawProducts = data?.data ?? [];
+    const { sort, sorted: products, onSort } = useTableSort(rawProducts, 'name');
 
     const del = useMutation({
         mutationFn: adminDeleteProduct,
@@ -88,13 +91,11 @@ export default function AdminProducts() {
                         <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
                             <tr>
                                 <th className="text-left px-4 py-3 w-12"></th>
-                                <th className="text-left px-4 py-3">
-                                    Prodotto
-                                </th>
-                                <th className="text-left px-4 py-3">Gioco</th>
-                                <th className="text-right px-4 py-3">Prezzo</th>
-                                <th className="text-center px-4 py-3">Stock</th>
-                                <th className="text-center px-4 py-3">Stato</th>
+                                <SortTh column="name" sort={sort} onSort={onSort}>Prodotto</SortTh>
+                                <SortTh column="game.name" sort={sort} onSort={onSort}>Gioco</SortTh>
+                                <SortTh column="price" sort={sort} onSort={onSort} align="right">Prezzo</SortTh>
+                                <SortTh column="stock" sort={sort} onSort={onSort} align="center">Stock</SortTh>
+                                <SortTh column="is_active" sort={sort} onSort={onSort} align="center">Stato</SortTh>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>

@@ -21,6 +21,7 @@ class CategoryRequest extends FormRequest
             'slug' => ['required', 'string', 'max:255', 'unique:categories,slug,' . $categoryId],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
+            'nav_column' => ['integer', 'min:1'],
         ];
     }
 }

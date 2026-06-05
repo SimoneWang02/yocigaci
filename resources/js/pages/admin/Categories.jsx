@@ -28,14 +28,21 @@ import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
 import { PageSpinner } from '../../components/ui/Spinner'
 
-function CategoryForm({ category, games, onSave, onCancel }) {
+function CategoryForm({ category, games, defaultNavColumn, onSave, onCancel }) {
+  const game = games.find((g) => g.id === (category?.game_id ?? games[0]?.id))
+  const maxColumns = game?.navbar_columns ?? 1
+
   const [form, setForm] = useState({
     game_id: category?.game_id ?? (games[0]?.id ?? ''),
     name: category?.name ?? '',
     slug: category?.slug ?? '',
     is_active: category?.is_active ?? true,
     sort_order: category?.sort_order ?? 0,
+    nav_column: category?.nav_column ?? defaultNavColumn ?? 1,
   })
+
+  const currentGame = games.find((g) => g.id == form.game_id)
+  const currentMaxCols = currentGame?.navbar_columns ?? 1
 
   const autoSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
@@ -45,7 +52,7 @@ function CategoryForm({ category, games, onSave, onCancel }) {
         <Select
           label="Gioco"
           value={form.game_id}
-          onChange={(e) => setForm({ ...form, game_id: e.target.value })}
+          onChange={(e) => setForm({ ...form, game_id: e.target.value, nav_column: 1 })}
         >
           {games.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
         </Select>
@@ -56,13 +63,15 @@ function CategoryForm({ category, games, onSave, onCancel }) {
         />
       </div>
       <div className="grid grid-cols-3 gap-3">
-        <Input
-          label="Ordine"
-          type="number"
-          min={0}
-          value={form.sort_order}
-          onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) })}
-        />
+        <Select
+          label="Colonna nav"
+          value={form.nav_column}
+          onChange={(e) => setForm({ ...form, nav_column: parseInt(e.target.value) })}
+        >
+          {Array.from({ length: currentMaxCols }, (_, i) => i + 1).map((col) => (
+            <option key={col} value={col}>Colonna {col}</option>
+          ))}
+        </Select>
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700">Stato</label>
           <label className="flex items-center gap-2 cursor-pointer mt-2">
@@ -142,7 +151,7 @@ function SortableRow({ cat, editing, games, onEdit, onDelete, onSave, onCancelEd
   )
 }
 
-function GameCategoryTable({ game, categories, games, search, editing, onEdit, onDelete, onSave, onCancelEdit, onReorder }) {
+function ColumnTable({ game, column, categories, games, search, editing, onEdit, onDelete, onSave, onCancelEdit, onReorder }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const filtered = categories.filter((c) =>
@@ -156,22 +165,22 @@ function GameCategoryTable({ game, categories, games, search, editing, onEdit, o
     const ids = categories.map((c) => c.id)
     const oldIndex = ids.indexOf(active.id)
     const newIndex = ids.indexOf(over.id)
-    onReorder(game.id, arrayMove(ids, oldIndex, newIndex))
+    onReorder(game.id, column, arrayMove(ids, oldIndex, newIndex))
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-700">{game.name}</span>
-        <span className="text-xs text-gray-400">{categories.length} categorie</span>
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-indigo-50 px-4 py-2 border-b border-indigo-100 flex items-center justify-between">
+        <span className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Colonna {column}</span>
+        <span className="text-xs text-indigo-400">{categories.length} {categories.length === 1 ? 'categoria' : 'categorie'}</span>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide border-b border-gray-100">
           <tr>
-            <th className="px-3 py-2.5 w-8"></th>
-            <th className="text-left px-4 py-2.5">Nome</th>
-            <th className="text-center px-4 py-2.5">Stato</th>
-            <th className="px-4 py-2.5"></th>
+            <th className="px-3 py-2 w-8"></th>
+            <th className="text-left px-4 py-2">Nome</th>
+            <th className="text-center px-4 py-2">Stato</th>
+            <th className="px-4 py-2"></th>
           </tr>
         </thead>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -189,10 +198,46 @@ function GameCategoryTable({ game, categories, games, search, editing, onEdit, o
                   onCancelEdit={onCancelEdit}
                 />
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-4 text-sm text-gray-400 text-center">Nessuna categoria</td>
+                </tr>
+              )}
             </tbody>
           </SortableContext>
         </DndContext>
       </table>
+    </div>
+  )
+}
+
+function GameSection({ game, categories, games, search, editing, onEdit, onDelete, onSave, onCancelEdit, onReorder }) {
+  const numCols = game.navbar_columns ?? 1
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-700">{game.name}</span>
+        <span className="text-xs text-gray-400">{categories.length} categorie · {numCols} {numCols === 1 ? 'colonna' : 'colonne'}</span>
+      </div>
+      <div className={`p-4 grid gap-4`} style={{ gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))` }}>
+        {Array.from({ length: numCols }, (_, i) => i + 1).map((col) => (
+          <ColumnTable
+            key={col}
+            game={game}
+            column={col}
+            categories={categories.filter((c) => (c.nav_column ?? 1) === col)}
+            games={games}
+            search={search}
+            editing={editing}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onSave={onSave}
+            onCancelEdit={onCancelEdit}
+            onReorder={onReorder}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -213,33 +258,65 @@ export default function AdminCategories() {
   const games = gamesData?.data ?? []
   const allCategories = data?.data ?? []
 
+  const invalidate = () => {
+    qc.invalidateQueries(['admin-categories'])
+    qc.invalidateQueries(['games-nav'])
+  }
+
   const create = useMutation({
     mutationFn: adminCreateCategory,
-    onSuccess: () => { qc.invalidateQueries(['admin-categories']); qc.invalidateQueries(['games-nav']); setCreating(false) },
+    onSuccess: () => { invalidate(); setCreating(false) },
   })
   const update = useMutation({
     mutationFn: ({ id, data }) => adminUpdateCategory(id, data),
-    onSuccess: () => { qc.invalidateQueries(['admin-categories']); qc.invalidateQueries(['games-nav']); setEditing(null) },
+    onSuccess: () => { invalidate(); setEditing(null) },
   })
   const del = useMutation({
     mutationFn: adminDeleteCategory,
-    onSuccess: () => { qc.invalidateQueries(['admin-categories']); qc.invalidateQueries(['games-nav']) },
+    onSuccess: invalidate,
   })
   const reorder = useMutation({
     mutationFn: adminReorderCategories,
-    onSuccess: () => { qc.invalidateQueries(['admin-categories']); qc.invalidateQueries(['games-nav']) },
+    onSuccess: invalidate,
   })
 
-  const handleReorder = (gameId, newIds) => {
-    setLocalOrders((prev) => ({ ...prev, [gameId]: newIds }))
-    reorder.mutate(newIds)
+  // localOrders: { [gameId]: { [col]: [id, id, ...] } }
+  const handleReorder = (gameId, column, newIds) => {
+    setLocalOrders((prev) => ({
+      ...prev,
+      [gameId]: { ...(prev[gameId] ?? {}), [column]: newIds },
+    }))
+
+    // Build full columns map for this game from current state + this change
+    const gameCategories = allCategories.filter((c) => c.game_id === gameId)
+    const game = games.find((g) => g.id === gameId)
+    const numCols = game?.navbar_columns ?? 1
+    const columns = {}
+    for (let col = 1; col <= numCols; col++) {
+      if (col === column) {
+        columns[col] = newIds
+      } else {
+        const prev = localOrders[gameId]?.[col]
+        if (prev) {
+          columns[col] = prev
+        } else {
+          columns[col] = gameCategories.filter((c) => (c.nav_column ?? 1) === col).map((c) => c.id)
+        }
+      }
+    }
+    reorder.mutate(columns)
   }
 
   const categoriesForGame = (gameId) => {
     const base = allCategories.filter((c) => c.game_id === gameId)
-    const order = localOrders[gameId]
-    if (!order) return base
-    return order.map((id) => base.find((c) => c.id === id)).filter(Boolean)
+    const gameLocal = localOrders[gameId]
+    if (!gameLocal) return base
+
+    return base.map((cat) => {
+      const col = cat.nav_column ?? 1
+      const colOrder = gameLocal[col]
+      return colOrder ? { ...cat, sort_order: colOrder.indexOf(cat.id) } : cat
+    }).sort((a, b) => a.sort_order - b.sort_order)
   }
 
   if (isLoading) return <PageSpinner />
@@ -262,13 +339,13 @@ export default function AdminCategories() {
 
       {creating && (
         <div className="mb-4">
-          <CategoryForm games={games} onSave={(d) => create.mutate(d)} onCancel={() => setCreating(false)} />
+          <CategoryForm games={games} defaultNavColumn={1} onSave={(d) => create.mutate(d)} onCancel={() => setCreating(false)} />
         </div>
       )}
 
       <div className="space-y-4">
         {games.map((game) => (
-          <GameCategoryTable
+          <GameSection
             key={game.id}
             game={game}
             categories={categoriesForGame(game.id)}

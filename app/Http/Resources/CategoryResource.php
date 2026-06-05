@@ -16,6 +16,7 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
+            'nav_column' => $this->nav_column,
             'game' => new GameResource($this->whenLoaded('game')),
         ];
     }

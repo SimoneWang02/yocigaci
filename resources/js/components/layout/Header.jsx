@@ -95,23 +95,25 @@ export function Header() {
                                                         <ArrowRight className="inline-block w-4 h-4 align-middle" />
                                                     </Link>
                                                 </div>
-                                                <div
-                                                    className="grid gap-x-8 gap-y-1"
-                                                    style={{
-                                                        gridTemplateColumns: `repeat(${Math.max(game.navbar_columns || 1, 1)}, minmax(0, 1fr))`,
-                                                    }}
-                                                >
-                                                    {game.categories.map(
-                                                        (cat) => (
-                                                            <Link
-                                                                key={cat.id}
-                                                                to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
-                                                                className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                                                            >
-                                                                {cat.name}
-                                                            </Link>
-                                                        ),
-                                                    )}
+                                                <div className="flex gap-8">
+                                                    {Array.from({ length: Math.max(game.navbar_columns || 1, 1) }, (_, i) => i + 1).map((col) => {
+                                                        const colCats = game.categories
+                                                            .filter((c) => (c.nav_column ?? 1) === col)
+                                                            .sort((a, b) => a.sort_order - b.sort_order)
+                                                        return (
+                                                            <div key={col} className="flex-1 space-y-0.5">
+                                                                {colCats.map((cat) => (
+                                                                    <Link
+                                                                        key={cat.id}
+                                                                        to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                                                                        className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                                    >
+                                                                        {cat.name}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        )
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
@@ -192,7 +194,7 @@ export function Header() {
                                         <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white border border-gray-200 shadow-lg rounded-lg py-2">
                                             {user.role === "admin" && (
                                                 <Link
-                                                    to="/admin/prodotti"
+                                                    to="/admin/homepage"
                                                     onClick={() =>
                                                         setUserMenuOpen(false)
                                                     }
@@ -298,7 +300,7 @@ export function Header() {
                                 <>
                                     {user.role === "admin" && (
                                         <Link
-                                            to="/admin/prodotti"
+                                            to="/admin/homepage"
                                             className="block px-3 py-2 text-indigo-600"
                                             onClick={() => setMobileOpen(false)}
                                         >

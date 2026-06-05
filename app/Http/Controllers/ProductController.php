@@ -16,6 +16,13 @@ class ProductController extends Controller
     {
         $query = Product::active()->with(['primaryImage', 'game', 'category']);
 
+        $sectionId = $request->integer('section_id') ?: null;
+
+        if ($sectionId) {
+            $query->join('homepage_section_product as hsp', 'hsp.product_id', '=', 'products.id')
+                ->where('hsp.homepage_section_id', $sectionId)
+                ->select('products.*');
+        }
         if ($request->game) {
             $query->byGame($request->game);
         }
@@ -34,7 +41,7 @@ class ProductController extends Controller
         $column = match ($sort) {
             'price_asc', 'price_desc' => 'price',
             'newest' => 'created_at',
-            default => 'sort_order',
+            default => $sectionId ? 'hsp.sort_order' : 'sort_order',
         };
 
         $query->orderBy($column, $direction);
