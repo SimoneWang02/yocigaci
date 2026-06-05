@@ -15,6 +15,7 @@ class AddressRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
             'address_line1' => ['required', 'string', 'max:255'],
             'address_line2' => ['nullable', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],
