@@ -124,9 +124,7 @@ function ProductPicker({ selected, onChange }) {
 function SectionForm({ section, onSave, onCancel, saving }) {
   const [form, setForm] = useState({
     title: section?.title ?? '',
-    cta_link: section?.cta_link ?? '',
     is_active: section?.is_active ?? true,
-    sort_order: section?.sort_order ?? 0,
   })
   const [products, setProducts] = useState(section?.products ?? [])
 
@@ -136,41 +134,12 @@ function SectionForm({ section, onSave, onCancel, saving }) {
 
   return (
     <div className="bg-gray-50 rounded-xl p-4 space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="Titolo sezione"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
-        />
-        <Input
-          label="Link 'Vedi tutto' (opzionale)"
-          placeholder="/catalogo?game=pokemon"
-          value={form.cta_link}
-          onChange={(e) => setForm({ ...form, cta_link: e.target.value })}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="Ordine"
-          type="number"
-          min={0}
-          value={form.sort_order}
-          onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
-        />
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Stato</label>
-          <label className="flex items-center gap-2 cursor-pointer mt-2">
-            <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-            />
-            <span className="text-sm text-gray-700">Visibile in homepage</span>
-          </label>
-        </div>
-      </div>
+      <Input
+        label="Titolo sezione"
+        value={form.title}
+        onChange={(e) => setForm({ ...form, title: e.target.value })}
+        required
+      />
 
       <ProductPicker selected={products} onChange={setProducts} />
 
@@ -184,7 +153,7 @@ function SectionForm({ section, onSave, onCancel, saving }) {
   )
 }
 
-function SortableRow({ section, editing, onEdit, onDelete, onCancelEdit, onSave, saving }) {
+function SortableRow({ section, editing, onEdit, onDelete, onCancelEdit, onSave, onToggleActive, saving }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
 
   const style = {
@@ -209,9 +178,14 @@ function SortableRow({ section, editing, onEdit, onDelete, onCancelEdit, onSave,
         <td className="px-4 py-3 font-medium text-gray-800">{section.title}</td>
         <td className="px-4 py-3 text-center text-gray-600">{section.products?.length ?? 0}</td>
         <td className="px-4 py-3 text-center">
-          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${section.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+          <button
+            type="button"
+            onClick={() => onToggleActive(section)}
+            className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${section.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+            title={section.is_active ? 'Clicca per nascondere' : 'Clicca per rendere visibile'}
+          >
             {section.is_active ? 'Visibile' : 'Nascosta'}
-          </span>
+          </button>
         </td>
         <td className="px-4 py-3">
           <div className="flex gap-2 justify-end">
@@ -299,6 +273,10 @@ export default function AdminHomepageSections() {
     mutationFn: adminReorderHomepageSections,
     onSuccess: invalidate,
   })
+  const toggleActive = useMutation({
+    mutationFn: ({ id, is_active }) => adminUpdateHomepageSection(id, { is_active }),
+    onSuccess: invalidate,
+  })
 
   const handleDragEnd = ({ active, over }) => {
     if (!over || active.id === over.id) return
@@ -369,6 +347,7 @@ export default function AdminHomepageSections() {
                       onDelete={(id) => del.mutate(id)}
                       onCancelEdit={() => setEditing(null)}
                       onSave={(id, d) => update.mutate({ id, data: d })}
+                      onToggleActive={(s) => toggleActive.mutate({ id: s.id, is_active: !s.is_active })}
                       saving={update.isPending}
                     />
                   ))}

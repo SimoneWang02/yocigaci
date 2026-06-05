@@ -13,8 +13,12 @@ class HomepageSectionRequest extends FormRequest
 
     public function rules(): array
     {
+        $titleRules = $this->isMethod('POST')
+            ? ['required', 'string', 'max:255']
+            : ['sometimes', 'required', 'string', 'max:255'];
+
         return [
-            'title' => ['required', 'string', 'max:255'],
+            'title' => $titleRules,
             'cta_link' => ['nullable', 'string', 'max:255'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
