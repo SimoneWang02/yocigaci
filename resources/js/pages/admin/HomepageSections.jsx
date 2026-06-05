@@ -574,6 +574,87 @@ function CarouselSection() {
     );
 }
 
+// ─── Navbar (CardTrader) ─────────────────────────────────────────────────────────
+
+function NavbarSettingsSection() {
+    const qc = useQueryClient();
+    const [label, setLabel] = useState("");
+    const [url, setUrl] = useState("");
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setLabel(data.data?.cardtrader_label ?? "");
+        setUrl(data.data?.cardtrader_url ?? "");
+        setHydrated(true);
+    }
+
+    const save = useMutation({
+        mutationFn: () =>
+            adminUpdateSettings({
+                cardtrader_label: label.trim(),
+                cardtrader_url: url.trim(),
+            }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+            qc.invalidateQueries({ queryKey: ["public-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Link CardTrader
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Voce e indirizzo del pulsante CardTrader nella barra di
+                    navigazione
+                </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                    label="Testo voce"
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    placeholder="CardTrader"
+                    maxLength={50}
+                />
+                <Input
+                    label="URL di destinazione"
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://www.cardtrader.com/..."
+                />
+            </div>
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending || !label.trim() || !url.trim()}
+                >
+                    {save.isPending ? "Salvataggio…" : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function AdminHomepageSections() {
@@ -661,6 +742,9 @@ export default function AdminHomepageSections() {
 
             {/* Carousel banners */}
             <CarouselSection />
+
+            {/* Link CardTrader navbar */}
+            <NavbarSettingsSection />
 
             {/* Sezioni prodotti */}
             <div className="flex items-center justify-between mb-4">

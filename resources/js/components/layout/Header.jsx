@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getGames } from "../../api/products";
+import { getGames, getSettings } from "../../api/products";
 import { logout } from "../../api/auth";
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
@@ -25,6 +25,15 @@ export function Header() {
         queryFn: () => getGames(true),
     });
     const games = gamesData?.data ?? [];
+
+    const { data: settingsData } = useQuery({
+        queryKey: ["public-settings"],
+        queryFn: getSettings,
+    });
+    const cardtraderLabel = settingsData?.data?.cardtrader_label || "CardTrader";
+    const cardtraderUrl =
+        settingsData?.data?.cardtrader_url ||
+        "https://www.cardtrader.com/en/users/yocigaci888";
 
     useEffect(() => {
         if (searchOpen) searchInputRef.current?.focus();
@@ -121,12 +130,12 @@ export function Header() {
                             </div>
                         ))}
                         <a
-                            href="https://www.cardtrader.com/en/users/yocigaci888"
+                            href={cardtraderUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
                         >
-                            CardTrader
+                            {cardtraderLabel}
                         </a>
                     </nav>
 
@@ -288,12 +297,12 @@ export function Header() {
                             </div>
                         ))}
                         <a
-                            href="https://www.cardtrader.com/en/users/yocigaci888"
+                            href={cardtraderUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block px-3 py-2 text-gray-800"
                         >
-                            CardTrader
+                            {cardtraderLabel}
                         </a>
                         <div className="pt-2 border-t border-gray-100">
                             {user ? (

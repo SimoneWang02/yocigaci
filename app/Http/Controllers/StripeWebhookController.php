@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OrderShipped;
 use App\Models\Order;
-use App\Models\Product;
+use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use Stripe\Checkout\Session as StripeSession;
 use Stripe\Event;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
+    public function __construct(private readonly OrderFulfillmentService $fulfillment)
+    {
+    }
+
     public function handle(Request $request): JsonResponse
     {
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -30,7 +32,10 @@ class StripeWebhookController extends Controller
         }
 
         match ($event->type) {
-            'payment_intent.succeeded' => $this->handlePaymentSucceeded($event),
+            // Crea l'ordine alla conferma del pagamento, anche se il cliente non
+            // torna sul sito (es. abbandono del redirect, frequente con PayPal).
+            'checkout.session.completed',
+            'checkout.session.async_payment_succeeded' => $this->handleCheckoutCompleted($event),
             'payment_intent.payment_failed' => $this->handlePaymentFailed($event),
             'charge.refunded' => $this->handleChargeRefunded($event),
             default => null,
@@ -39,27 +44,12 @@ class StripeWebhookController extends Controller
         return response()->json(['received' => true]);
     }
 
-    private function handlePaymentSucceeded(Event $event): void
+    private function handleCheckoutCompleted(Event $event): void
     {
-        $intent = $event->data->object;
-        $order = Order::where('stripe_payment_intent_id', $intent->id)->first();
+        $session = $event->data->object;
 
-        if (! $order) {
-            return;
-        }
-
-        if ($order->type === 'standard' && $order->status === 'pending') {
-            $order->update([
-                'status' => 'paid',
-                'stripe_payment_status' => 'succeeded',
-            ]);
-
-            // Decrement stock for standard orders confirmed via webhook
-            foreach ($order->items as $item) {
-                if (! ($item->product_snapshot['is_preorder'] ?? false)) {
-                    Product::where('id', $item->product_id)->decrement('stock', $item->quantity);
-                }
-            }
+        if ($session instanceof StripeSession) {
+            $this->fulfillment->fulfillFromSession($session);
         }
     }
 

@@ -18,6 +18,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);
+Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
 
 // Auth
 Route::post('/auth/register', [AuthController::class, 'register']);
