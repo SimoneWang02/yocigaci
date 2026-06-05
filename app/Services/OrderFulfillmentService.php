@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Stripe\Checkout\Session as StripeSession;
 
@@ -32,15 +33,34 @@ class OrderFulfillmentService
 
         $paymentIntentId = $session->payment_intent;
 
+        if (! $paymentIntentId) {
+            return null;
+        }
+
         if ($existing = Order::where('stripe_payment_intent_id', $paymentIntentId)->first()) {
             return $existing;
         }
 
-        $shippingAddress = json_decode($session->metadata->shipping_address, true);
+        // La sessione potrebbe non provenire dal nostro flusso (altra integrazione,
+        // evento di test): senza i metadati del carrello non possiamo creare l'ordine.
+        $rawItems = json_decode($session->metadata->items ?? '[]', true);
+        if (! is_array($rawItems) || $rawItems === []) {
+            Log::warning('Checkout session senza metadati items, ordine non creato.', [
+                'session_id' => $session->id,
+                'payment_intent' => $paymentIntentId,
+            ]);
+
+            return null;
+        }
+
+        $shippingAddress = json_decode($session->metadata->shipping_address ?? 'null', true);
         $notes = $session->metadata->notes ?? null;
         $userId = ($session->metadata->user_id ?? null) ?: null;
 
-        $cartItems = $this->validateCartItems(json_decode($session->metadata->items, true));
+        // A differenza di validateCartItems() (pre-pagamento), qui il cliente ha gia'
+        // pagato: prodotti disattivati o stock insufficiente NON devono mai bloccare
+        // la creazione dell'ordine. Eventuali scoperti restano visibili come stock negativo.
+        $cartItems = $this->resolveItemsForFulfillment($rawItems);
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
         $shipping = $subtotal >= self::SHIPPING_FREE_THRESHOLD ? 0 : self::SHIPPING_COST;
@@ -123,19 +143,71 @@ class OrderFulfillmentService
                 abort(422, "Stock insufficiente per \"{$product->name}\".");
             }
 
-            $items[] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'price' => (float) $product->price,
-                'quantity' => $rawItem['quantity'],
-                'is_preorder' => $product->is_preorder,
-                'preorder_release_date' => $product->preorder_release_date?->toDateString(),
-                'image_url' => $product->primaryImage?->url,
-            ];
+            $items[] = $this->mapProduct($product, $rawItem['quantity']);
         }
 
         return $items;
+    }
+
+    /**
+     * Risolve gli articoli per la fase di fulfillment (post-pagamento).
+     *
+     * Non chiama mai abort(): il cliente ha gia' pagato. I prodotti disattivati
+     * vengono comunque risolti (niente scope active()); per i prodotti eliminati
+     * si crea una riga minima dai metadati cosi' l'ordine resta tracciabile.
+     *
+     * @param  array<int, array{product_id: int, quantity: int}>  $rawItems
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveItemsForFulfillment(array $rawItems): array
+    {
+        $productIds = array_column($rawItems, 'product_id');
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+        $items = [];
+
+        foreach ($rawItems as $rawItem) {
+            $product = $products->get($rawItem['product_id']);
+
+            if (! $product) {
+                Log::warning('Prodotto non trovato durante il fulfillment di un ordine pagato.', [
+                    'product_id' => $rawItem['product_id'],
+                ]);
+
+                $items[] = [
+                    'id' => $rawItem['product_id'],
+                    'name' => "Prodotto #{$rawItem['product_id']}",
+                    'slug' => null,
+                    'price' => 0.0,
+                    'quantity' => $rawItem['quantity'],
+                    'is_preorder' => false,
+                    'preorder_release_date' => null,
+                    'image_url' => null,
+                ];
+
+                continue;
+            }
+
+            $items[] = $this->mapProduct($product, $rawItem['quantity']);
+        }
+
+        return $items;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapProduct(Product $product, int $quantity): array
+    {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'price' => (float) $product->price,
+            'quantity' => $quantity,
+            'is_preorder' => $product->is_preorder,
+            'preorder_release_date' => $product->preorder_release_date?->toDateString(),
+            'image_url' => $product->primaryImage?->url,
+        ];
     }
 
     private function sendConfirmationEmail(Order $order, ?array $shippingAddress, ?int $userId): void
