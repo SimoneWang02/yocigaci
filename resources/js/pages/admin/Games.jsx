@@ -1,7 +1,30 @@
 import { useState } from 'react'
-import { Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Pencil, Trash2, X, GripVertical } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminGetGames, adminCreateGame, adminUpdateGame, adminDeleteGame, adminGetProducts } from '../../api/admin'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import {
+  adminGetGames,
+  adminCreateGame,
+  adminUpdateGame,
+  adminDeleteGame,
+  adminReorderGames,
+  adminGetProducts,
+  adminUpdateProduct,
+} from '../../api/admin'
+import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
@@ -13,52 +36,18 @@ function GameForm({ game, onSave, onCancel }) {
   const [form, setForm] = useState({
     name: game?.name ?? '',
     slug: game?.slug ?? '',
-    navbar_columns: game?.navbar_columns ?? 1,
-    is_active: game?.is_active ?? true,
-    sort_order: game?.sort_order ?? 0,
   })
 
   const autoSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   return (
     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-      <div className="grid grid-cols-1 gap-3">
-        <Input
-          label="Nome"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value, slug: autoSlug(e.target.value) })}
-          required
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        <Input
-          label="Colonne navbar"
-          type="number"
-          min={1}
-          max={4}
-          value={form.navbar_columns}
-          onChange={(e) => setForm({ ...form, navbar_columns: parseInt(e.target.value) })}
-        />
-        <Input
-          label="Ordine"
-          type="number"
-          min={0}
-          value={form.sort_order}
-          onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) })}
-        />
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Attivo</label>
-          <label className="flex items-center gap-2 cursor-pointer mt-2">
-            <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-            />
-            <span className="text-sm text-gray-700">Visibile</span>
-          </label>
-        </div>
-      </div>
+      <Input
+        label="Nome"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value, slug: autoSlug(e.target.value) })}
+        required
+      />
       <div className="flex gap-2 justify-end">
         <Button variant="outline" size="sm" onClick={onCancel}>Annulla</Button>
         <Button variant="primary" size="sm" onClick={() => onSave(form)}>
@@ -70,12 +59,18 @@ function GameForm({ game, onSave, onCancel }) {
 }
 
 function GameProducts({ gameId }) {
+  const qc = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ['admin-products-by-game', gameId],
     queryFn: () => adminGetProducts({ game_id: gameId, per_page: 100 }),
   })
   const raw = data?.data ?? []
   const { sort, sorted: products, onSort } = useTableSort(raw, 'name')
+
+  const toggleActive = useMutation({
+    mutationFn: ({ id, is_active }) => adminUpdateProduct(id, { is_active }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-products-by-game', gameId] }),
+  })
 
   if (isLoading) return <div className="px-6 py-3 text-sm text-gray-400">Caricamento...</div>
   if (raw.length === 0) return <div className="px-6 py-3 text-sm text-gray-400">Nessun prodotto per questo gioco.</div>
@@ -103,15 +98,25 @@ function GameProducts({ gameId }) {
                   <div className="w-8 h-10 bg-gray-200 rounded shrink-0" />
                 )}
               </td>
-              <td className="px-4 py-2 text-gray-800">{p.name}</td>
+              <td className="px-4 py-2 text-gray-800">
+                <span className="flex items-center gap-2">
+                  {p.name}
+                  {p.is_preorder && <Badge variant="preorder">Preordine</Badge>}
+                </span>
+              </td>
               <td className="px-4 py-2 text-right text-gray-500">€ {Number(p.price).toFixed(2).replace('.', ',')}</td>
-              <td className={`px-4 py-2 text-center text-xs font-semibold tabular-nums ${p.stock === 0 ? 'text-red-600' : 'text-gray-700'}`}>
-                {p.stock}
+              <td className="px-4 py-2 text-center text-xs font-semibold tabular-nums">
+                {p.stock === 0 ? <span className="text-gray-400">-</span> : <span className="text-gray-700">{p.stock}</span>}
               </td>
               <td className="px-4 py-2 text-center">
-                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${p.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                <button
+                  type="button"
+                  onClick={() => toggleActive.mutate({ id: p.id, is_active: !p.is_active })}
+                  className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${p.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                  title={p.is_active ? 'Clicca per nascondere' : 'Clicca per rendere visibile'}
+                >
                   {p.is_active ? 'Attivo' : 'Nascosto'}
-                </span>
+                </button>
               </td>
               <td className="px-4 py-2 text-right">
                 <Link to={`/admin/prodotti/${p.id}/modifica`}>
@@ -126,31 +131,141 @@ function GameProducts({ gameId }) {
   )
 }
 
+function SortableRow({ game, expanded, onToggleExpand, onSave, onDelete, onToggleActive }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: game.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <>
+      <tr ref={setNodeRef} style={style} className="border-t border-gray-100 first:border-t-0 hover:bg-gray-50">
+        <td className="px-3 py-3 w-8">
+          <button
+            {...attributes}
+            {...listeners}
+            className="text-gray-300 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+            aria-label="Trascina per riordinare"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        </td>
+        <td className="px-4 py-3 font-medium text-gray-800">{game.name}</td>
+        <td className="px-4 py-3 text-center">
+          <button
+            type="button"
+            onClick={() => onToggleActive(game)}
+            className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${game.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+            title={game.is_active ? 'Clicca per nascondere' : 'Clicca per rendere visibile'}
+          >
+            {game.is_active ? 'Attivo' : 'Nascosto'}
+          </button>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={expanded ? 'Chiudi' : 'Modifica'}
+              title={expanded ? 'Chiudi' : 'Modifica'}
+              className="!px-2"
+              onClick={() => onToggleExpand(game.id)}
+            >
+              {expanded ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              aria-label="Elimina"
+              title="Elimina"
+              className="!px-2"
+              onClick={() => window.confirm('Eliminare questo gioco?') && onDelete(game.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </td>
+      </tr>
+      {expanded && (
+        <tr>
+          <td colSpan={4} className="p-0">
+            <div className="px-4 py-3 border-t border-gray-100 bg-white">
+              <GameForm
+                game={game}
+                onSave={(d) => onSave(game.id, d)}
+                onCancel={() => onToggleExpand(game.id)}
+              />
+            </div>
+            <GameProducts gameId={game.id} />
+          </td>
+        </tr>
+      )}
+    </>
+  )
+}
+
 export default function AdminGames() {
   const qc = useQueryClient()
-  const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
-  const [search, setSearch] = useState('')
   const [expandedGame, setExpandedGame] = useState(null)
+  const [search, setSearch] = useState('')
+  const [localOrder, setLocalOrder] = useState(null)
 
-  const { data, isLoading } = useQuery({ queryKey: ['admin-games'], queryFn: adminGetGames })
-  const filtered = (data?.data ?? []).filter((g) =>
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-games'],
+    queryFn: adminGetGames,
+    onSuccess: () => setLocalOrder(null),
+  })
+
+  const rawGames = data?.data ?? []
+  const orderedGames = localOrder
+    ? localOrder.map((id) => rawGames.find((g) => g.id === id)).filter(Boolean)
+    : rawGames
+
+  const games = orderedGames.filter((g) =>
     !search || g.name.toLowerCase().includes(search.toLowerCase())
   )
-  const { sort, sorted: games, onSort } = useTableSort(filtered, 'name')
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['admin-games'] })
+    qc.invalidateQueries({ queryKey: ['games-nav'] })
+  }
 
   const create = useMutation({
     mutationFn: adminCreateGame,
-    onSuccess: () => { qc.invalidateQueries(['admin-games']); qc.invalidateQueries(['games-nav']); setCreating(false) },
+    onSuccess: () => { invalidate(); setCreating(false) },
   })
   const update = useMutation({
     mutationFn: ({ id, data }) => adminUpdateGame(id, data),
-    onSuccess: () => { qc.invalidateQueries(['admin-games']); qc.invalidateQueries(['games-nav']); setEditing(null) },
+    onSuccess: () => { invalidate(); setExpandedGame(null) },
   })
   const del = useMutation({
     mutationFn: adminDeleteGame,
-    onSuccess: () => { qc.invalidateQueries(['admin-games']); qc.invalidateQueries(['games-nav']) },
+    onSuccess: invalidate,
   })
+  const reorder = useMutation({
+    mutationFn: adminReorderGames,
+    onSuccess: invalidate,
+  })
+  const toggleActive = useMutation({
+    mutationFn: ({ id, is_active }) => adminUpdateGame(id, { is_active }),
+    onSuccess: invalidate,
+  })
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return
+    const ids = orderedGames.map((g) => g.id)
+    const oldIndex = ids.indexOf(active.id)
+    const newIndex = ids.indexOf(over.id)
+    const newIds = arrayMove(ids, oldIndex, newIndex)
+    setLocalOrder(newIds)
+    reorder.mutate(newIds)
+  }
 
   if (isLoading) return <PageSpinner />
 
@@ -180,76 +295,29 @@ export default function AdminGames() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
             <tr>
-              <th className="text-left px-4 py-3 w-8"></th>
-              <SortTh column="name" sort={sort} onSort={onSort}>Nome</SortTh>
-              <SortTh column="navbar_columns" sort={sort} onSort={onSort} align="center">Colonne</SortTh>
-              <SortTh column="sort_order" sort={sort} onSort={onSort} align="center">Ordine</SortTh>
-              <SortTh column="is_active" sort={sort} onSort={onSort} align="center">Stato</SortTh>
+              <th className="px-3 py-3 w-8"></th>
+              <th className="text-left px-4 py-3">Nome</th>
+              <th className="text-center px-4 py-3">Stato</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody>
-            {games.map((game) => (
-              <>
-                <tr key={game.id} className="hover:bg-gray-50 border-t border-gray-100 first:border-t-0">
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => setExpandedGame(expandedGame === game.id ? null : game.id)}
-                      className="text-gray-400 hover:text-gray-700 transition-colors"
-                    >
-                      {expandedGame === game.id
-                        ? <ChevronDown className="w-4 h-4" />
-                        : <ChevronRight className="w-4 h-4" />
-                      }
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{game.name}</td>
-                  <td className="px-4 py-3 text-center">{game.navbar_columns}</td>
-                  <td className="px-4 py-3 text-center">{game.sort_order}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${game.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      {game.is_active ? 'Attivo' : 'Nascosto'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
-                      <Button variant="ghost" size="sm" aria-label="Modifica" title="Modifica" className="!px-2" onClick={() => setEditing(game.id)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        aria-label="Elimina"
-                        title="Elimina"
-                        className="!px-2"
-                        onClick={() => window.confirm('Eliminare questo gioco?') && del.mutate(game.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-                {editing === game.id && (
-                  <tr key={`edit-${game.id}`}>
-                    <td colSpan={6} className="px-4 pb-4">
-                      <GameForm
-                        game={game}
-                        onSave={(d) => update.mutate({ id: game.id, data: d })}
-                        onCancel={() => setEditing(null)}
-                      />
-                    </td>
-                  </tr>
-                )}
-                {expandedGame === game.id && (
-                  <tr key={`products-${game.id}`}>
-                    <td colSpan={6} className="p-0">
-                      <GameProducts gameId={game.id} />
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
-          </tbody>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={games.map((g) => g.id)} strategy={verticalListSortingStrategy}>
+              <tbody>
+                {games.map((game) => (
+                  <SortableRow
+                    key={game.id}
+                    game={game}
+                    expanded={expandedGame === game.id}
+                    onToggleExpand={(id) => setExpandedGame(expandedGame === id ? null : id)}
+                    onSave={(id, d) => update.mutate({ id, data: d })}
+                    onDelete={(id) => del.mutate(id)}
+                    onToggleActive={(g) => toggleActive.mutate({ id: g.id, is_active: !g.is_active })}
+                  />
+                ))}
+              </tbody>
+            </SortableContext>
+          </DndContext>
         </table>
       </div>
     </div>

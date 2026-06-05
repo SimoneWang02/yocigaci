@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Admin
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    Route::post('/games/reorder', [App\Http\Controllers\Admin\GameController::class, 'reorder']);
     Route::apiResource('/games', App\Http\Controllers\Admin\GameController::class);
     Route::apiResource('/categories', App\Http\Controllers\Admin\CategoryController::class);
     Route::post('/categories/reorder', [App\Http\Controllers\Admin\CategoryController::class, 'reorder']);

@@ -5,6 +5,7 @@ export const adminGetGames = () => api.get('/admin/games').then((r) => r.data)
 export const adminCreateGame = (data) => api.post('/admin/games', data).then((r) => r.data)
 export const adminUpdateGame = (id, data) => api.put(`/admin/games/${id}`, data).then((r) => r.data)
 export const adminDeleteGame = (id) => api.delete(`/admin/games/${id}`).then((r) => r.data)
+export const adminReorderGames = (ids) => api.post('/admin/games/reorder', { ids }).then((r) => r.data)
 
 // Categories
 export const adminGetCategories = (params) => api.get('/admin/categories', { params }).then((r) => r.data)

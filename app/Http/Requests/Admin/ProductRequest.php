@@ -14,15 +14,16 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         $productId = $this->route('product')?->id;
+        $req = $this->isMethod('POST') ? 'required' : 'sometimes|required';
 
         return [
-            'game_id' => ['required', 'exists:games,id'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:products,slug,' . $productId],
+            'game_id' => [$req, 'exists:games,id'],
+            'category_id' => [$req, 'exists:categories,id'],
+            'name' => [$req, 'string', 'max:255'],
+            'slug' => [$req, 'string', 'max:255', 'unique:products,slug,' . $productId],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['required', 'integer', 'min:0'],
+            'price' => [$req, 'numeric', 'min:0'],
+            'stock' => [$req, 'integer', 'min:0'],
             'is_preorder' => ['boolean'],
             'preorder_release_date' => ['nullable', 'date', 'required_if:is_preorder,true'],
             'preorder_note' => ['nullable', 'string', 'max:255'],

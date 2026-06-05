@@ -35,8 +35,6 @@ export default function ProductForm() {
         is_preorder: false,
         preorder_release_date: "",
         preorder_note: "",
-        is_active: true,
-        sort_order: 0,
     });
     const [images, setImages] = useState([]);
     const [uploading, setUploading] = useState(false);
@@ -74,8 +72,6 @@ export default function ProductForm() {
                 is_preorder: p.is_preorder ?? false,
                 preorder_release_date: p.preorder_release_date ?? "",
                 preorder_note: p.preorder_note ?? "",
-                is_active: p.is_active ?? true,
-                sort_order: p.sort_order ?? 0,
             });
             setImages(p.images ?? []);
         }
@@ -125,7 +121,6 @@ export default function ProductForm() {
                 ...form,
                 price: parseFloat(form.price),
                 stock: parseInt(form.stock),
-                sort_order: parseInt(form.sort_order),
                 game_id: parseInt(form.game_id),
                 category_id: parseInt(form.category_id),
                 preorder_release_date: form.is_preorder
@@ -162,7 +157,7 @@ export default function ProductForm() {
                     onClick={() => navigate("/admin/prodotti")}
                     className="text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
                 >
-                    <ArrowLeft className="w-4 h-4" /> Prodotti
+                    <ArrowLeft className="w-4 h-4" />
                 </button>
                 <h1 className="text-2xl font-bold text-gray-900">
                     {isEdit ? "Modifica prodotto" : "Nuovo prodotto"}
@@ -244,7 +239,7 @@ export default function ProductForm() {
                     <h2 className="font-semibold text-gray-800">
                         Prezzi e disponibilità
                     </h2>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <Input
                             label="Prezzo (€)"
                             type="number"
@@ -266,15 +261,6 @@ export default function ProductForm() {
                             }
                             disabled={form.is_preorder}
                         />
-                        <Input
-                            label="Ordine visualizzazione"
-                            type="number"
-                            min="0"
-                            value={form.sort_order}
-                            onChange={(e) =>
-                                setForm({ ...form, sort_order: e.target.value })
-                            }
-                        />
                     </div>
                     <div className="flex gap-8">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -292,22 +278,6 @@ export default function ProductForm() {
                             />
                             <span className="text-sm font-medium text-gray-700">
                                 Preordine
-                            </span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={form.is_active}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        is_active: e.target.checked,
-                                    })
-                                }
-                                className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-                            />
-                            <span className="text-sm font-medium text-gray-700">
-                                Visibile nel negozio
                             </span>
                         </label>
                     </div>

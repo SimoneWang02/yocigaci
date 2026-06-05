@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\GameRequest;
 use App\Http\Resources\GameResource;
 use App\Models\Game;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GameController extends Controller
@@ -38,5 +39,16 @@ class GameController extends Controller
         $game->delete();
 
         return response()->json(['message' => 'Gioco eliminato.']);
+    }
+
+    public function reorder(Request $request): JsonResponse
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+
+        foreach ($request->ids as $index => $id) {
+            Game::where('id', $id)->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['message' => 'Ordine aggiornato.']);
     }
 }

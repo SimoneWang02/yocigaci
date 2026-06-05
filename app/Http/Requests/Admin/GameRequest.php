@@ -14,10 +14,16 @@ class GameRequest extends FormRequest
     public function rules(): array
     {
         $gameId = $this->route('game')?->id;
+        $nameRules = $this->isMethod('POST')
+            ? ['required', 'string', 'max:255']
+            : ['sometimes', 'required', 'string', 'max:255'];
+        $slugRules = $this->isMethod('POST')
+            ? ['required', 'string', 'max:255', 'unique:games,slug']
+            : ['sometimes', 'required', 'string', 'max:255', 'unique:games,slug,' . $gameId];
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:games,slug,' . $gameId],
+            'name' => $nameRules,
+            'slug' => $slugRules,
             'navbar_columns' => ['integer', 'min:1', 'max:4'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],

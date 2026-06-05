@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminGetProducts, adminDeleteProduct } from "../../api/admin";
+import { adminGetProducts, adminDeleteProduct, adminUpdateProduct } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
@@ -15,7 +15,6 @@ import { SortTh } from "../../components/ui/SortTh";
 export default function AdminProducts() {
     const qc = useQueryClient();
     const [filterGame, setFilterGame] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
     const [search, setSearch] = useState("");
 
     const { data: gamesData } = useQuery({
@@ -23,12 +22,10 @@ export default function AdminProducts() {
         queryFn: adminGetGames,
     });
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-products", filterGame, filterStatus, search],
+        queryKey: ["admin-products", filterGame, search],
         queryFn: () =>
             adminGetProducts({
                 ...(filterGame ? { game_id: filterGame } : {}),
-                ...(filterStatus === "active" ? { is_active: true } : {}),
-                ...(filterStatus === "inactive" ? { is_active: false } : {}),
                 ...(search ? { search } : {}),
             }),
     });
@@ -40,6 +37,10 @@ export default function AdminProducts() {
     const del = useMutation({
         mutationFn: adminDeleteProduct,
         onSuccess: () => qc.invalidateQueries(["admin-products"]),
+    });
+    const toggleActive = useMutation({
+        mutationFn: ({ id, is_active }) => adminUpdateProduct(id, { is_active }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
     });
 
     return (
@@ -53,17 +54,15 @@ export default function AdminProducts() {
                 </Link>
             </div>
 
-            <div className="flex gap-3 mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
                 <Input
                     placeholder="Cerca prodotto..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-56"
                 />
                 <Select
                     value={filterGame}
                     onChange={(e) => setFilterGame(e.target.value)}
-                    className="w-44"
                 >
                     <option value="">Tutti i giochi</option>
                     {games.map((g) => (
@@ -71,15 +70,6 @@ export default function AdminProducts() {
                             {g.name}
                         </option>
                     ))}
-                </Select>
-                <Select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-44"
-                >
-                    <option value="">Tutti gli stati</option>
-                    <option value="active">Attivi</option>
-                    <option value="inactive">Nascosti</option>
                 </Select>
             </div>
 
@@ -133,28 +123,21 @@ export default function AdminProducts() {
                                             .replace(".", ",")}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        {p.is_preorder ? (
-                                            "-"
+                                        {p.is_preorder || p.stock === 0 ? (
+                                            <span className="text-gray-400">-</span>
                                         ) : (
-                                            <span
-                                                className={
-                                                    p.stock === 0
-                                                        ? "text-red-500 font-medium"
-                                                        : "text-gray-700"
-                                                }
-                                            >
-                                                {p.stock}
-                                            </span>
+                                            <span className="text-gray-700">{p.stock}</span>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        <span
-                                            className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${p.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleActive.mutate({ id: p.id, is_active: !p.is_active })}
+                                            className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${p.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                                            title={p.is_active ? "Clicca per nascondere" : "Clicca per rendere visibile"}
                                         >
-                                            {p.is_active
-                                                ? "Attivo"
-                                                : "Nascosto"}
-                                        </span>
+                                            {p.is_active ? "Attivo" : "Nascosto"}
+                                        </button>
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2 justify-end">
