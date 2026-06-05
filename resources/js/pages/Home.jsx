@@ -1,29 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHomepageSections } from "../api/products";
+import { getHomepageSections, getCarouselBanners } from "../api/products";
 import { PageSpinner } from "../components/ui/Spinner";
 import HeroCarousel from "../components/home/HeroCarousel";
 import ProductCarousel from "../components/home/ProductCarousel";
-
-const HERO_BANNERS = [
-    {
-        id: "pokemon",
-        image: "/images/banners/banner-1.svg",
-        alt: "Nuove uscite Pokémon",
-        href: "/catalogo?game=pokemon",
-    },
-    {
-        id: "one-piece",
-        image: "/images/banners/banner-2.svg",
-        alt: "One Piece Card Game - preordini",
-        href: "/catalogo?preorder=true",
-    },
-    {
-        id: "magic-riftbound",
-        image: "/images/banners/banner-3.svg",
-        alt: "Magic e Riftbound",
-        href: "/catalogo",
-    },
-];
 
 export default function Home() {
     const { data: sectionsData, isLoading } = useQuery({
@@ -31,12 +10,25 @@ export default function Home() {
         queryFn: getHomepageSections,
     });
 
+    const { data: carouselData } = useQuery({
+        queryKey: ["carousel-banners"],
+        queryFn: getCarouselBanners,
+    });
+
     const sections = sectionsData?.data ?? [];
+    const carouselEnabled = carouselData?.carousel_enabled ?? true;
+    const bannerSlides = (carouselData?.data ?? []).map((b) => ({
+        id: String(b.id),
+        image: b.url,
+        alt: "",
+        href: b.link ?? undefined,
+    }));
 
     return (
         <div>
-            {/* Hero - carousel di banner */}
-            <HeroCarousel slides={HERO_BANNERS} />
+            {carouselEnabled && bannerSlides.length > 0 && (
+                <HeroCarousel slides={bannerSlides} />
+            )}
 
             {/* Sezioni gestite dall'admin */}
             {isLoading ? (

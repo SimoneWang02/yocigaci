@@ -15,6 +15,7 @@ Route::get('/products/{slug}/related', [ProductController::class, 'related']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
+Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);
 
 // Auth
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -49,6 +50,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('/homepage-sections', App\Http\Controllers\Admin\HomepageSectionController::class)
         ->parameters(['homepage-sections' => 'homepageSection']);
     Route::post('/homepage-sections/reorder', [App\Http\Controllers\Admin\HomepageSectionController::class, 'reorder']);
+    Route::get('/carousel-banners', [App\Http\Controllers\Admin\CarouselBannerController::class, 'index']);
+    Route::post('/carousel-banners', [App\Http\Controllers\Admin\CarouselBannerController::class, 'store']);
+    Route::post('/carousel-banners/reorder', [App\Http\Controllers\Admin\CarouselBannerController::class, 'reorder']);
+    Route::patch('/carousel-banners/{carouselBanner}', [App\Http\Controllers\Admin\CarouselBannerController::class, 'update']);
+    Route::delete('/carousel-banners/{carouselBanner}', [App\Http\Controllers\Admin\CarouselBannerController::class, 'destroy']);
+    Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index']);
+    Route::patch('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update']);
     Route::get('/orders', [App\Http\Controllers\Admin\OrderController::class, 'index']);
     Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);

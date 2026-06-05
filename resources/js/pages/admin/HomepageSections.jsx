@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Pencil, Trash2, X, GripVertical } from "lucide-react";
+import { useState, useRef } from "react";
+import { Pencil, Trash2, X, GripVertical, Upload, ImageOff } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     DndContext,
@@ -11,6 +11,7 @@ import {
 import {
     SortableContext,
     verticalListSortingStrategy,
+    horizontalListSortingStrategy,
     useSortable,
     arrayMove,
 } from "@dnd-kit/sortable";
@@ -22,11 +23,20 @@ import {
     adminDeleteHomepageSection,
     adminReorderHomepageSections,
     adminGetProducts,
+    adminGetCarouselBanners,
+    adminUploadCarouselBanner,
+    adminUpdateCarouselBanner,
+    adminDeleteCarouselBanner,
+    adminReorderCarouselBanners,
+    adminGetSettings,
+    adminUpdateSettings,
 } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
+
+// ─── Product picker ────────────────────────────────────────────────────────────
 
 function ProductPicker({ selected, onChange }) {
     const [search, setSearch] = useState("");
@@ -165,6 +175,8 @@ function ProductPicker({ selected, onChange }) {
     );
 }
 
+// ─── Section form ──────────────────────────────────────────────────────────────
+
 function SectionForm({ section, onSave, onCancel, saving }) {
     const [form, setForm] = useState({
         title: section?.title ?? "",
@@ -203,6 +215,8 @@ function SectionForm({ section, onSave, onCancel, saving }) {
         </div>
     );
 }
+
+// ─── Sortable section row ──────────────────────────────────────────────────────
 
 function SortableRow({
     section,
@@ -314,6 +328,254 @@ function SortableRow({
     );
 }
 
+// ─── Sortable banner card ──────────────────────────────────────────────────────
+
+function SortableBannerCard({ banner, onToggleActive, onDelete }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: banner.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`relative group rounded-xl overflow-hidden border-2 bg-gray-100 ${banner.is_active ? "border-transparent" : "border-gray-200"}`}
+        >
+            <div className="aspect-[21/9] overflow-hidden">
+                <img
+                    src={banner.url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.nextSibling.style.display = "flex";
+                    }}
+                />
+                <div className="hidden w-full h-full items-center justify-center text-gray-400">
+                    <ImageOff className="w-8 h-8" />
+                </div>
+            </div>
+
+            {!banner.is_active && (
+                <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+            )}
+
+            {/* drag handle */}
+            <button
+                {...attributes}
+                {...listeners}
+                className="absolute top-2 left-2 p-1 rounded bg-white/80 text-gray-500 hover:text-gray-900 cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Trascina per riordinare"
+            >
+                <GripVertical className="w-4 h-4" />
+            </button>
+
+            {/* actions */}
+            <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                    type="button"
+                    onClick={() => onToggleActive(banner)}
+                    className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${banner.is_active ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                    title={banner.is_active ? "Clicca per nascondere" : "Clicca per rendere visibile"}
+                >
+                    {banner.is_active ? "Visibile" : "Nascosto"}
+                </button>
+                <button
+                    type="button"
+                    onClick={() =>
+                        window.confirm("Eliminare questo banner?") &&
+                        onDelete(banner.id)
+                    }
+                    className="p-1 rounded bg-white/90 text-red-500 hover:text-red-700 hover:bg-white"
+                    aria-label="Elimina banner"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// ─── Carousel section ──────────────────────────────────────────────────────────
+
+function CarouselSection() {
+    const qc = useQueryClient();
+    const fileRef = useRef(null);
+    const [localOrder, setLocalOrder] = useState(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    );
+
+    const { data: settingsData } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    const { data: bannersData, isLoading } = useQuery({
+        queryKey: ["admin-carousel-banners"],
+        queryFn: adminGetCarouselBanners,
+        onSuccess: () => setLocalOrder(null),
+    });
+
+    const carouselEnabled = settingsData?.data?.carousel_enabled === "1";
+    const rawBanners = bannersData?.data ?? [];
+    const banners = localOrder
+        ? localOrder.map((id) => rawBanners.find((b) => b.id === id)).filter(Boolean)
+        : rawBanners;
+
+    const invalidate = () => {
+        qc.invalidateQueries({ queryKey: ["admin-carousel-banners"] });
+        qc.invalidateQueries({ queryKey: ["carousel-banners"] });
+    };
+
+    const toggleCarousel = useMutation({
+        mutationFn: (enabled) => adminUpdateSettings({ carousel_enabled: enabled }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-settings"] }),
+    });
+
+    const upload = useMutation({
+        mutationFn: adminUploadCarouselBanner,
+        onSuccess: invalidate,
+    });
+
+    const toggleActive = useMutation({
+        mutationFn: ({ id, is_active }) => adminUpdateCarouselBanner(id, { is_active }),
+        onSuccess: invalidate,
+    });
+
+    const del = useMutation({
+        mutationFn: adminDeleteCarouselBanner,
+        onSuccess: invalidate,
+    });
+
+    const reorder = useMutation({
+        mutationFn: adminReorderCarouselBanners,
+        onSuccess: invalidate,
+    });
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) upload.mutate(file);
+        e.target.value = "";
+    };
+
+    const handleDragEnd = ({ active, over }) => {
+        if (!over || active.id === over.id) return;
+        const ids = banners.map((b) => b.id);
+        const oldIndex = ids.indexOf(active.id);
+        const newIndex = ids.indexOf(over.id);
+        const newIds = arrayMove(ids, oldIndex, newIndex);
+        setLocalOrder(newIds);
+        reorder.mutate(newIds);
+    };
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="flex items-center justify-between mb-4">
+                <div>
+                    <h2 className="text-base font-semibold text-gray-900">
+                        Banner Carousel
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                        Immagini mostrate nel carousel in cima alla homepage
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    {/* toggle carousel visibilità */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <span className="text-sm text-gray-600">
+                            Mostra carousel
+                        </span>
+                        <button
+                            type="button"
+                            role="switch"
+                            aria-checked={carouselEnabled}
+                            onClick={() =>
+                                toggleCarousel.mutate(!carouselEnabled)
+                            }
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${carouselEnabled ? "bg-indigo-600" : "bg-gray-200"}`}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${carouselEnabled ? "translate-x-6" : "translate-x-1"}`}
+                            />
+                        </button>
+                    </label>
+
+                    {/* upload button */}
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={upload.isPending}
+                    >
+                        <Upload className="w-4 h-4 mr-1.5" />
+                        {upload.isPending ? "Caricamento…" : "Aggiungi banner"}
+                    </Button>
+                </div>
+            </div>
+
+            {isLoading ? (
+                <div className="py-8 flex justify-center">
+                    <PageSpinner />
+                </div>
+            ) : banners.length === 0 ? (
+                <div className="border border-dashed border-gray-200 rounded-xl py-10 text-center text-gray-400 text-sm">
+                    Nessun banner. Caricane uno con il pulsante qui sopra.
+                </div>
+            ) : (
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={banners.map((b) => b.id)}
+                        strategy={horizontalListSortingStrategy}
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {banners.map((banner) => (
+                                <SortableBannerCard
+                                    key={banner.id}
+                                    banner={banner}
+                                    onToggleActive={(b) =>
+                                        toggleActive.mutate({
+                                            id: b.id,
+                                            is_active: !b.is_active,
+                                        })
+                                    }
+                                    onDelete={(id) => del.mutate(id)}
+                                />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
+            )}
+        </div>
+    );
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────────
+
 export default function AdminHomepageSections() {
     const qc = useQueryClient();
     const [editing, setEditing] = useState(null);
@@ -392,9 +654,19 @@ export default function AdminHomepageSections() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                        Sezioni Homepage
+                        Homepage
                     </h1>
                 </div>
+            </div>
+
+            {/* Carousel banners */}
+            <CarouselSection />
+
+            {/* Sezioni prodotti */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Sezioni prodotti
+                </h2>
                 <Button
                     variant="primary"
                     size="sm"

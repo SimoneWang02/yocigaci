@@ -44,12 +44,14 @@ export default function HeroCarousel({ slides = [], interval = 6000 }) {
             >
                 {slides.map((slide) => {
                     const inner = (
-                        <img
-                            src={slide.image}
-                            alt={slide.alt ?? ""}
-                            className="h-[220px] w-full object-cover sm:h-[320px] md:h-[420px] lg:h-[500px]"
-                            loading="lazy"
-                        />
+                        <div className="relative w-full aspect-[21/9]">
+                            <img
+                                src={slide.image}
+                                alt={slide.alt ?? ""}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loading="lazy"
+                            />
+                        </div>
                     );
                     return (
                         <div key={slide.id} className="w-full shrink-0">

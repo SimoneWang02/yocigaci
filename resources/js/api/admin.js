@@ -39,6 +39,21 @@ export const adminUpdateHomepageSection = (id, data) => api.put(`/admin/homepage
 export const adminDeleteHomepageSection = (id) => api.delete(`/admin/homepage-sections/${id}`).then((r) => r.data)
 export const adminReorderHomepageSections = (ids) => api.post('/admin/homepage-sections/reorder', { ids }).then((r) => r.data)
 
+// Carousel banners
+export const adminGetCarouselBanners = () => api.get('/admin/carousel-banners').then((r) => r.data)
+export const adminUploadCarouselBanner = (file) => {
+  const form = new FormData()
+  form.append('image', file)
+  return api.post('/admin/carousel-banners', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data)
+}
+export const adminUpdateCarouselBanner = (id, data) => api.patch(`/admin/carousel-banners/${id}`, data).then((r) => r.data)
+export const adminDeleteCarouselBanner = (id) => api.delete(`/admin/carousel-banners/${id}`).then((r) => r.data)
+export const adminReorderCarouselBanners = (ids) => api.post('/admin/carousel-banners/reorder', { ids }).then((r) => r.data)
+
+// Settings
+export const adminGetSettings = () => api.get('/admin/settings').then((r) => r.data)
+export const adminUpdateSettings = (data) => api.patch('/admin/settings', data).then((r) => r.data)
+
 // Orders
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)
 export const adminGetOrder = (id) => api.get(`/admin/orders/${id}`).then((r) => r.data)
