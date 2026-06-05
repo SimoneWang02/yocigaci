@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
-import { X } from 'lucide-react'
+import { X, Package, User, MapPin, Truck, Hash, RefreshCw } from 'lucide-react'
 import { useTableSort } from '../../hooks/useTableSort'
 import { SortTh } from '../../components/ui/SortTh'
 
@@ -23,6 +23,17 @@ const STATUS_LABELS = {
 }
 
 const ALL_STATUSES = Object.entries(STATUS_LABELS).map(([value, { label }]) => ({ value, label }))
+
+function SectionHeader({ icon: Icon, title }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <div className="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center">
+        <Icon className="w-4 h-4 text-indigo-500" />
+      </div>
+      <span className="text-sm font-semibold text-gray-700">{title}</span>
+    </div>
+  )
+}
 
 function OrderDrawer({ orderId, onClose }) {
   const qc = useQueryClient()
@@ -48,117 +59,173 @@ function OrderDrawer({ orderId, onClose }) {
   const order = data?.data
   const status = order ? (STATUS_LABELS[order.status] ?? { label: order.status, variant: 'default' }) : null
 
+  const initials = order?.user?.name
+    ? order.user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+    : null
+
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-xl bg-white shadow-2xl z-50 flex flex-col overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-semibold text-gray-900">
-            {order ? order.order_number : 'Ordine'}
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
+      <div className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl z-50 flex flex-col">
+
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-4 flex-shrink-0">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Hash className="w-4 h-4 text-indigo-300" />
+                <span className="font-mono text-white font-bold text-base tracking-wide">
+                  {order?.order_number ?? '—'}
+                </span>
+                {order?.type === 'preorder' && (
+                  <span className="text-xs bg-amber-400/20 text-amber-200 border border-amber-400/30 px-1.5 py-0.5 rounded font-medium">
+                    Preordine
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {status && <Badge variant={status.variant}>{status.label}</Badge>}
+                {order && (
+                  <span className="text-indigo-200 text-xs">
+                    {new Date(order.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="mt-0.5 p-1.5 rounded-lg text-indigo-200 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {isLoading ? <PageSpinner /> : order && (
-          <div className="p-5 space-y-6">
-            <div className="flex items-center gap-3">
-              <Badge variant={status.variant}>{status.label}</Badge>
-              <span className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('it-IT')}</span>
-              {order.type === 'preorder' && <Badge variant="preorder">Preordine</Badge>}
-            </div>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? <PageSpinner /> : order && (
+            <div className="p-5 space-y-6">
 
-            {/* Items */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-gray-700">Prodotti</p>
-              {order.items?.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm py-2 border-b last:border-0">
-                  <div>
-                    <p className="font-medium">{item.product_snapshot?.name}</p>
-                    <p className="text-gray-500">x{item.quantity}</p>
-                  </div>
-                  <p className="font-semibold">€ {Number(item.total_price).toFixed(2).replace('.', ',')}</p>
-                </div>
-              ))}
-              <div className="flex justify-between font-bold text-base pt-2">
-                <span>Totale</span>
-                <span>€ {Number(order.total).toFixed(2).replace('.', ',')}</span>
-              </div>
-            </div>
-
-            {/* Customer */}
-            {order.user && (
-              <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
-                <p className="font-semibold text-gray-700">Cliente</p>
-                <p>{order.user.name}</p>
-                <p className="text-gray-500">{order.user.email}</p>
-              </div>
-            )}
-
-            {/* Shipping address */}
-            <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
-              <p className="font-semibold text-gray-700">Indirizzo di spedizione</p>
-              {order.shipping_address && (
-                <p className="text-gray-600">
-                  {order.shipping_address.full_name}<br />
-                  {order.shipping_address.address_line1}<br />
-                  {order.shipping_address.postal_code} {order.shipping_address.city} ({order.shipping_address.province})
-                </p>
-              )}
-            </div>
-
-            {/* Tracking */}
-            {order.tracking_code && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
-                <p className="font-semibold text-green-800">Tracciamento: {order.tracking_code}</p>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="space-y-3 pt-2 border-t">
-              <p className="text-sm font-semibold text-gray-700">Aggiorna stato</p>
-              <div className="flex gap-2">
-                <Select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="flex-1"
-                >
-                  <option value="">Seleziona stato...</option>
-                  {ALL_STATUSES.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
+              {/* Products */}
+              <div>
+                <SectionHeader icon={Package} title="Prodotti" />
+                <div className="bg-gray-50 rounded-xl overflow-hidden divide-y divide-gray-100">
+                  {order.items?.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-indigo-600">{item.quantity}</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-800">{item.product_snapshot?.name}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-800 ml-3 flex-shrink-0">
+                        € {Number(item.total_price).toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
                   ))}
-                </Select>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={!newStatus}
-                  onClick={() => { updateStatus.mutate({ id: order.id, status: newStatus }); setNewStatus('') }}
-                >
-                  Aggiorna
-                </Button>
+                  <div className="flex justify-between items-center px-4 py-3 bg-white">
+                    <span className="text-sm font-bold text-gray-900">Totale ordine</span>
+                    <span className="text-base font-bold text-indigo-600">
+                      € {Number(order.total).toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-gray-700">Aggiungi tracking</p>
-              <div className="flex gap-2">
-                <Input
-                  value={tracking}
-                  onChange={(e) => setTracking(e.target.value)}
-                  placeholder="Codice spedizione..."
-                  className="flex-1"
-                />
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={!tracking}
-                  onClick={() => { addTracking.mutate({ id: order.id, code: tracking }); setTracking('') }}
-                >
-                  Salva
-                </Button>
+              {/* Customer */}
+              {order.user && (
+                <div>
+                  <SectionHeader icon={User} title="Cliente" />
+                  <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-indigo-700">{initials}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">{order.user.name}</p>
+                      <p className="text-xs text-gray-500">{order.user.email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Shipping address */}
+              {order.shipping_address && (
+                <div>
+                  <SectionHeader icon={MapPin} title="Indirizzo di spedizione" />
+                  <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
+                    <p className="font-semibold text-gray-800">{order.shipping_address.full_name}</p>
+                    <p>{order.shipping_address.address_line1}</p>
+                    <p>
+                      {order.shipping_address.postal_code} {order.shipping_address.city}
+                      {order.shipping_address.province && ` (${order.shipping_address.province})`}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tracking */}
+              {order.tracking_code && (
+                <div>
+                  <SectionHeader icon={Truck} title="Tracciamento" />
+                  <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                    <Truck className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <span className="text-sm font-mono font-semibold text-green-800">{order.tracking_code}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="border-t border-gray-100 pt-5 space-y-5">
+                <div>
+                  <SectionHeader icon={RefreshCw} title="Aggiorna stato" />
+                  <div className="flex items-stretch gap-2">
+                    <div className="flex-1">
+                    <Select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                    >
+                      <option value="">Seleziona stato...</option>
+                      {ALL_STATUSES.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </Select>
+                    </div>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      disabled={!newStatus || updateStatus.isPending}
+                      onClick={() => { updateStatus.mutate({ id: order.id, status: newStatus }); setNewStatus('') }}
+                    >
+                      Aggiorna
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <SectionHeader icon={Truck} title="Aggiungi tracking" />
+                  <div className="flex items-stretch gap-2">
+                    <div className="flex-1">
+                    <Input
+                      value={tracking}
+                      onChange={(e) => setTracking(e.target.value)}
+                      placeholder="Codice spedizione..."
+                    />
+                    </div>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      disabled={!tracking || addTracking.isPending}
+                      onClick={() => { addTracking.mutate({ id: order.id, code: tracking }); setTracking('') }}
+                    >
+                      Salva
+                    </Button>
+                  </div>
+                </div>
               </div>
+
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   )
@@ -194,21 +261,26 @@ export default function AdminOrders() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Ordini</h1>
 
       <div className="flex gap-3 mb-4">
-        <Input
-          placeholder="Cerca ordine o cliente..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-64"
-        />
-        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-52">
-          <option value="">Tutti gli stati</option>
-          {ALL_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </Select>
-        <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-44">
-          <option value="">Tutti i tipi</option>
-          <option value="standard">Standard</option>
-          <option value="preorder">Preordine</option>
-        </Select>
+        <div className="flex-1">
+          <Input
+            placeholder="Cerca ordine o cliente..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex-1">
+          <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="">Tutti gli stati</option>
+            {ALL_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </Select>
+        </div>
+        <div className="flex-1">
+          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+            <option value="">Tutti i tipi</option>
+            <option value="standard">Standard</option>
+            <option value="preorder">Preordine</option>
+          </Select>
+        </div>
       </div>
 
       {isLoading ? <PageSpinner /> : (
@@ -251,7 +323,7 @@ export default function AdminOrders() {
                       € {Number(order.total).toFixed(2).replace('.', ',')}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-xs text-gray-600">{order.type}</span>
+                      <span className="text-xs text-gray-600">{order.type ? order.type.charAt(0).toUpperCase() + order.type.slice(1) : ''}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <Badge variant={status.variant}>{status.label}</Badge>
