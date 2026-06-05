@@ -21,6 +21,8 @@ import AdminOrders from './pages/admin/Orders'
 import AdminGames from './pages/admin/Games'
 import AdminCategories from './pages/admin/Categories'
 import AdminHomepageSections from './pages/admin/HomepageSections'
+import AdminPages from './pages/admin/Pages'
+import StaticPage from './pages/StaticPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -55,6 +57,7 @@ const ADMIN_LINKS = [
   { to: '/admin/categorie', label: 'Categorie' },
   { to: '/admin/prodotti', label: 'Prodotti' },
   { to: '/admin/ordini', label: 'Ordini' },
+  { to: '/admin/pagine', label: 'Pagine' },
 ]
 
 function AdminNav() {
@@ -114,6 +117,8 @@ export default function App() {
           <Route path="/admin/prodotti/:id/modifica" element={<AdminRoute><AdminLayout><ProductForm /></AdminLayout></AdminRoute>} />
           <Route path="/admin/ordini" element={<AdminRoute><AdminLayout><AdminOrders /></AdminLayout></AdminRoute>} />
           <Route path="/admin/homepage" element={<AdminRoute><AdminLayout><AdminHomepageSections /></AdminLayout></AdminRoute>} />
+          <Route path="/admin/pagine" element={<AdminRoute><AdminLayout><AdminPages /></AdminLayout></AdminRoute>} />
+          <Route path="/p/:slug" element={<Layout><StaticPage /></Layout>} />
           <Route path="*" element={<Layout><div className="text-center py-32 text-gray-500"><p className="text-6xl mb-4">404</p><p>Pagina non trovata</p></div></Layout>} />
         </Routes>
       </BrowserRouter>

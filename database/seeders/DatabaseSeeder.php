@@ -65,6 +65,8 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
+        $this->call(PageSeeder::class);
+
         foreach ($games as $gameData) {
             $categories = $gameData['categories'];
             unset($gameData['categories']);

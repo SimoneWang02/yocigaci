@@ -24,25 +24,12 @@ export default function ProductCarousel({ title, products = [], ctaLink, itemCla
     const el = scrollRef.current
     if (!el) return
 
-    // Converte lo scroll verticale del mouse in scroll orizzontale.
-    // Lascia scorrere la pagina quando il carosello è già al limite.
-    const onWheel = (e) => {
-      if (e.deltaX !== 0) return // trackpad orizzontale: lascia il comportamento nativo
-      const atStart = el.scrollLeft <= 0
-      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1
-      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return
-      e.preventDefault()
-      el.scrollLeft += e.deltaY
-    }
-
     el.addEventListener('scroll', updateArrows, { passive: true })
-    el.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('resize', updateArrows)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', endDrag)
     return () => {
       el.removeEventListener('scroll', updateArrows)
-      el.removeEventListener('wheel', onWheel)
       window.removeEventListener('resize', updateArrows)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', endDrag)

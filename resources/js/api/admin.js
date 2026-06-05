@@ -54,6 +54,10 @@ export const adminReorderCarouselBanners = (ids) => api.post('/admin/carousel-ba
 export const adminGetSettings = () => api.get('/admin/settings').then((r) => r.data)
 export const adminUpdateSettings = (data) => api.patch('/admin/settings', data).then((r) => r.data)
 
+// Pages
+export const adminGetPages = () => api.get('/admin/pages').then((r) => r.data.data)
+export const adminUpdatePage = (slug, data) => api.patch(`/admin/pages/${slug}`, data).then((r) => r.data.data)
+
 // Orders
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)
 export const adminGetOrder = (id) => api.get(`/admin/orders/${id}`).then((r) => r.data)

@@ -5,11 +5,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomepageSectionController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Pubbliche - catalogo e giochi
+Route::get('/pages/{slug}', [PageController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}/related', [ProductController::class, 'related']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
@@ -61,4 +63,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);
     Route::patch('/orders/{order}/tracking', [App\Http\Controllers\Admin\OrderController::class, 'addTracking']);
+    Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
+    Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);
 });
