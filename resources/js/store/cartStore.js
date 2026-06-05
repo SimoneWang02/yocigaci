@@ -63,6 +63,6 @@ export const useCartStore = create(
         return get().items.some((i) => i.is_preorder)
       },
     }),
-    { name: 'yocigaci-cart' }
+    { name: 'yocigaci-cart', partialize: (state) => ({ items: state.items }) }
   )
 )

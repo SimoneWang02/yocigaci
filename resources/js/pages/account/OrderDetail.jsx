@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getOrder } from '../../api/orders'
 import { Badge } from '../../components/ui/Badge'
 import { PageSpinner } from '../../components/ui/Spinner'
+import { ArrowLeft } from 'lucide-react'
 
 const STATUS_LABELS = {
   pending: { label: 'In attesa', variant: 'default' },
@@ -33,8 +34,8 @@ export default function OrderDetail() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
-      <Link to="/account/ordini" className="text-sm text-indigo-600 hover:underline mb-4 block">
-        ← Tutti gli ordini
+      <Link to="/account/ordini" className="text-sm text-indigo-600 hover:underline mb-4 inline-flex items-center gap-1">
+        <ArrowLeft className="w-4 h-4" /> Tutti gli ordini
       </Link>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{order.order_number}</h1>

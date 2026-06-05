@@ -1,14 +1,30 @@
 import { useState } from 'react'
-import { Pencil, Trash2, X } from 'lucide-react'
+import { Pencil, Trash2, X, GripVertical } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   adminGetHomepageSections,
   adminCreateHomepageSection,
   adminUpdateHomepageSection,
   adminDeleteHomepageSection,
+  adminReorderHomepageSections,
   adminGetProducts,
 } from '../../api/admin'
 import { Button } from '../../components/ui/Button'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
 
@@ -54,11 +70,11 @@ function ProductPicker({ selected, onChange }) {
                 <span className="flex-1 text-sm text-gray-800 truncate">{p.name}</span>
                 <div className="flex items-center gap-1">
                   <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
-                    className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30">↑</button>
+                    className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30"><ArrowUp className="w-4 h-4" /></button>
                   <button type="button" onClick={() => move(i, 1)} disabled={i === selected.length - 1}
-                    className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30">↓</button>
+                    className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30"><ArrowDown className="w-4 h-4" /></button>
                   <button type="button" onClick={() => remove(p.id)}
-                    className="px-1.5 text-red-500 hover:text-red-700">✕</button>
+                    className="px-1.5 text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button>
                 </div>
               </li>
             ))}
@@ -168,13 +184,99 @@ function SectionForm({ section, onSave, onCancel, saving }) {
   )
 }
 
+function SortableRow({ section, editing, onEdit, onDelete, onCancelEdit, onSave, saving }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <>
+      <tr ref={setNodeRef} style={style} className="border-t border-gray-100 first:border-t-0 hover:bg-gray-50">
+        <td className="px-3 py-3 w-8">
+          <button
+            {...attributes}
+            {...listeners}
+            className="text-gray-300 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+            aria-label="Trascina per riordinare"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        </td>
+        <td className="px-4 py-3 font-medium text-gray-800">{section.title}</td>
+        <td className="px-4 py-3 text-center text-gray-600">{section.products?.length ?? 0}</td>
+        <td className="px-4 py-3 text-center">
+          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${section.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            {section.is_active ? 'Visibile' : 'Nascosta'}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={editing ? 'Chiudi' : 'Modifica'}
+              title={editing ? 'Chiudi' : 'Modifica'}
+              className="!px-2"
+              onClick={() => onEdit(section.id)}
+            >
+              {editing ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              aria-label="Elimina"
+              title="Elimina"
+              className="!px-2"
+              onClick={() => window.confirm('Eliminare questa sezione?') && onDelete(section.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </td>
+      </tr>
+      {editing && (
+        <tr>
+          <td colSpan={5} className="px-4 pb-4 bg-white">
+            <SectionForm
+              section={section}
+              onSave={(d) => onSave(section.id, d)}
+              onCancel={onCancelEdit}
+              saving={saving}
+            />
+          </td>
+        </tr>
+      )}
+    </>
+  )
+}
+
 export default function AdminHomepageSections() {
   const qc = useQueryClient()
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
+  const [search, setSearch] = useState('')
+  const [localOrder, setLocalOrder] = useState(null)
 
-  const { data, isLoading } = useQuery({ queryKey: ['admin-homepage-sections'], queryFn: adminGetHomepageSections })
-  const sections = data?.data ?? []
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-homepage-sections'],
+    queryFn: adminGetHomepageSections,
+    onSuccess: () => setLocalOrder(null),
+  })
+
+  const rawSections = data?.data ?? []
+  const orderedSections = localOrder
+    ? localOrder.map((id) => rawSections.find((s) => s.id === id)).filter(Boolean)
+    : rawSections
+
+  const sections = orderedSections.filter((s) =>
+    !search || s.title.toLowerCase().includes(search.toLowerCase())
+  )
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['admin-homepage-sections'] })
@@ -193,17 +295,40 @@ export default function AdminHomepageSections() {
     mutationFn: adminDeleteHomepageSection,
     onSuccess: invalidate,
   })
+  const reorder = useMutation({
+    mutationFn: adminReorderHomepageSections,
+    onSuccess: invalidate,
+  })
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return
+    const ids = orderedSections.map((s) => s.id)
+    const oldIndex = ids.indexOf(active.id)
+    const newIndex = ids.indexOf(over.id)
+    const newIds = arrayMove(ids, oldIndex, newIndex)
+    setLocalOrder(newIds)
+    reorder.mutate(newIds)
+  }
 
   if (isLoading) return <PageSpinner />
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sezioni homepage</h1>
           <p className="text-sm text-gray-500">Gestisci le sezioni di prodotti mostrate sotto la hero.</p>
         </div>
         <Button variant="primary" size="sm" onClick={() => { setCreating(true); setEditing(null) }}>+ Nuova sezione</Button>
+      </div>
+
+      <div className="mb-4">
+        <Input
+          placeholder="Cerca sezione..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-64"
+        />
       </div>
 
       {creating && (
@@ -221,43 +346,36 @@ export default function AdminHomepageSections() {
           Nessuna sezione. Creane una per popolare la homepage.
         </div>
       ) : (
-        <div className="space-y-3">
-          {sections.map((section) => (
-            <div key={section.id} className="bg-white border border-gray-200 rounded-xl">
-              <div className="flex items-center gap-3 px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-800 truncate">{section.title}</span>
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${section.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      {section.is_active ? 'Visibile' : 'Nascosta'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {(section.products?.length ?? 0)} prodotti · ordine {section.sort_order}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" aria-label={editing === section.id ? 'Chiudi' : 'Modifica'} title={editing === section.id ? 'Chiudi' : 'Modifica'} className="!px-2" onClick={() => { setEditing(editing === section.id ? null : section.id); setCreating(false) }}>
-                    {editing === section.id ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-                  </Button>
-                  <Button variant="danger" size="sm" aria-label="Elimina" title="Elimina" className="!px-2"
-                    onClick={() => window.confirm('Eliminare questa sezione?') && del.mutate(section.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              {editing === section.id && (
-                <div className="px-4 pb-4">
-                  <SectionForm
-                    section={section}
-                    onSave={(d) => update.mutate({ id: section.id, data: d })}
-                    onCancel={() => setEditing(null)}
-                    saving={update.isPending}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+              <tr>
+                <th className="px-3 py-3 w-8"></th>
+                <th className="text-left px-4 py-3">Titolo</th>
+                <th className="text-center px-4 py-3">Prodotti</th>
+                <th className="text-center px-4 py-3">Stato</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <tbody>
+                  {sections.map((section) => (
+                    <SortableRow
+                      key={section.id}
+                      section={section}
+                      editing={editing === section.id}
+                      onEdit={(id) => setEditing(editing === id ? null : id)}
+                      onDelete={(id) => del.mutate(id)}
+                      onCancelEdit={() => setEditing(null)}
+                      onSave={(id, d) => update.mutate({ id, data: d })}
+                      saving={update.isPending}
+                    />
+                  ))}
+                </tbody>
+              </SortableContext>
+            </DndContext>
+          </table>
         </div>
       )}
     </div>

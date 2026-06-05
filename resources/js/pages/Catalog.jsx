@@ -4,6 +4,7 @@ import { getProducts } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
+import { Package } from 'lucide-react'
 
 export default function Catalog() {
   const [params, setParams] = useSearchParams()
@@ -72,7 +73,7 @@ export default function Catalog() {
             <p className="text-center py-16 text-red-500">Errore nel caricamento dei prodotti.</p>
           ) : products.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
-              <p className="text-5xl mb-4">📦</p>
+              <Package className="w-14 h-14 mx-auto mb-4" strokeWidth={1.5} />
               <p className="text-lg">Nessun prodotto trovato.</p>
             </div>
           ) : (

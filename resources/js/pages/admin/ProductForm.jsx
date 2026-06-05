@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     adminGetProduct,
@@ -160,9 +160,9 @@ export default function ProductForm() {
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => navigate("/admin/prodotti")}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
                 >
-                    ← Prodotti
+                    <ArrowLeft className="w-4 h-4" /> Prodotti
                 </button>
                 <h1 className="text-2xl font-bold text-gray-900">
                     {isEdit ? "Modifica prodotto" : "Nuovo prodotto"}

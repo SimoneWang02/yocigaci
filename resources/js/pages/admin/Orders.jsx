@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
+import { X } from 'lucide-react'
 
 const STATUS_LABELS = {
   pending: { label: 'In attesa', variant: 'default' },
@@ -53,7 +54,7 @@ function OrderDrawer({ orderId, onClose }) {
           <h2 className="font-semibold text-gray-900">
             {order ? order.order_number : 'Ordine'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
         </div>
 
         {isLoading ? <PageSpinner /> : order && (
@@ -164,6 +165,7 @@ function OrderDrawer({ orderId, onClose }) {
 export default function AdminOrders() {
   const [filterStatus, setFilterStatus] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(null)
 
   const { data, isLoading } = useQuery({
@@ -174,13 +176,27 @@ export default function AdminOrders() {
     }),
   })
 
-  const orders = data?.data ?? []
+  const orders = (data?.data ?? []).filter((o) => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (
+      o.order_number?.toLowerCase().includes(q) ||
+      o.user?.name?.toLowerCase().includes(q) ||
+      o.user?.email?.toLowerCase().includes(q)
+    )
+  })
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Ordini</h1>
 
       <div className="flex gap-3 mb-4">
+        <Input
+          placeholder="Cerca ordine o cliente..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-64"
+        />
         <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-52">
           <option value="">Tutti gli stati</option>
           {ALL_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}

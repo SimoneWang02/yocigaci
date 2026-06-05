@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Check } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { Badge } from "../ui/Badge";
 
@@ -95,9 +95,11 @@ export function ProductCard({ product }) {
                                       : "bg-indigo-600 text-white hover:bg-indigo-700"
                             }`}
                         >
-                            {added
-                                ? "✓ Aggiunto"
-                                : product.is_preorder
+                            {added ? (
+                                <span className="inline-flex items-center justify-center gap-1.5">
+                                    <Check className="w-4 h-4" /> Aggiunto
+                                </span>
+                            ) : product.is_preorder
                                   ? "Preordina"
                                   : "Aggiungi al carrello"}
                         </button>

@@ -9,6 +9,7 @@ import Home from './pages/Home'
 import Catalog from './pages/Catalog'
 import ProductDetail from './pages/ProductDetail'
 import Checkout from './pages/Checkout'
+import CheckoutSuccess from './pages/CheckoutSuccess'
 import OrderConfirmation from './pages/OrderConfirmation'
 import Login from './pages/account/Login'
 import Register from './pages/account/Register'
@@ -49,23 +50,23 @@ function Layout({ children }) {
 }
 
 const ADMIN_LINKS = [
-  { to: '/admin/prodotti', label: 'Prodotti' },
+  { to: '/admin/homepage', label: 'Homepage' },
   { to: '/admin/giochi', label: 'Giochi' },
   { to: '/admin/categorie', label: 'Categorie' },
-  { to: '/admin/homepage', label: 'Homepage' },
+  { to: '/admin/prodotti', label: 'Prodotti' },
   { to: '/admin/ordini', label: 'Ordini' },
 ]
 
 function AdminNav() {
   return (
     <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+      <div className="max-w-6xl mx-auto px-4 flex">
         {ADMIN_LINKS.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `px-3 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+              `flex-1 text-center py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 isActive
                   ? 'border-indigo-600 text-indigo-600'
                   : 'border-transparent text-gray-500 hover:text-gray-800'
@@ -99,6 +100,7 @@ export default function App() {
           <Route path="/catalogo" element={<Layout><Catalog /></Layout>} />
           <Route path="/prodotti/:slug" element={<Layout><ProductDetail /></Layout>} />
           <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+          <Route path="/checkout/success" element={<Layout><CheckoutSuccess /></Layout>} />
           <Route path="/ordine-confermato/:orderNumber" element={<Layout><OrderConfirmation /></Layout>} />
           <Route path="/login" element={<Login />} />
           <Route path="/registrati" element={<Register />} />

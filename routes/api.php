@@ -21,7 +21,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 // Checkout (pubblico - funziona anche per guest)
-Route::post('/checkout/create-intent', [CheckoutController::class, 'createIntent']);
+Route::post('/checkout/create-session', [CheckoutController::class, 'createSession']);
 Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']);
 
 // Stripe webhook - escluso da CSRF e auth
@@ -40,12 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     Route::apiResource('/games', App\Http\Controllers\Admin\GameController::class);
     Route::apiResource('/categories', App\Http\Controllers\Admin\CategoryController::class);
+    Route::post('/categories/reorder', [App\Http\Controllers\Admin\CategoryController::class, 'reorder']);
     Route::apiResource('/products', App\Http\Controllers\Admin\ProductController::class);
     Route::post('/products/{product}/images', [App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
     Route::patch('/products/{product}/images/reorder', [App\Http\Controllers\Admin\ProductController::class, 'reorderImages']);
     Route::delete('/products/{product}/images/{imageId}', [App\Http\Controllers\Admin\ProductController::class, 'deleteImage']);
     Route::apiResource('/homepage-sections', App\Http\Controllers\Admin\HomepageSectionController::class)
         ->parameters(['homepage-sections' => 'homepageSection']);
+    Route::post('/homepage-sections/reorder', [App\Http\Controllers\Admin\HomepageSectionController::class, 'reorder']);
     Route::get('/orders', [App\Http\Controllers\Admin\OrderController::class, 'index']);
     Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);

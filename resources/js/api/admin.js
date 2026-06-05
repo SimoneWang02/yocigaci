@@ -11,6 +11,7 @@ export const adminGetCategories = (params) => api.get('/admin/categories', { par
 export const adminCreateCategory = (data) => api.post('/admin/categories', data).then((r) => r.data)
 export const adminUpdateCategory = (id, data) => api.put(`/admin/categories/${id}`, data).then((r) => r.data)
 export const adminDeleteCategory = (id) => api.delete(`/admin/categories/${id}`).then((r) => r.data)
+export const adminReorderCategories = (ids) => api.post('/admin/categories/reorder', { ids }).then((r) => r.data)
 
 // Products
 export const adminGetProducts = (params) => api.get('/admin/products', { params }).then((r) => r.data)
@@ -35,6 +36,7 @@ export const adminGetHomepageSections = () => api.get('/admin/homepage-sections'
 export const adminCreateHomepageSection = (data) => api.post('/admin/homepage-sections', data).then((r) => r.data)
 export const adminUpdateHomepageSection = (id, data) => api.put(`/admin/homepage-sections/${id}`, data).then((r) => r.data)
 export const adminDeleteHomepageSection = (id) => api.delete(`/admin/homepage-sections/${id}`).then((r) => r.data)
+export const adminReorderHomepageSections = (ids) => api.post('/admin/homepage-sections/reorder', { ids }).then((r) => r.data)
 
 // Orders
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)

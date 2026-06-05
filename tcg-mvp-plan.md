@@ -348,9 +348,9 @@ public function confirm(Request $request) {
 
 **Webhook Stripe** - gestire almeno questi eventi:
 
-- `payment_intent.succeeded` → aggiornare ordine a `paid`
-- `payment_intent.payment_failed` → aggiornare ordine a `pending` + notifica
-- `charge.refunded` → aggiornare ordine a `refunded`
+- `payment_intent.succeeded` -> aggiornare ordine a `paid`
+- `payment_intent.payment_failed` -> aggiornare ordine a `pending` + notifica
+- `charge.refunded` -> aggiornare ordine a `refunded`
 
 ---
 
@@ -558,7 +558,7 @@ export const useCartStore = create(
 - Filtro per gioco: Pokémon | MTG | One Piece | Riftbound
 - Filtro per categoria: Booster Box | Display | Collezione | Accessorio
 - Toggle "Solo preordini"
-- Ordinamento: Rilevanza | Prezzo ↑ | Prezzo ↓ | Più recenti
+- Ordinamento: Rilevanza | Prezzo su | Prezzo giu | Più recenti
 - I filtri attivi vanno nei query params URL (per condivisibilità del link)
 
 #### `CartDrawer`
@@ -584,7 +584,7 @@ Ispirata a jpycollectibles, nell'ordine:
 2. **Ultime uscite** - grid orizzontale scrollabile, prodotti con `sort_order` più alto
 3. **Preordini aperti** - sezione dedicata, card con countdown alla release date
 4. **Per gioco** - sezione Pokémon / One Piece / MTG / Riftbound con link alla collection
-5. **Carte singole** - banner/sezione con CTA "Trova le tue carte su CardTrader →" (link esterno, `target="_blank"`)
+5. **Carte singole** - banner/sezione con CTA "Trova le tue carte su CardTrader ->" (link esterno, `target="_blank"`)
 
 ---
 
@@ -613,7 +613,7 @@ Ispirata a jpycollectibles, nell'ordine:
 ### Form Prodotto (`/admin/prodotti/nuovo` e `/modifica`)
 
 - Campi: nome, slug (auto-generato dal nome)
-- Select gioco (caricato da `/admin/games`) → al cambio, ricarica le categorie disponibili
+- Select gioco (caricato da `/admin/games`) -> al cambio, ricarica le categorie disponibili
 - Select categoria (filtrata per gioco selezionato)
 - Prezzi: prezzo vendita
 - Stock: quantità numerica
@@ -626,7 +626,7 @@ Ispirata a jpycollectibles, nell'ordine:
 
 - Tabella: numero ordine, cliente, data, totale, stato, tipo (standard/preordine)
 - Filtri per stato e tipo
-- Click su riga → dettaglio ordine
+- Click su riga -> dettaglio ordine
 - Dettaglio ordine: prodotti, indirizzo, storico stati, form per cambio stato + tracking
 
 ---
@@ -675,7 +675,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 
 ## Checklist MVP - cosa è incluso / escluso
 
-### ✅ Incluso nel MVP
+### Incluso nel MVP
 
 - Catalogo prodotti con filtri per gioco/categoria
 - Scheda prodotto con immagini e varianti
@@ -688,7 +688,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 - Email transazionali base
 - Spedizione gratuita sopra soglia configurabile
 
-### ❌ Escluso dal MVP (future iterazioni)
+### Escluso dal MVP (future iterazioni)
 
 - Integrazione Cardmarket / eBay
 - Wishlist
@@ -732,12 +732,12 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 | **Frontend - Auth**              | Login, Register, ProtectedRoute, AdminRoute                                                            | 6       |
 | **Frontend - Area cliente**      | Lista ordini, dettaglio ordine con stato e tracking                                                    | 6       |
 | **Frontend - Admin giochi/cat.** | Tabelle CRUD + form giochi, tabella CRUD + form categorie                                              | 8       |
-| **Frontend - Admin prodotti**    | Tabella prodotti, form prodotto (select gioco→categoria dinamica, upload immagini drag&drop, reorder)  | 16      |
+| **Frontend - Admin prodotti**    | Tabella prodotti, form prodotto (select gioco->categoria dinamica, upload immagini drag&drop, reorder)  | 16      |
 | **Frontend - Admin ordini**      | Tabella ordini con filtri, dettaglio ordine, cambio stato, tracking                                    | 8       |
 | **Subtotale frontend**           |                                                                                                        | **113** |
 |                                  |                                                                                                        |         |
 | **Deploy**                       | VPS setup (Nginx, PHP, MySQL, SSL), CI base, .env produzione, Stripe webhook registrazione             | 10      |
-| **Testing & bug fix**            | Test funzionali end-to-end (catalogo → checkout → webhook → email), fix pre-consegna                   | 16      |
+| **Testing & bug fix**            | Test funzionali end-to-end (catalogo -> checkout -> webhook -> email), fix pre-consegna                   | 16      |
 | **Buffer (15%)**                 | Scope creep, richieste aggiuntive, imprevisti                                                          | 35      |
 | **Subtotale altro**              |                                                                                                        | **61**  |
 |                                  |                                                                                                        |         |

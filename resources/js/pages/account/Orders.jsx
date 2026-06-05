@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getOrders } from '../../api/orders'
 import { Badge } from '../../components/ui/Badge'
 import { PageSpinner } from '../../components/ui/Spinner'
+import { Package, ArrowRight } from 'lucide-react'
 
 const STATUS_LABELS = {
   pending: { label: 'In attesa', variant: 'default' },
@@ -27,10 +28,10 @@ export default function Orders() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">I miei ordini</h1>
       {orders.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-5xl mb-4">📦</p>
+          <Package className="w-14 h-14 mx-auto mb-4" strokeWidth={1.5} />
           <p>Nessun ordine ancora.</p>
-          <Link to="/catalogo" className="mt-4 inline-block text-indigo-600 hover:underline">
-            Vai al catalogo →
+          <Link to="/catalogo" className="mt-4 inline-flex items-center gap-1 text-indigo-600 hover:underline">
+            Vai al catalogo <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (

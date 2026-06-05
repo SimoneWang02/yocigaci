@@ -46,4 +46,15 @@ class CategoryController extends Controller
 
         return response()->json(['message' => 'Categoria eliminata.']);
     }
+
+    public function reorder(Request $request): JsonResponse
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+
+        foreach ($ids as $index => $id) {
+            Category::where('id', $id)->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['message' => 'Ordine aggiornato.']);
+    }
 }

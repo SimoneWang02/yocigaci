@@ -6,6 +6,7 @@ import { adminGetProducts, adminDeleteProduct } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
+import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { adminGetGames } from "../../api/admin";
 
@@ -13,18 +14,20 @@ export default function AdminProducts() {
     const qc = useQueryClient();
     const [filterGame, setFilterGame] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const [search, setSearch] = useState("");
 
     const { data: gamesData } = useQuery({
         queryKey: ["admin-games"],
         queryFn: adminGetGames,
     });
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-products", filterGame, filterStatus],
+        queryKey: ["admin-products", filterGame, filterStatus, search],
         queryFn: () =>
             adminGetProducts({
                 ...(filterGame ? { game_id: filterGame } : {}),
                 ...(filterStatus === "active" ? { is_active: true } : {}),
                 ...(filterStatus === "inactive" ? { is_active: false } : {}),
+                ...(search ? { search } : {}),
             }),
     });
 
@@ -48,6 +51,12 @@ export default function AdminProducts() {
             </div>
 
             <div className="flex gap-3 mb-4">
+                <Input
+                    placeholder="Cerca prodotto..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-56"
+                />
                 <Select
                     value={filterGame}
                     onChange={(e) => setFilterGame(e.target.value)}

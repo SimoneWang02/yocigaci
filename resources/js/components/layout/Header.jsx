@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getGames } from "../../api/products";
 import { logout } from "../../api/auth";
@@ -91,7 +91,8 @@ export function Header() {
                                                         className="text-sm font-semibold text-indigo-700 hover:underline"
                                                     >
                                                         Tutti i prodotti{" "}
-                                                        {game.name} →
+                                                        {game.name}{" "}
+                                                        <ArrowRight className="inline-block w-4 h-4 align-middle" />
                                                     </Link>
                                                 </div>
                                                 <div
@@ -123,7 +124,7 @@ export function Header() {
                             rel="noopener noreferrer"
                             className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
                         >
-                            Carte Singole
+                            CardTrader
                         </a>
                     </nav>
 
@@ -290,7 +291,7 @@ export function Header() {
                             rel="noopener noreferrer"
                             className="block px-3 py-2 text-gray-800"
                         >
-                            Carte Singole
+                            CardTrader
                         </a>
                         <div className="pt-2 border-t border-gray-100">
                             {user ? (

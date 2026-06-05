@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Image as ImageIcon, Check } from "lucide-react";
+import { Image as ImageIcon, Check, Frown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getProduct, getRelatedProducts } from "../api/products";
 import { useCartStore } from "../store/cartStore";
@@ -33,7 +33,7 @@ export default function ProductDetail() {
     if (isError || !product)
         return (
             <div className="text-center py-32 text-gray-500">
-                <p className="text-6xl mb-4">😕</p>
+                <Frown className="w-14 h-14 mx-auto mb-4" strokeWidth={1.5} />
                 <p className="mb-4">Prodotto non trovato.</p>
                 <Link
                     to="/catalogo"
@@ -233,9 +233,11 @@ export default function ProductDetail() {
                                 size="lg"
                                 className="w-full"
                             >
-                                {added
-                                    ? "✓ Aggiunto al carrello"
-                                    : product.is_preorder
+                                {added ? (
+                                    <span className="inline-flex items-center gap-1.5">
+                                        <Check className="w-5 h-5" /> Aggiunto al carrello
+                                    </span>
+                                ) : product.is_preorder
                                       ? "Preordina ora"
                                       : "Aggiungi al carrello"}
                             </Button>

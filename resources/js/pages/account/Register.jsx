@@ -15,7 +15,7 @@ export default function Register() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Appena c'è un utente (dopo la registrazione o se già autenticato) → redirect.
+    // Appena c'è un utente (dopo la registrazione o se già autenticato) -> redirect.
     useEffect(() => {
         if (user) navigate("/", { replace: true });
     }, [user, navigate]);

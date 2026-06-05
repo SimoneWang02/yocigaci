@@ -51,6 +51,17 @@ class HomepageSectionController extends Controller
         return response()->json(['message' => 'Sezione eliminata.']);
     }
 
+    public function reorder(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+
+        foreach ($ids as $index => $id) {
+            HomepageSection::where('id', $id)->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['message' => 'Ordine aggiornato.']);
+    }
+
     private function syncProducts(HomepageSection $section, array $productIds): void
     {
         $sync = [];
