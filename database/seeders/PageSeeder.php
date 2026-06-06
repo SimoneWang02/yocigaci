@@ -16,7 +16,7 @@ class PageSeeder extends Seeder
                 'content' => <<<'HTML'
 <p><em>Ultimo aggiornamento: 7 giugno 2026</em></p>
 
-<p>La presente informativa descrive le modalità di trattamento dei dati personali degli utenti che navigano su <strong>yocigaci.it</strong> e acquistano prodotti offerti da Yocigaci Srl, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato dal D.Lgs. 101/2018.</p>
+<p>La presente informativa descrive le modalità di trattamento dei dati personali degli utenti che navigano su <strong>yocigaci.com</strong> e acquistano prodotti offerti da Yocigaci Srl, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato dal D.Lgs. 101/2018.</p>
 
 <h2>1. Titolare del trattamento</h2>
 <p>
@@ -85,7 +85,7 @@ HTML,
                 'content' => <<<'HTML'
 <p><em>Ultimo aggiornamento: 7 giugno 2026</em></p>
 
-<p>I presenti Termini e Condizioni regolano l'utilizzo del sito <strong>yocigaci.it</strong> e la vendita di prodotti tramite esso, ai sensi del D.Lgs. 206/2005 (Codice del Consumo) e del D.Lgs. 70/2003 (commercio elettronico).</p>
+<p>I presenti Termini e Condizioni regolano l'utilizzo del sito <strong>yocigaci.com</strong> e la vendita di prodotti tramite esso, ai sensi del D.Lgs. 206/2005 (Codice del Consumo) e del D.Lgs. 70/2003 (commercio elettronico).</p>
 
 <h2>1. Venditore</h2>
 <p>
@@ -130,7 +130,7 @@ HTML,
 <p>Yocigaci Srl non è responsabile per danni indiretti, perdite di profitto o interruzioni del servizio derivanti dall'utilizzo del sito, salvo i casi di dolo o colpa grave. La responsabilità massima di Yocigaci Srl è in ogni caso limitata al valore dell'ordine in oggetto.</p>
 
 <h2>12. Risoluzione delle controversie</h2>
-<p>Per qualsiasi controversia relativa a ordini effettuati su yocigaci.it è competente il giudice del luogo di residenza o domicilio del consumatore, ai sensi dell'art. 66-bis D.Lgs. 206/2005. In via alternativa, le controversie possono essere risolte tramite la piattaforma ODR della Commissione Europea all'indirizzo <strong>ec.europa.eu/consumers/odr</strong>.</p>
+<p>Per qualsiasi controversia relativa a ordini effettuati su yocigaci.com è competente il giudice del luogo di residenza o domicilio del consumatore, ai sensi dell'art. 66-bis D.Lgs. 206/2005. In via alternativa, le controversie possono essere risolte tramite la piattaforma ODR della Commissione Europea all'indirizzo <strong>ec.europa.eu/consumers/odr</strong>.</p>
 <p>Si applica la legge italiana.</p>
 HTML,
             ],
@@ -297,7 +297,7 @@ HTML,
                 'content' => <<<'HTML'
 <p><em>Ultimo aggiornamento: 7 giugno 2026</em></p>
 
-<p>La presente informativa descrive l'utilizzo dei cookie su <strong>yocigaci.it</strong>, in conformità al Provvedimento del Garante per la protezione dei dati personali del 10 giugno 2021 e al D.Lgs. 196/2003.</p>
+<p>La presente informativa descrive l'utilizzo dei cookie su <strong>yocigaci.com</strong>, in conformità al Provvedimento del Garante per la protezione dei dati personali del 10 giugno 2021 e al D.Lgs. 196/2003.</p>
 
 <h2>1. Cosa sono i cookie</h2>
 <p>I cookie sono piccoli file di testo che i siti web salvano sul dispositivo dell'utente. Vengono utilizzati per far funzionare il sito correttamente, ricordare le preferenze dell'utente e, nel caso di cookie di terze parti, raccogliere informazioni statistiche o di profilazione.</p>
