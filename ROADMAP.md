@@ -8,12 +8,11 @@
 ## Importante
 
 - [ ] **Dashboard vendite admin** — fatturato per periodo, ordini per stato, prodotti piu venduti
-- [ ] **SEO base** — meta description e og:title/og:image per prodotti e pagine statiche
+- [x] **SEO base** — meta description e og:title/og:image per prodotti e pagine statiche
 
 ## Legale (obbligatorio per negozio italiano)
 
 - [x] **Cookie Policy** — pagina `/p/cookie` gia presente nel seeder e linkata nel footer
-- [ ] **IVA e fattura** — gestione IVA sugli ordini, generazione ricevuta/fattura PDF scaricabile
 - [x] **Checkbox T&C al checkout** — accettazione esplicita termini e condizioni prima del pagamento
 
 ## Utile

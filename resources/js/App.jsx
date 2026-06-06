@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { HelmetProvider, Helmet } from 'react-helmet-async'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { CartDrawer } from './components/cart/CartDrawer'
@@ -25,6 +26,7 @@ import AdminGames from './pages/admin/Games'
 import AdminCategories from './pages/admin/Categories'
 import AdminHomepageSections from './pages/admin/HomepageSections'
 import AdminPages from './pages/admin/Pages'
+import AdminDashboard from './pages/admin/Dashboard'
 import StaticPage from './pages/StaticPage'
 
 const queryClient = new QueryClient({
@@ -55,6 +57,7 @@ function Layout({ children }) {
 }
 
 const ADMIN_LINKS = [
+  { to: '/admin/dashboard', label: 'Dashboard' },
   { to: '/admin/homepage', label: 'Homepage' },
   { to: '/admin/giochi', label: 'Giochi' },
   { to: '/admin/categorie', label: 'Categorie' },
@@ -100,8 +103,16 @@ function AdminLayout({ children }) {
 
 export default function App() {
   return (
+    <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <Helmet>
+          <title>Yocigaci — TCG Store a Carpi</title>
+          <meta name="description" content="Yocigaci è il negozio di carte collezionabili a Carpi. Magic: The Gathering, Pokémon, One Piece e molto altro. Acquista online o ritira in negozio." />
+          <meta property="og:site_name" content="Yocigaci" />
+          <meta property="og:type" content="website" />
+          <meta property="og:image" content="https://yocigaci.it/images/square_logo.svg" />
+        </Helmet>
         <Routes>
           <Route path="/" element={<Layout><Home /></Layout>} />
           <Route path="/catalogo" element={<Layout><Catalog /></Layout>} />
@@ -122,6 +133,7 @@ export default function App() {
           <Route path="/admin/prodotti/nuovo" element={<AdminRoute><AdminLayout><ProductForm /></AdminLayout></AdminRoute>} />
           <Route path="/admin/prodotti/:id/modifica" element={<AdminRoute><AdminLayout><ProductForm /></AdminLayout></AdminRoute>} />
           <Route path="/admin/ordini" element={<AdminRoute><AdminLayout><AdminOrders /></AdminLayout></AdminRoute>} />
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminLayout><AdminDashboard /></AdminLayout></AdminRoute>} />
           <Route path="/admin/homepage" element={<AdminRoute><AdminLayout><AdminHomepageSections /></AdminLayout></AdminRoute>} />
           <Route path="/admin/pagine" element={<AdminRoute><AdminLayout><AdminPages /></AdminLayout></AdminRoute>} />
           <Route path="/p/:slug" element={<Layout><StaticPage /></Layout>} />
@@ -129,5 +141,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </HelmetProvider>
   )
 }

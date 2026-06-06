@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Image as ImageIcon, Check, Frown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { getProduct, getRelatedProducts } from "../api/products";
 import { useCartStore } from "../store/cartStore";
 import { Badge } from "../components/ui/Badge";
@@ -62,7 +63,23 @@ export default function ProductDetail() {
         setTimeout(() => setAdded(false), 2000);
     };
 
+    const metaTitle = `${product.name} — Yocigaci`
+    const metaDescription = product.description
+        ? product.description.slice(0, 155)
+        : `Acquista ${product.name} su Yocigaci, negozio TCG a Carpi. € ${Number(product.price).toFixed(2).replace('.', ',')}.`
+    const metaImage = product.primary_image?.url ?? product.images?.[0]?.url
+
     return (
+        <>
+        <Helmet>
+            <title>{metaTitle}</title>
+            <meta name="description" content={metaDescription} />
+            <meta property="og:title" content={metaTitle} />
+            <meta property="og:description" content={metaDescription} />
+            <meta property="og:type" content="product" />
+            <meta property="og:url" content={`https://yocigaci.it/prodotti/${product.slug}`} />
+            {metaImage && <meta property="og:image" content={metaImage} />}
+        </Helmet>
         <div className="max-w-6xl mx-auto px-4 py-10">
             {/* Breadcrumb */}
             <nav className="text-sm text-gray-500 mb-6 flex gap-1">
@@ -271,5 +288,6 @@ export default function ProductDetail() {
                 </div>
             )}
         </div>
+        </>
     );
 }
