@@ -6,31 +6,21 @@ import { PageSpinner } from "../../components/ui/Spinner";
 import { Package, ArrowRight, ChevronRight, Truck, MapPin, Store } from "lucide-react";
 
 const STATUS_CONFIG = {
-    pending: {
-        label: "In Attesa",
-        variant: "default",
-        border: "border-l-gray-300",
-    },
     paid: { label: "Pagato", variant: "success", border: "border-l-green-400" },
-    processing: {
-        label: "In Preparazione",
-        variant: "info",
-        border: "border-l-blue-400",
-    },
     shipped: {
         label: "Spedito",
         variant: "success",
         border: "border-l-green-500",
     },
-    delivered: {
-        label: "Consegnato",
-        variant: "success",
-        border: "border-l-green-600",
+    ready_for_pickup: {
+        label: "Pronto al ritiro",
+        variant: "warning",
+        border: "border-l-violet-400",
     },
-    cancelled: {
-        label: "Annullato",
-        variant: "sold_out",
-        border: "border-l-red-400",
+    picked_up: {
+        label: "Ritirato",
+        variant: "success",
+        border: "border-l-green-500",
     },
     refunded: {
         label: "Rimborsato",
@@ -41,11 +31,6 @@ const STATUS_CONFIG = {
         label: "Preordine Confermato",
         variant: "preorder",
         border: "border-l-amber-400",
-    },
-    preorder_ready: {
-        label: "Pronto per Spedizione",
-        variant: "info",
-        border: "border-l-blue-500",
     },
 };
 

@@ -5,7 +5,7 @@ import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "../store/authStore";
 import { createSession } from "../api/checkout";
 import { getSettings } from "../api/products";
-import { getAddresses, saveAddress } from "../api/addresses";
+import { getAddresses, saveAddress, deleteAddress } from "../api/addresses";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import {
@@ -18,6 +18,8 @@ import {
     MapPin,
     Plus,
     Check,
+    Clock,
+    Trash2,
 } from "lucide-react";
 
 // Fallback usati finche' le impostazioni admin non sono caricate.
@@ -62,19 +64,21 @@ function ShippingProgress({ subtotal, threshold }) {
     );
 }
 
-function SavedAddressCard({ address, selected, onSelect }) {
+function SavedAddressCard({ address, selected, onSelect, onDelete }) {
     return (
-        <button
-            type="button"
-            onClick={() => onSelect(address)}
-            className={`w-full text-left rounded-xl border-2 px-4 py-3 transition-all ${
+        <div
+            className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                 selected
                     ? "border-indigo-500 bg-indigo-50"
                     : "border-gray-200 bg-white hover:border-gray-300"
             }`}
         >
             <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
+                <button
+                    type="button"
+                    onClick={() => onSelect(address)}
+                    className="flex-1 min-w-0 text-left"
+                >
                     <p className="text-sm font-semibold text-gray-900 truncate">
                         {address.full_name}
                     </p>
@@ -91,14 +95,24 @@ function SavedAddressCard({ address, selected, onSelect }) {
                         - {address.postal_code} {address.city} (
                         {address.province})
                     </p>
+                </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                    {selected && (
+                        <span className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                        </span>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => onDelete(address.id)}
+                        className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Elimina indirizzo"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                 </div>
-                {selected && (
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center mt-0.5">
-                        <Check className="w-3 h-3 text-white" />
-                    </span>
-                )}
             </div>
-        </button>
+        </div>
     );
 }
 
@@ -386,6 +400,8 @@ export default function Checkout() {
     );
 
     const isPickup = deliveryMethod === "pickup";
+    const hasMixedCart =
+        items.some((i) => i.is_preorder) && items.some((i) => !i.is_preorder);
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
     const shipping = isPickup
         ? 0
@@ -474,6 +490,21 @@ export default function Checkout() {
     const handleUseNewAddress = () => {
         setSelectedAddress(null);
         setShowNewForm(true);
+    };
+
+    const handleDeleteAddress = async (id) => {
+        await deleteAddress(id);
+        const updated = savedAddresses.filter((a) => a.id !== id);
+        setSavedAddresses(updated);
+        if (selectedAddress?.id === id) {
+            if (updated.length > 0) {
+                setSelectedAddress(updated[0]);
+                setShowNewForm(false);
+            } else {
+                setSelectedAddress(null);
+                setShowNewForm(true);
+            }
+        }
     };
 
     const hasSaved = savedAddresses.length > 0;
@@ -586,6 +617,7 @@ export default function Checkout() {
                                                         addr.id
                                                 }
                                                 onSelect={handleSelectSaved}
+                                                onDelete={handleDeleteAddress}
                                             />
                                         ))}
                                     </div>
@@ -698,6 +730,15 @@ export default function Checkout() {
                                 </div>
                             ))}
                         </div>
+
+                        {hasMixedCart && (
+                            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mb-3">
+                                <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-xs text-amber-800 leading-snug">
+                                    Il carrello contiene preordini: l&apos;intero ordine verra&apos; spedito quando tutti i prodotti saranno disponibili.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">
                             <div className="flex justify-between text-gray-500">

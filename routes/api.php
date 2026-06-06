@@ -34,6 +34,7 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 // Autenticate
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::patch('/auth/password', [AuthController::class, 'changePassword']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::apiResource('/addresses', AddressController::class);
     Route::get('/orders', [OrderController::class, 'index']);
@@ -62,8 +63,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::patch('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update']);
     Route::get('/orders', [App\Http\Controllers\Admin\OrderController::class, 'index']);
     Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
-    Route::patch('/orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);
     Route::patch('/orders/{order}/tracking', [App\Http\Controllers\Admin\OrderController::class, 'addTracking']);
+    Route::post('/orders/{order}/notify-pickup', [App\Http\Controllers\Admin\OrderController::class, 'notifyPickupReady']);
+    Route::post('/orders/{order}/confirm-pickup', [App\Http\Controllers\Admin\OrderController::class, 'confirmPickup']);
     Route::post('/orders/{order}/refund', [App\Http\Controllers\Admin\OrderController::class, 'refund']);
     Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
     Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);

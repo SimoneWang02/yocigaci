@@ -15,6 +15,7 @@ import Login from './pages/account/Login'
 import Register from './pages/account/Register'
 import Orders from './pages/account/Orders'
 import OrderDetail from './pages/account/OrderDetail'
+import Profile from './pages/account/Profile'
 import AdminProducts from './pages/admin/Products'
 import ProductForm from './pages/admin/ProductForm'
 import AdminOrders from './pages/admin/Orders'
@@ -110,6 +111,7 @@ export default function App() {
           <Route path="/registrati" element={<Register />} />
           <Route path="/account/ordini" element={<ProtectedRoute><Layout><Orders /></Layout></ProtectedRoute>} />
           <Route path="/account/ordini/:orderNumber" element={<ProtectedRoute><Layout><OrderDetail /></Layout></ProtectedRoute>} />
+          <Route path="/account/profilo" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
           <Route path="/admin/giochi" element={<AdminRoute><AdminLayout><AdminGames /></AdminLayout></AdminRoute>} />
           <Route path="/admin/categorie" element={<AdminRoute><AdminLayout><AdminCategories /></AdminLayout></AdminRoute>} />
           <Route path="/admin/prodotti" element={<AdminRoute><AdminLayout><AdminProducts /></AdminLayout></AdminRoute>} />

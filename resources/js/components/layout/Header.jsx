@@ -213,15 +213,26 @@ export function Header() {
                                                 </Link>
                                             )}
                                             {user.role !== "admin" && (
-                                                <Link
-                                                    to="/account/ordini"
-                                                    onClick={() =>
-                                                        setUserMenuOpen(false)
-                                                    }
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                >
-                                                    I miei ordini
-                                                </Link>
+                                                <>
+                                                    <Link
+                                                        to="/account/profilo"
+                                                        onClick={() =>
+                                                            setUserMenuOpen(false)
+                                                        }
+                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        Profilo
+                                                    </Link>
+                                                    <Link
+                                                        to="/account/ordini"
+                                                        onClick={() =>
+                                                            setUserMenuOpen(false)
+                                                        }
+                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        I miei ordini
+                                                    </Link>
+                                                </>
                                             )}
                                             <button
                                                 onClick={handleLogout}
@@ -317,13 +328,22 @@ export function Header() {
                                         </Link>
                                     )}
                                     {user.role !== "admin" && (
-                                        <Link
-                                            to="/account/ordini"
-                                            className="block px-3 py-2 text-gray-700"
-                                            onClick={() => setMobileOpen(false)}
-                                        >
-                                            I miei ordini
-                                        </Link>
+                                        <>
+                                            <Link
+                                                to="/account/profilo"
+                                                className="block px-3 py-2 text-gray-700"
+                                                onClick={() => setMobileOpen(false)}
+                                            >
+                                                Profilo
+                                            </Link>
+                                            <Link
+                                                to="/account/ordini"
+                                                className="block px-3 py-2 text-gray-700"
+                                                onClick={() => setMobileOpen(false)}
+                                            >
+                                                I miei ordini
+                                            </Link>
+                                        </>
                                     )}
                                     <button
                                         onClick={() => {

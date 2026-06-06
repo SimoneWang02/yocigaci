@@ -62,8 +62,8 @@ export default function ProductForm() {
         if (productData?.data) {
             const p = productData.data;
             setForm({
-                game_id: String(p.game_id ?? ""),
-                category_id: String(p.category_id ?? ""),
+                game_id: String(p.game?.id ?? p.game_id ?? ""),
+                category_id: String(p.category?.id ?? p.category_id ?? ""),
                 name: p.name ?? "",
                 slug: p.slug ?? "",
                 description: p.description ?? "",

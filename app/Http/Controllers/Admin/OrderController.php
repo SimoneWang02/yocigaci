@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Mail\OrderShipped;
-use App\Mail\PreorderReady;
+use App\Mail\PickupReady;
 use App\Models\Order;
 use App\Services\RefundService;
 use Illuminate\Http\Request;
@@ -38,27 +38,6 @@ class OrderController extends Controller
         return new OrderResource($order->load(['items', 'user']));
     }
 
-    public function updateStatus(Request $request, Order $order): OrderResource
-    {
-        // Gli stati di rimborso non sono impostabili a mano: derivano sempre da un
-        // rimborso Stripe reale (endpoint refund o webhook), cosi' non mentono mai.
-        $request->validate([
-            'status' => ['required', 'in:pending,paid,processing,shipped,delivered,cancelled,preorder_confirmed,preorder_ready'],
-        ]);
-
-        $order->update(['status' => $request->status]);
-
-        if ($request->status === 'shipped' && $order->user) {
-            Mail::to($order->user->email)->queue(new OrderShipped($order));
-        }
-
-        if ($request->status === 'preorder_ready' && $order->user) {
-            Mail::to($order->user->email)->queue(new PreorderReady($order));
-        }
-
-        return new OrderResource($order->load(['items', 'user']));
-    }
-
     public function addTracking(Request $request, Order $order): OrderResource
     {
         $request->validate([
@@ -76,6 +55,29 @@ class OrderController extends Controller
         }
 
         return new OrderResource($order->load(['items', 'user']));
+    }
+
+    public function notifyPickupReady(Order $order): OrderResource
+    {
+        abort_if($order->delivery_method !== 'pickup', 422, 'Questo ordine non è un ritiro in negozio.');
+
+        $order->update(['status' => 'ready_for_pickup']);
+
+        $email = $order->recipientEmail();
+        if ($email) {
+            Mail::to($email)->queue(new PickupReady($order));
+        }
+
+        return new OrderResource($order->fresh()->load(['items', 'user']));
+    }
+
+    public function confirmPickup(Order $order): OrderResource
+    {
+        abort_if($order->delivery_method !== 'pickup', 422, 'Questo ordine non è un ritiro in negozio.');
+
+        $order->update(['status' => 'picked_up']);
+
+        return new OrderResource($order->fresh()->load(['items', 'user']));
     }
 
     /**

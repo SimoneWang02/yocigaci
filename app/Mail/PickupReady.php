@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PreorderReady extends Mailable
+class PickupReady extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -17,11 +17,11 @@ class PreorderReady extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Il tuo preordine è pronto - ' . $this->order->order_number);
+        return new Envelope(subject: 'Il tuo ordine è pronto al ritiro - ' . $this->order->order_number);
     }
 
     public function content(): Content
     {
-        return new Content(view: 'emails.preorder-ready');
+        return new Content(view: 'emails.pickup-ready');
     }
 }

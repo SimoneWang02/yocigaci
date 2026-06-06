@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     adminGetOrders,
     adminGetOrder,
-    adminUpdateOrderStatus,
     adminAddTracking,
+    adminNotifyPickupReady,
+    adminConfirmPickup,
     adminRefundOrder,
 } from "../../api/admin";
 import { Badge } from "../../components/ui/Badge";
@@ -20,34 +21,25 @@ import {
     Truck,
     Store,
     Hash,
-    RefreshCw,
     RotateCcw,
     AlertCircle,
+    Bell,
 } from "lucide-react";
 import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
 
 const STATUS_LABELS = {
-    pending: { label: "In Attesa", variant: "default" },
     paid: { label: "Pagato", variant: "success" },
-    processing: { label: "In Preparazione", variant: "info" },
     shipped: { label: "Spedito", variant: "success" },
-    delivered: { label: "Consegnato", variant: "success" },
-    cancelled: { label: "Annullato", variant: "sold_out" },
+    ready_for_pickup: { label: "Pronto al ritiro", variant: "warning" },
+    picked_up: { label: "Ritirato", variant: "success" },
     partially_refunded: { label: "Rimborso Parziale", variant: "warning" },
     refunded: { label: "Rimborsato", variant: "default" },
-    preorder_confirmed: { label: "Preordine Confermato", variant: "preorder" },
-    preorder_ready: { label: "Pronto", variant: "info" },
+    preorder_confirmed: { label: "Preordine", variant: "preorder" },
 };
 
 const ALL_STATUSES = Object.entries(STATUS_LABELS).map(
     ([value, { label }]) => ({ value, label }),
-);
-
-// Gli stati di rimborso non si impostano a mano: derivano da un rimborso Stripe reale.
-const REFUND_STATUSES = ["refunded", "partially_refunded"];
-const MANUAL_STATUSES = ALL_STATUSES.filter(
-    (s) => !REFUND_STATUSES.includes(s.value),
 );
 
 const REFUND_REASONS = [
@@ -71,7 +63,6 @@ function SectionHeader({ icon: Icon, title }) {
 
 function OrderDrawer({ orderId, onClose }) {
     const qc = useQueryClient();
-    const [newStatus, setNewStatus] = useState("");
     const [tracking, setTracking] = useState("");
     const [refundAmount, setRefundAmount] = useState("");
     const [refundReason, setRefundReason] = useState("");
@@ -87,13 +78,18 @@ function OrderDrawer({ orderId, onClose }) {
         qc.invalidateQueries(["admin-order", orderId]);
     };
 
-    const updateStatus = useMutation({
-        mutationFn: ({ id, status }) => adminUpdateOrderStatus(id, status),
+    const addTracking = useMutation({
+        mutationFn: ({ id, code }) => adminAddTracking(id, code),
         onSuccess: invalidate,
     });
 
-    const addTracking = useMutation({
-        mutationFn: ({ id, code }) => adminAddTracking(id, code),
+    const notifyPickup = useMutation({
+        mutationFn: (id) => adminNotifyPickupReady(id),
+        onSuccess: invalidate,
+    });
+
+    const confirmPickup = useMutation({
+        mutationFn: (id) => adminConfirmPickup(id),
         onSuccess: invalidate,
     });
 
@@ -144,11 +140,6 @@ function OrderDrawer({ orderId, onClose }) {
                                 <span className="font-mono text-white font-bold text-base tracking-wide">
                                     {order?.order_number ?? "-"}
                                 </span>
-                                {order?.type === "preorder" && (
-                                    <span className="text-xs bg-amber-400/20 text-amber-200 border border-amber-400/30 px-1.5 py-0.5 rounded font-medium">
-                                        Preordine
-                                    </span>
-                                )}
                             </div>
                             <div className="flex items-center gap-3">
                                 {status && (
@@ -342,92 +333,95 @@ function OrderDrawer({ orderId, onClose }) {
 
                                 {/* Actions */}
                                 <div className="border-t border-gray-100 pt-5 space-y-5">
-                                    <div>
-                                        <SectionHeader
-                                            icon={RefreshCw}
-                                            title="Aggiorna stato"
-                                        />
-                                        <div className="flex items-stretch gap-2">
-                                            <div className="flex-1">
-                                                <Select
-                                                    value={newStatus}
-                                                    onChange={(e) =>
-                                                        setNewStatus(
-                                                            e.target.value,
-                                                        )
-                                                    }
+                                    {order.delivery_method === "pickup" ? (
+                                        <div>
+                                            <SectionHeader
+                                                icon={Bell}
+                                                title="Ritiro in negozio"
+                                            />
+                                            {order.status === "picked_up" ? (
+                                                <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                                                    <Store className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                                    <span className="text-sm text-green-800">
+                                                        Ordine ritirato dal cliente
+                                                    </span>
+                                                </div>
+                                            ) : order.status === "ready_for_pickup" ? (
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
+                                                        <Bell className="w-4 h-4 text-violet-600 flex-shrink-0" />
+                                                        <span className="text-sm text-violet-800">
+                                                            Cliente notificato — in attesa di ritiro
+                                                        </span>
+                                                    </div>
+                                                    <Button
+                                                        variant="primary"
+                                                        size="md"
+                                                        className="w-full"
+                                                        disabled={confirmPickup.isPending}
+                                                        onClick={() => {
+                                                            confirmPickup.mutate(order.id);
+                                                        }}
+                                                    >
+                                                        {confirmPickup.isPending
+                                                            ? "Salvataggio..."
+                                                            : "Conferma ritiro"}
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    variant="primary"
+                                                    size="md"
+                                                    className="w-full"
+                                                    disabled={notifyPickup.isPending}
+                                                    onClick={() => {
+                                                        notifyPickup.mutate(order.id);
+                                                    }}
                                                 >
-                                                    <option value="">
-                                                        Seleziona stato...
-                                                    </option>
-                                                    {MANUAL_STATUSES.map(
-                                                        (s) => (
-                                                            <option
-                                                                key={s.value}
-                                                                value={s.value}
-                                                            >
-                                                                {s.label}
-                                                            </option>
-                                                        ),
-                                                    )}
-                                                </Select>
-                                            </div>
-                                            <Button
-                                                variant="primary"
-                                                size="md"
-                                                disabled={
-                                                    !newStatus ||
-                                                    updateStatus.isPending
-                                                }
-                                                onClick={() => {
-                                                    updateStatus.mutate({
-                                                        id: order.id,
-                                                        status: newStatus,
-                                                    });
-                                                    setNewStatus("");
-                                                }}
-                                            >
-                                                Aggiorna
-                                            </Button>
+                                                    {notifyPickup.isPending
+                                                        ? "Invio notifica..."
+                                                        : "Notifica cliente"}
+                                                </Button>
+                                            )}
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <SectionHeader
-                                            icon={Truck}
-                                            title="Aggiungi tracking"
-                                        />
-                                        <div className="flex items-stretch gap-2">
-                                            <div className="flex-1">
-                                                <Input
-                                                    value={tracking}
-                                                    onChange={(e) =>
-                                                        setTracking(
-                                                            e.target.value,
-                                                        )
+                                    ) : (
+                                        <div>
+                                            <SectionHeader
+                                                icon={Truck}
+                                                title="Aggiungi tracking"
+                                            />
+                                            <div className="flex items-stretch gap-2">
+                                                <div className="flex-1">
+                                                    <Input
+                                                        value={tracking}
+                                                        onChange={(e) =>
+                                                            setTracking(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        placeholder="Codice spedizione..."
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="primary"
+                                                    size="md"
+                                                    disabled={
+                                                        !tracking ||
+                                                        addTracking.isPending
                                                     }
-                                                    placeholder="Codice spedizione..."
-                                                />
+                                                    onClick={() => {
+                                                        addTracking.mutate({
+                                                            id: order.id,
+                                                            code: tracking,
+                                                        });
+                                                        setTracking("");
+                                                    }}
+                                                >
+                                                    Salva
+                                                </Button>
                                             </div>
-                                            <Button
-                                                variant="primary"
-                                                size="md"
-                                                disabled={
-                                                    !tracking ||
-                                                    addTracking.isPending
-                                                }
-                                                onClick={() => {
-                                                    addTracking.mutate({
-                                                        id: order.id,
-                                                        code: tracking,
-                                                    });
-                                                    setTracking("");
-                                                }}
-                                            >
-                                                Salva
-                                            </Button>
                                         </div>
-                                    </div>
+                                    )}
 
                                     {(order.is_refundable ||
                                         order.refunded_amount > 0) && (
@@ -672,7 +666,15 @@ export default function AdminOrders() {
                                     sort={sort}
                                     onSort={onSort}
                                 >
-                                    Data
+                                    Data acquisto
+                                </SortTh>
+                                <SortTh
+                                    column="delivery_method"
+                                    sort={sort}
+                                    onSort={onSort}
+                                    align="center"
+                                >
+                                    Data spedizione
                                 </SortTh>
                                 <SortTh
                                     column="total"
@@ -735,6 +737,39 @@ export default function AdminOrders() {
                                             {new Date(
                                                 order.created_at,
                                             ).toLocaleDateString("it-IT")}
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            {order.delivery_method ===
+                                            "pickup" ? (
+                                                order.status === "picked_up" ? (
+                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                                        <Store className="w-3 h-3" />
+                                                        Ritirato
+                                                    </span>
+                                                ) : order.status === "ready_for_pickup" ? (
+                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                                        <Bell className="w-3 h-3" />
+                                                        Notificato
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+                                                        <Store className="w-3 h-3" />
+                                                        Ritiro
+                                                    </span>
+                                                )
+                                            ) : order.shipped_at ? (
+                                                <span className="text-gray-500">
+                                                    {new Date(
+                                                        order.shipped_at,
+                                                    ).toLocaleDateString(
+                                                        "it-IT",
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-300">
+                                                    -
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3 text-right font-semibold">
                                             €{" "}

@@ -61,9 +61,11 @@ export const adminUpdatePage = (slug, data) => api.patch(`/admin/pages/${slug}`,
 // Orders
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)
 export const adminGetOrder = (id) => api.get(`/admin/orders/${id}`).then((r) => r.data)
-export const adminUpdateOrderStatus = (id, status) =>
-  api.patch(`/admin/orders/${id}/status`, { status }).then((r) => r.data)
 export const adminAddTracking = (id, tracking_code) =>
   api.patch(`/admin/orders/${id}/tracking`, { tracking_code }).then((r) => r.data)
+export const adminNotifyPickupReady = (id) =>
+  api.post(`/admin/orders/${id}/notify-pickup`).then((r) => r.data)
+export const adminConfirmPickup = (id) =>
+  api.post(`/admin/orders/${id}/confirm-pickup`).then((r) => r.data)
 export const adminRefundOrder = (id, { amount, reason } = {}) =>
   api.post(`/admin/orders/${id}/refund`, { amount, reason }).then((r) => r.data)

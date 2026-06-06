@@ -39,7 +39,6 @@ class StripeWebhookController extends Controller
             // torna sul sito (es. abbandono del redirect, frequente con PayPal).
             'checkout.session.completed',
             'checkout.session.async_payment_succeeded' => $this->handleCheckoutCompleted($event),
-            'payment_intent.payment_failed' => $this->handlePaymentFailed($event),
             'charge.refunded' => $this->handleChargeRefunded($event),
             default => null,
         };
@@ -54,17 +53,6 @@ class StripeWebhookController extends Controller
         if ($session instanceof StripeSession) {
             $this->fulfillment->fulfillFromSession($session);
         }
-    }
-
-    private function handlePaymentFailed(Event $event): void
-    {
-        $intent = $event->data->object;
-        $order = Order::where('stripe_payment_intent_id', $intent->id)->first();
-
-        $order?->update([
-            'status' => 'pending',
-            'stripe_payment_status' => 'failed',
-        ]);
     }
 
     private function handleChargeRefunded(Event $event): void
