@@ -15,7 +15,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'phone', 'stripe_customer_id',
+        'name', 'email', 'password', 'role', 'phone', 'stripe_customer_id', 'last_seen_orders_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -24,6 +24,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_seen_orders_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

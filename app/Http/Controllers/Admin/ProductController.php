@@ -48,6 +48,17 @@ class ProductController extends Controller
         return new ProductResource($product->load(['images', 'game', 'category']));
     }
 
+    public function decrementStock(Product $product): JsonResponse
+    {
+        if ($product->is_preorder || $product->stock <= 0) {
+            return response()->json(['message' => 'Impossibile decrementare lo stock.'], 422);
+        }
+
+        $product->decrement('stock');
+
+        return response()->json(['stock' => $product->stock]);
+    }
+
     public function destroy(Product $product): JsonResponse
     {
         foreach ($product->images as $image) {

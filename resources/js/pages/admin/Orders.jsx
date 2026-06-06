@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     adminGetOrders,
@@ -7,6 +7,7 @@ import {
     adminNotifyPickupReady,
     adminConfirmPickup,
     adminRefundOrder,
+    adminMarkOrdersSeen,
 } from "../../api/admin";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -24,6 +25,7 @@ import {
     RotateCcw,
     AlertCircle,
     Bell,
+    Pencil,
 } from "lucide-react";
 import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
@@ -64,6 +66,8 @@ function SectionHeader({ icon: Icon, title }) {
 function OrderDrawer({ orderId, onClose }) {
     const qc = useQueryClient();
     const [tracking, setTracking] = useState("");
+    const [editingTracking, setEditingTracking] = useState(false);
+    const [editTrackingValue, setEditTrackingValue] = useState("");
     const [refundAmount, setRefundAmount] = useState("");
     const [refundReason, setRefundReason] = useState("");
 
@@ -236,7 +240,7 @@ function OrderDrawer({ orderId, onClose }) {
                                                 <p className="text-sm font-semibold text-gray-800">
                                                     {order.user.name}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm text-gray-500">
                                                     {order.user.email}
                                                 </p>
                                             </div>
@@ -317,12 +321,87 @@ function OrderDrawer({ orderId, onClose }) {
                                             icon={Truck}
                                             title="Tracciamento"
                                         />
-                                        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                                            <Truck className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                            <span className="text-sm font-mono font-semibold text-green-800">
-                                                {order.tracking_code}
-                                            </span>
-                                        </div>
+                                        {editingTracking ? (
+                                            <div className="flex items-stretch gap-2">
+                                                <div className="flex-1">
+                                                    <Input
+                                                        value={editTrackingValue}
+                                                        onChange={(e) =>
+                                                            setEditTrackingValue(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        placeholder="Nuovo codice di tracciamento..."
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="primary"
+                                                    size="md"
+                                                    disabled={
+                                                        !editTrackingValue ||
+                                                        addTracking.isPending
+                                                    }
+                                                    onClick={() => {
+                                                        if (
+                                                            window.confirm(
+                                                                `Aggiornare il codice di tracciamento per l'ordine ${order.order_number}?\nVerrà inviata una nuova email di spedizione al cliente.`,
+                                                            )
+                                                        ) {
+                                                            addTracking.mutate(
+                                                                {
+                                                                    id: order.id,
+                                                                    code: editTrackingValue,
+                                                                },
+                                                                {
+                                                                    onSuccess:
+                                                                        () =>
+                                                                            setEditingTracking(
+                                                                                false,
+                                                                            ),
+                                                                },
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    {addTracking.isPending
+                                                        ? "Salvataggio..."
+                                                        : "Salva"}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="md"
+                                                    onClick={() =>
+                                                        setEditingTracking(
+                                                            false,
+                                                        )
+                                                    }
+                                                >
+                                                    Annulla
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <Truck className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                                    <span className="text-sm font-mono font-semibold text-green-800">
+                                                        {order.tracking_code}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditTrackingValue(
+                                                            order.tracking_code,
+                                                        );
+                                                        setEditingTracking(
+                                                            true,
+                                                        );
+                                                    }}
+                                                    className="p-1.5 rounded-lg text-green-600 hover:bg-green-100 transition-colors"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -390,7 +469,7 @@ function OrderDrawer({ orderId, onClose }) {
                                                 </Button>
                                             )}
                                         </div>
-                                    ) : (
+                                    ) : !order.tracking_code && (
                                         <div>
                                             <SectionHeader
                                                 icon={Truck}
@@ -581,16 +660,21 @@ function OrderDrawer({ orderId, onClose }) {
 
 export default function AdminOrders() {
     const [filterStatus, setFilterStatus] = useState("");
-    const [filterType, setFilterType] = useState("");
     const [search, setSearch] = useState("");
     const [selectedId, setSelectedId] = useState(null);
+    const qc = useQueryClient();
+
+    useEffect(() => {
+        adminMarkOrdersSeen().then(() => {
+            qc.invalidateQueries({ queryKey: ["admin-new-orders-count"] });
+        });
+    }, []);
 
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-orders", filterStatus, filterType],
+        queryKey: ["admin-orders", filterStatus],
         queryFn: () =>
             adminGetOrders({
                 ...(filterStatus ? { status: filterStatus } : {}),
-                ...(filterType ? { type: filterType } : {}),
             }),
     });
 
@@ -632,16 +716,6 @@ export default function AdminOrders() {
                                 {s.label}
                             </option>
                         ))}
-                    </Select>
-                </div>
-                <div className="flex-1">
-                    <Select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                    >
-                        <option value="">Tutti i tipi</option>
-                        <option value="standard">Standard</option>
-                        <option value="preorder">Preordine</option>
                     </Select>
                 </div>
             </div>
@@ -691,14 +765,6 @@ export default function AdminOrders() {
                                     Totale
                                 </SortTh>
                                 <SortTh
-                                    column="type"
-                                    sort={sort}
-                                    onSort={onSort}
-                                    align="center"
-                                >
-                                    Tipo
-                                </SortTh>
-                                <SortTh
                                     column="status"
                                     sort={sort}
                                     onSort={onSort}
@@ -729,7 +795,7 @@ export default function AdminOrders() {
                                                     <p className="font-medium text-gray-800">
                                                         {order.user.name}
                                                     </p>
-                                                    <p className="text-gray-500 text-xs">
+                                                    <p className="text-gray-500 text-sm">
                                                         {order.user.email}
                                                     </p>
                                                 </div>
@@ -789,16 +855,6 @@ export default function AdminOrders() {
                                             {Number(order.total)
                                                 .toFixed(2)
                                                 .replace(".", ",")}
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="text-xs text-gray-600">
-                                                {order.type
-                                                    ? order.type
-                                                          .charAt(0)
-                                                          .toUpperCase() +
-                                                      order.type.slice(1)
-                                                    : ""}
-                                            </span>
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <Badge variant={status.variant}>

@@ -19,6 +19,23 @@ class OrderController extends Controller
     {
     }
 
+    public function newCount(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $since = $request->user()->last_seen_orders_at;
+
+        $count = Order::when($since, fn($q) => $q->where('created_at', '>', $since))
+            ->count();
+
+        return response()->json(['count' => $count]);
+    }
+
+    public function markSeen(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->user()->update(['last_seen_orders_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Order::with(['user'])->orderByDesc('created_at');

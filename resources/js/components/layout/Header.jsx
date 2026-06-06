@@ -4,6 +4,7 @@ import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getGames, getSettings } from "../../api/products";
 import { logout } from "../../api/auth";
+import { adminGetNewOrdersCount } from "../../api/admin";
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
 
@@ -30,6 +31,14 @@ export function Header() {
         queryKey: ["public-settings"],
         queryFn: getSettings,
     });
+
+    const { data: newOrdersData } = useQuery({
+        queryKey: ["admin-new-orders-count"],
+        queryFn: adminGetNewOrdersCount,
+        enabled: user?.role === "admin",
+        refetchInterval: 60_000,
+    });
+    const newOrdersCount = newOrdersData?.count ?? 0;
     const cardtraderLabel = settingsData?.data?.cardtrader_label || "CardTrader";
     const cardtraderUrl =
         settingsData?.data?.cardtrader_url ||
@@ -188,9 +197,14 @@ export function Header() {
                                 <button
                                     onClick={() => setUserMenuOpen((o) => !o)}
                                     aria-label="Account"
-                                    className="p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
+                                    className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
                                 >
                                     <User className="w-6 h-6" />
+                                    {newOrdersCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                                            {newOrdersCount > 99 ? "99+" : newOrdersCount}
+                                        </span>
+                                    )}
                                 </button>
                                 {userMenuOpen && (
                                     <>

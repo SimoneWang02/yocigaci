@@ -20,6 +20,7 @@ export const adminGetProduct = (id) => api.get(`/admin/products/${id}`).then((r)
 export const adminCreateProduct = (data) => api.post('/admin/products', data).then((r) => r.data)
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data).then((r) => r.data)
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`).then((r) => r.data)
+export const adminDecrementStock = (id) => api.patch(`/admin/products/${id}/decrement-stock`).then((r) => r.data)
 export const adminUploadImage = (id, file) => {
   const form = new FormData()
   form.append('image', file)
@@ -59,6 +60,8 @@ export const adminGetPages = () => api.get('/admin/pages').then((r) => r.data.da
 export const adminUpdatePage = (slug, data) => api.patch(`/admin/pages/${slug}`, data).then((r) => r.data.data)
 
 // Orders
+export const adminGetNewOrdersCount = () => api.get('/admin/orders/new-count').then((r) => r.data)
+export const adminMarkOrdersSeen = () => api.post('/admin/orders/mark-seen').then((r) => r.data)
 export const adminGetOrders = (params) => api.get('/admin/orders', { params }).then((r) => r.data)
 export const adminGetOrder = (id) => api.get(`/admin/orders/${id}`).then((r) => r.data)
 export const adminAddTracking = (id, tracking_code) =>

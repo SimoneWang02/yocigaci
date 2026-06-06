@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle, PackageMinus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminGetProducts, adminDeleteProduct, adminUpdateProduct } from "../../api/admin";
+import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
@@ -34,12 +34,21 @@ export default function AdminProducts() {
     const rawProducts = data?.data ?? [];
     const { sort, sorted: products, onSort } = useTableSort(rawProducts, 'name');
 
+    const today = new Date().toISOString().slice(0, 10);
+    const expiredPreorders = rawProducts.filter(
+        (p) => p.is_preorder && p.preorder_release_date && p.preorder_release_date < today,
+    );
+
     const del = useMutation({
         mutationFn: adminDeleteProduct,
         onSuccess: () => qc.invalidateQueries(["admin-products"]),
     });
     const toggleActive = useMutation({
         mutationFn: ({ id, is_active }) => adminUpdateProduct(id, { is_active }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
+    });
+    const decreaseStock = useMutation({
+        mutationFn: (id) => adminDecrementStock(id),
         onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
     });
 
@@ -53,6 +62,43 @@ export default function AdminProducts() {
                     </Button>
                 </Link>
             </div>
+
+            {expiredPreorders.length > 0 && (
+                <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <p className="text-sm font-semibold text-amber-800">
+                            {expiredPreorders.length === 1
+                                ? "1 preordine ha superato la data di uscita"
+                                : `${expiredPreorders.length} preordini hanno superato la data di uscita`}
+                        </p>
+                    </div>
+                    <div className="space-y-1.5">
+                        {expiredPreorders.map((p) => (
+                            <div key={p.id} className="flex items-center justify-between bg-white border border-amber-100 rounded-lg px-3 py-2">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    {p.primary_image?.url ? (
+                                        <img src={p.primary_image.url} alt="" className="w-8 h-10 object-cover rounded shrink-0" />
+                                    ) : (
+                                        <div className="w-8 h-10 bg-gray-100 rounded shrink-0" />
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
+                                        <p className="text-xs text-amber-600">
+                                            Data uscita: {new Date(p.preorder_release_date + "T00:00:00").toLocaleDateString("it-IT")}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Link to={`/admin/prodotti/${p.id}/modifica`}>
+                                    <Button variant="ghost" size="sm" className="!px-2 shrink-0">
+                                        <Pencil className="w-4 h-4" />
+                                    </Button>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 mb-4">
                 <Input
@@ -141,6 +187,19 @@ export default function AdminProducts() {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2 justify-end">
+                                            {!p.is_preorder && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    aria-label="Diminuisci stock"
+                                                    title="Diminuisci stock di 1"
+                                                    className="!px-2"
+                                                    disabled={p.stock <= 0 || decreaseStock.isPending}
+                                                    onClick={() => decreaseStock.mutate(p.id)}
+                                                >
+                                                    <PackageMinus className="w-4 h-4" />
+                                                </Button>
+                                            )}
                                             <Link
                                                 to={`/admin/prodotti/${p.id}/modifica`}
                                             >

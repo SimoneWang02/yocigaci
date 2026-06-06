@@ -1,13 +1,15 @@
+import { useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getProducts } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
-import { Package } from 'lucide-react'
+import { Package, Search } from 'lucide-react'
 
 export default function Catalog() {
   const [params, setParams] = useSearchParams()
+  const searchRef = useRef(null)
 
   const sectionId = params.get('sezione') || undefined
 
@@ -41,8 +43,9 @@ export default function Catalog() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Catalogo</h1>
 
       {/* Search */}
-      <div className="mb-6">
+      <div className="mb-6 flex gap-2">
         <input
+          ref={searchRef}
           type="search"
           placeholder="Cerca prodotti..."
           defaultValue={params.get('search') ?? ''}
@@ -56,8 +59,22 @@ export default function Catalog() {
               setParams(next)
             }
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
+        <button
+          onClick={() => {
+            const next = new URLSearchParams(params)
+            const val = searchRef.current?.value.trim() ?? ''
+            if (val) next.set('search', val)
+            else next.delete('search')
+            next.delete('page')
+            setParams(next)
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Search size={16} />
+          Cerca
+        </button>
       </div>
 
       <div className="flex gap-6">
