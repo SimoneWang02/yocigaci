@@ -261,6 +261,6 @@ class OrderFulfillmentService
             ? new PreorderConfirmed($order)
             : new OrderConfirmed($order);
 
-        Mail::to($email)->queue($mailable);
+        Mail::to($email)->send($mailable);
     }
 }

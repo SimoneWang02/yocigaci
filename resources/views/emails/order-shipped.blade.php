@@ -33,7 +33,7 @@
         <p>Di solito le consegne avvengono entro 2–5 giorni lavorativi.</p>
     </div>
     <div class="footer">
-        <p>© {{ date('Y') }} Yocigaci. Per assistenza rispondi a questa email.</p>
+        <p>© {{ date('Y') }} Yocigaci. Per assistenza scrivi a <a href="mailto:assistenza-yocigaci@gmail.com" style="color: #999;">assistenza-yocigaci@gmail.com</a></p>
     </div>
 </div>
 </body>

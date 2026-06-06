@@ -24,7 +24,7 @@
         <p>Grazie per la pazienza!</p>
     </div>
     <div class="footer">
-        <p>© {{ date('Y') }} Yocigaci.</p>
+        <p>© {{ date('Y') }} Yocigaci. Per assistenza scrivi a <a href="mailto:assistenza-yocigaci@gmail.com" style="color: #999;">assistenza-yocigaci@gmail.com</a></p>
     </div>
 </div>
 </body>

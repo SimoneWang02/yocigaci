@@ -13,7 +13,7 @@ class Order extends Model
         'subtotal', 'shipping_cost', 'total',
         'shipping_address', 'notes',
         'stripe_payment_intent_id', 'stripe_payment_status',
-        'shipped_at', 'tracking_code',
+        'shipped_at', 'picked_up_at', 'tracking_code',
         'refunded_amount', 'refunded_at', 'refund_reason',
     ];
 
@@ -23,6 +23,7 @@ class Order extends Model
         'shipping_cost' => 'decimal:2',
         'total' => 'decimal:2',
         'shipped_at' => 'datetime',
+        'picked_up_at' => 'datetime',
         'refunded_amount' => 'decimal:2',
         'refunded_at' => 'datetime',
     ];

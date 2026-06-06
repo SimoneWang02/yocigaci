@@ -51,7 +51,7 @@ class OrderController extends Controller
         ]);
 
         if ($order->user) {
-            Mail::to($order->user->email)->queue(new OrderShipped($order));
+            Mail::to($order->user->email)->send(new OrderShipped($order));
         }
 
         return new OrderResource($order->load(['items', 'user']));
@@ -65,7 +65,7 @@ class OrderController extends Controller
 
         $email = $order->recipientEmail();
         if ($email) {
-            Mail::to($email)->queue(new PickupReady($order));
+            Mail::to($email)->send(new PickupReady($order));
         }
 
         return new OrderResource($order->fresh()->load(['items', 'user']));
@@ -75,7 +75,7 @@ class OrderController extends Controller
     {
         abort_if($order->delivery_method !== 'pickup', 422, 'Questo ordine non è un ritiro in negozio.');
 
-        $order->update(['status' => 'picked_up']);
+        $order->update(['status' => 'picked_up', 'picked_up_at' => now()]);
 
         return new OrderResource($order->fresh()->load(['items', 'user']));
     }

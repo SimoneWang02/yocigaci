@@ -27,6 +27,11 @@
     <div class="body">
         <p class="order-number">Ordine {{ $order->order_number }}</p>
         <p>Grazie per il tuo acquisto. Il tuo ordine è stato ricevuto e verrà preparato a breve.</p>
+        @if($order->delivery_method === 'pickup')
+        <p>Riceverai una email non appena il tuo ordine sarà pronto per il ritiro in negozio.</p>
+        @else
+        <p>Riceverai una email con il numero di tracking non appena il tuo ordine verrà spedito.</p>
+        @endif
 
         <table>
             <tr>
@@ -51,6 +56,12 @@
             </tr>
         </table>
 
+        @if($order->delivery_method === 'pickup')
+        <div class="address-box">
+            <strong>Ritiro in negozio</strong>
+            <p style="margin: 8px 0 0;">Ti contatteremo quando l'ordine sarà pronto.</p>
+        </div>
+        @elseif(!empty($order->shipping_address))
         <div class="address-box">
             <strong>Indirizzo di spedizione</strong>
             <p style="margin: 8px 0 0;">
@@ -63,9 +74,10 @@
                 {{ $order->shipping_address['country'] }}
             </p>
         </div>
+        @endif
     </div>
     <div class="footer">
-        <p>© {{ date('Y') }} Yocigaci. Per assistenza rispondi a questa email.</p>
+        <p>© {{ date('Y') }} Yocigaci. Per assistenza scrivi a <a href="mailto:assistenza-yocigaci@gmail.com" style="color: #999;">assistenza-yocigaci@gmail.com</a></p>
     </div>
 </div>
 </body>

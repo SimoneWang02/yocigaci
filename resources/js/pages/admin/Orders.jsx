@@ -232,11 +232,6 @@ function OrderDrawer({ orderId, onClose }) {
                                             title="Cliente"
                                         />
                                         <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                                                <span className="text-sm font-bold text-indigo-700">
-                                                    {initials}
-                                                </span>
-                                            </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-800">
                                                     {order.user.name}
@@ -343,24 +338,31 @@ function OrderDrawer({ orderId, onClose }) {
                                                 <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                                                     <Store className="w-4 h-4 text-green-600 flex-shrink-0" />
                                                     <span className="text-sm text-green-800">
-                                                        Ordine ritirato dal cliente
+                                                        Ordine ritirato dal
+                                                        cliente
                                                     </span>
                                                 </div>
-                                            ) : order.status === "ready_for_pickup" ? (
+                                            ) : order.status ===
+                                              "ready_for_pickup" ? (
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
                                                         <Bell className="w-4 h-4 text-violet-600 flex-shrink-0" />
                                                         <span className="text-sm text-violet-800">
-                                                            Cliente notificato — in attesa di ritiro
+                                                            Cliente notificato -
+                                                            In attesa di ritiro
                                                         </span>
                                                     </div>
                                                     <Button
                                                         variant="primary"
                                                         size="md"
                                                         className="w-full"
-                                                        disabled={confirmPickup.isPending}
+                                                        disabled={
+                                                            confirmPickup.isPending
+                                                        }
                                                         onClick={() => {
-                                                            confirmPickup.mutate(order.id);
+                                                            confirmPickup.mutate(
+                                                                order.id,
+                                                            );
                                                         }}
                                                     >
                                                         {confirmPickup.isPending
@@ -373,9 +375,13 @@ function OrderDrawer({ orderId, onClose }) {
                                                     variant="primary"
                                                     size="md"
                                                     className="w-full"
-                                                    disabled={notifyPickup.isPending}
+                                                    disabled={
+                                                        notifyPickup.isPending
+                                                    }
                                                     onClick={() => {
-                                                        notifyPickup.mutate(order.id);
+                                                        notifyPickup.mutate(
+                                                            order.id,
+                                                        );
                                                     }}
                                                 >
                                                     {notifyPickup.isPending
@@ -742,11 +748,18 @@ export default function AdminOrders() {
                                             {order.delivery_method ===
                                             "pickup" ? (
                                                 order.status === "picked_up" ? (
-                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                                                        <Store className="w-3 h-3" />
-                                                        Ritirato
-                                                    </span>
-                                                ) : order.status === "ready_for_pickup" ? (
+                                                    order.picked_up_at ? (
+                                                        <span className="text-gray-500">
+                                                            {new Date(order.picked_up_at).toLocaleDateString("it-IT")}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                                            <Store className="w-3 h-3" />
+                                                            Ritirato
+                                                        </span>
+                                                    )
+                                                ) : order.status ===
+                                                  "ready_for_pickup" ? (
                                                     <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                                                         <Bell className="w-3 h-3" />
                                                         Notificato

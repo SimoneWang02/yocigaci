@@ -22,6 +22,7 @@ class OrderResource extends JsonResource
             'notes' => $this->notes,
             'stripe_payment_status' => $this->stripe_payment_status,
             'shipped_at' => $this->shipped_at?->toIso8601String(),
+            'picked_up_at' => $this->picked_up_at?->toIso8601String(),
             'tracking_code' => $this->tracking_code,
             'refunded_amount' => (float) $this->refunded_amount,
             'refunded_at' => $this->refunded_at?->toIso8601String(),

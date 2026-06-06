@@ -30,7 +30,7 @@
         <p style="font-size: 20px; font-weight: bold; letter-spacing: 1px; text-align: center;">{{ $order->order_number }}</p>
     </div>
     <div class="footer">
-        <p>&copy; {{ date('Y') }} Yocigaci. Per assistenza rispondi a questa email.</p>
+        <p>&copy; {{ date('Y') }} Yocigaci. Per assistenza scrivi a <a href="mailto:assistenza-yocigaci@gmail.com" style="color: #999;">assistenza-yocigaci@gmail.com</a></p>
     </div>
 </div>
 </body>

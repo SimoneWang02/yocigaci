@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "../../api/orders";
 import { Badge } from "../../components/ui/Badge";
 import { PageSpinner } from "../../components/ui/Spinner";
-import { Package, ArrowRight, ChevronRight, Truck, MapPin, Store } from "lucide-react";
+import {
+    Package,
+    ArrowRight,
+    ChevronRight,
+    Truck,
+    MapPin,
+    Store,
+} from "lucide-react";
 
 const STATUS_CONFIG = {
     paid: { label: "Pagato", variant: "success", border: "border-l-green-400" },
@@ -136,12 +143,6 @@ export default function Orders() {
                                                         <span className="font-mono font-bold text-sm text-gray-900 tracking-wide">
                                                             {order.order_number}
                                                         </span>
-                                                        {order.type ===
-                                                            "preorder" && (
-                                                            <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-px rounded">
-                                                                Preordine
-                                                            </span>
-                                                        )}
                                                         {order.tracking_code && (
                                                             <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 border border-green-200 px-1.5 py-px rounded">
                                                                 <Truck className="w-3 h-3" />
@@ -167,19 +168,28 @@ export default function Orders() {
                                                     </div>
 
                                                     {/* Address / pickup */}
-                                                    {order.delivery_method === 'pickup' ? (
+                                                    {order.delivery_method ===
+                                                    "pickup" ? (
                                                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
                                                             <Store className="w-3 h-3 flex-shrink-0" />
-                                                            <span>Ritiro in negozio</span>
-                                                        </div>
-                                                    ) : addr?.full_name && (
-                                                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                                                            <span className="truncate">
-                                                                {addr.full_name}{" "}
-                                                                - {addr.city}
+                                                            <span>
+                                                                Ritiro in
+                                                                negozio
                                                             </span>
                                                         </div>
+                                                    ) : (
+                                                        addr?.full_name && (
+                                                            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                                                                <MapPin className="w-3 h-3 flex-shrink-0" />
+                                                                <span className="truncate">
+                                                                    {
+                                                                        addr.full_name
+                                                                    }{" "}
+                                                                    -{" "}
+                                                                    {addr.city}
+                                                                </span>
+                                                            </div>
+                                                        )
                                                     )}
                                                 </div>
 

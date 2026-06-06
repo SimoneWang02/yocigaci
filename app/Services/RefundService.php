@@ -119,7 +119,7 @@ class RefundService
 
         // Email a ogni rimborso reale, parziale o totale.
         if ($shouldNotify && ($email = $order->recipientEmail())) {
-            Mail::to($email)->queue(new OrderRefunded($order, $newlyRefunded, $fullyRefunded));
+            Mail::to($email)->send(new OrderRefunded($order, $newlyRefunded, $fullyRefunded));
         }
     }
 }
