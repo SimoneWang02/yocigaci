@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "../../api/auth";
 import { useAuthStore } from "../../store/authStore";
 import { Input } from "../../components/ui/Input";
@@ -7,6 +7,8 @@ import { Input } from "../../components/ui/Input";
 export default function Login() {
     const { setAuth, user } = useAuthStore();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const resetOk = searchParams.get("reset") === "ok";
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -78,16 +80,31 @@ export default function Login() {
                         }
                         required
                     />
-                    <Input
-                        label="Password"
-                        type="password"
-                        autoComplete="current-password"
-                        value={form.password}
-                        onChange={(e) =>
-                            setForm({ ...form, password: e.target.value })
-                        }
-                        required
-                    />
+                    <div>
+                        <Input
+                            label="Password"
+                            type="password"
+                            autoComplete="current-password"
+                            value={form.password}
+                            onChange={(e) =>
+                                setForm({ ...form, password: e.target.value })
+                            }
+                            required
+                        />
+                        <div className="flex justify-end mt-1">
+                            <Link
+                                to="/recupera-password"
+                                className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                            >
+                                Hai dimenticato la password?
+                            </Link>
+                        </div>
+                    </div>
+                    {resetOk && (
+                        <p className="text-sm text-green-600">
+                            Password reimpostata. Accedi con la nuova password.
+                        </p>
+                    )}
                     {error && <p className="text-sm text-red-500">{error}</p>}
                     <button
                         type="submit"

@@ -16,6 +16,8 @@ import Register from './pages/account/Register'
 import Orders from './pages/account/Orders'
 import OrderDetail from './pages/account/OrderDetail'
 import Profile from './pages/account/Profile'
+import ForgotPassword from './pages/account/ForgotPassword'
+import ResetPassword from './pages/account/ResetPassword'
 import AdminProducts from './pages/admin/Products'
 import ProductForm from './pages/admin/ProductForm'
 import AdminOrders from './pages/admin/Orders'
@@ -109,6 +111,8 @@ export default function App() {
           <Route path="/ordine-confermato/:orderNumber" element={<Layout><OrderConfirmation /></Layout>} />
           <Route path="/login" element={<Login />} />
           <Route path="/registrati" element={<Register />} />
+          <Route path="/recupera-password" element={<ForgotPassword />} />
+          <Route path="/reimposta-password" element={<ResetPassword />} />
           <Route path="/account/ordini" element={<ProtectedRoute><Layout><Orders /></Layout></ProtectedRoute>} />
           <Route path="/account/ordini/:orderNumber" element={<ProtectedRoute><Layout><OrderDetail /></Layout></ProtectedRoute>} />
           <Route path="/account/profilo" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />

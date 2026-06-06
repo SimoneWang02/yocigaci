@@ -6,6 +6,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomepageSectionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'
 // Auth
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink']);
+Route::post('/auth/reset-password', [PasswordResetController::class, 'reset']);
 
 // Checkout (pubblico - funziona anche per guest)
 Route::post('/checkout/create-session', [CheckoutController::class, 'createSession']);
