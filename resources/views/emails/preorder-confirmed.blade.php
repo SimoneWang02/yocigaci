@@ -21,7 +21,7 @@
 <div class="container">
     <div class="header">
         <h1>Yocigaci</h1>
-        <p style="margin: 8px 0 0;">Preordine confermato!</p>
+        <p style="margin: 8px 0 0;">Preordine Confermato!</p>
     </div>
     <div class="banner">Preordine in attesa di disponibilità</div>
     <div class="body">

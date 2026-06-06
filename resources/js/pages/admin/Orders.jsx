@@ -28,15 +28,15 @@ import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
 
 const STATUS_LABELS = {
-    pending: { label: "In attesa", variant: "default" },
+    pending: { label: "In Attesa", variant: "default" },
     paid: { label: "Pagato", variant: "success" },
-    processing: { label: "In preparazione", variant: "info" },
+    processing: { label: "In Preparazione", variant: "info" },
     shipped: { label: "Spedito", variant: "success" },
     delivered: { label: "Consegnato", variant: "success" },
     cancelled: { label: "Annullato", variant: "sold_out" },
-    partially_refunded: { label: "Rimborso parziale", variant: "warning" },
+    partially_refunded: { label: "Rimborso Parziale", variant: "warning" },
     refunded: { label: "Rimborsato", variant: "default" },
-    preorder_confirmed: { label: "Preordine confermato", variant: "preorder" },
+    preorder_confirmed: { label: "Preordine Confermato", variant: "preorder" },
     preorder_ready: { label: "Pronto", variant: "info" },
 };
 
@@ -56,8 +56,7 @@ const REFUND_REASONS = [
     { value: "fraudulent", label: "Pagamento fraudolento" },
 ];
 
-const formatEur = (value) =>
-    Number(value).toFixed(2).replace(".", ",");
+const formatEur = (value) => Number(value).toFixed(2).replace(".", ",");
 
 function SectionHeader({ icon: Icon, title }) {
     return (
@@ -361,14 +360,16 @@ function OrderDrawer({ orderId, onClose }) {
                                                     <option value="">
                                                         Seleziona stato...
                                                     </option>
-                                                    {MANUAL_STATUSES.map((s) => (
-                                                        <option
-                                                            key={s.value}
-                                                            value={s.value}
-                                                        >
-                                                            {s.label}
-                                                        </option>
-                                                    ))}
+                                                    {MANUAL_STATUSES.map(
+                                                        (s) => (
+                                                            <option
+                                                                key={s.value}
+                                                                value={s.value}
+                                                            >
+                                                                {s.label}
+                                                            </option>
+                                                        ),
+                                                    )}
                                                 </Select>
                                             </div>
                                             <Button

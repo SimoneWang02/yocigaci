@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "../../api/orders";
 import { Badge } from "../../components/ui/Badge";
 import { PageSpinner } from "../../components/ui/Spinner";
-import { Package, ArrowRight, ChevronRight, Truck, MapPin } from "lucide-react";
+import { Package, ArrowRight, ChevronRight, Truck, MapPin, Store } from "lucide-react";
 
 const STATUS_CONFIG = {
     pending: {
@@ -181,8 +181,13 @@ export default function Orders() {
                                                         </span>
                                                     </div>
 
-                                                    {/* Address */}
-                                                    {addr?.full_name && (
+                                                    {/* Address / pickup */}
+                                                    {order.delivery_method === 'pickup' ? (
+                                                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                                                            <Store className="w-3 h-3 flex-shrink-0" />
+                                                            <span>Ritiro in negozio</span>
+                                                        </div>
+                                                    ) : addr?.full_name && (
                                                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
                                                             <MapPin className="w-3 h-3 flex-shrink-0" />
                                                             <span className="truncate">
