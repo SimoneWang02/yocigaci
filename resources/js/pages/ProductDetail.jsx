@@ -63,7 +63,7 @@ export default function ProductDetail() {
         setTimeout(() => setAdded(false), 2000);
     };
 
-    const metaTitle = `${product.name} — Yocigaci`
+    const metaTitle = `${product.name} - Yocigaci`
     const metaDescription = product.description
         ? product.description.slice(0, 155)
         : `Acquista ${product.name} su Yocigaci, negozio TCG a Carpi. € ${Number(product.price).toFixed(2).replace('.', ',')}.`

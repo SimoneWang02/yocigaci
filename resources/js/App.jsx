@@ -107,7 +107,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Helmet>
-          <title>Yocigaci — TCG Store a Carpi</title>
+          <title>Yocigaci - TCG Store a Carpi</title>
           <meta name="description" content="Yocigaci è il negozio di carte collezionabili a Carpi. Magic: The Gathering, Pokémon, One Piece e molto altro. Acquista online o ritira in negozio." />
           <meta property="og:site_name" content="Yocigaci" />
           <meta property="og:type" content="website" />

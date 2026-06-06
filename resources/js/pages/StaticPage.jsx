@@ -30,8 +30,8 @@ export default function StaticPage() {
     return (
         <>
         <Helmet>
-            <title>{page.title} — Yocigaci</title>
-            <meta property="og:title" content={`${page.title} — Yocigaci`} />
+            <title>{page.title} - Yocigaci</title>
+            <meta property="og:title" content={`${page.title} - Yocigaci`} />
         </Helmet>
         <div className="max-w-3xl mx-auto px-4 py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-8">{page.title}</h1>
