@@ -20,6 +20,6 @@
 
 - [ ] **Wishlist** — salvataggio prodotti per acquisto futuro, persiste per utenti autenticati
 - [ ] **Prodotti visti di recente** — ultime N schede prodotto visitate, in localStorage
-- [ ] **Autocomplete ricerca** — suggerimenti prodotti mentre si digita
+- [x] **Autocomplete ricerca** — suggerimenti prodotti mentre si digita
 - [ ] **Export ordini CSV** — per contabilita admin
 - [ ] **Sitemap XML** — generazione automatica per indicizzazione Google

@@ -1,7 +1,7 @@
-import { useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { getProducts } from '../api/products'
+import { getProducts, getSearchSuggestions } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
@@ -9,9 +9,26 @@ import { Package, Search } from 'lucide-react'
 
 export default function Catalog() {
   const [params, setParams] = useSearchParams()
-  const searchRef = useRef(null)
+  const navigate = useNavigate()
 
   const sectionId = params.get('sezione') || undefined
+
+  const [searchValue, setSearchValue] = useState(params.get('search') ?? '')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchValue), 300)
+    return () => clearTimeout(t)
+  }, [searchValue])
+
+  const { data: suggestionsData } = useQuery({
+    queryKey: ['search-suggestions', debouncedSearch],
+    queryFn: () => getSearchSuggestions(debouncedSearch),
+    enabled: debouncedSearch.length >= 2,
+    staleTime: 10_000,
+  })
+  const suggestions = suggestionsData?.data ?? []
 
   const filters = {
     section_id: sectionId,
@@ -38,38 +55,76 @@ export default function Catalog() {
     window.scrollTo({ top: 0 })
   }
 
+  const applySearch = () => {
+    const next = new URLSearchParams(params)
+    const val = searchValue.trim()
+    if (val) next.set('search', val)
+    else next.delete('search')
+    next.delete('page')
+    setParams(next)
+    setShowSuggestions(false)
+  }
+
+  const goToSuggestion = (slug) => {
+    navigate(`/prodotti/${slug}`)
+    setShowSuggestions(false)
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Catalogo</h1>
 
       {/* Search */}
       <div className="mb-6 flex gap-2">
-        <input
-          ref={searchRef}
-          type="search"
-          placeholder="Cerca prodotti..."
-          defaultValue={params.get('search') ?? ''}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              const next = new URLSearchParams(params)
-              const val = e.target.value.trim()
-              if (val) next.set('search', val)
-              else next.delete('search')
-              next.delete('page')
-              setParams(next)
-            }
-          }}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+        <div className="relative flex-1">
+          <input
+            type="search"
+            placeholder="Cerca prodotti..."
+            value={searchValue}
+            onChange={(e) => { setSearchValue(e.target.value); setShowSuggestions(true) }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onKeyDown={(e) => { if (e.key === 'Enter') applySearch(); if (e.key === 'Escape') setShowSuggestions(false) }}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 overflow-hidden">
+              {suggestions.map((s) => (
+                <button
+                  key={s.slug}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => goToSuggestion(s.slug)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                >
+                  {s.primary_image ? (
+                    <img src={s.primary_image} alt="" className="w-8 h-10 object-cover rounded flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 h-10 bg-gray-100 rounded flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-800 font-medium truncate leading-snug">{s.name}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {s.is_preorder && <span className="text-amber-500 mr-1.5">Preordine</span>}
+                      € {Number(s.price).toFixed(2).replace('.', ',')}
+                    </p>
+                  </div>
+                </button>
+              ))}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={applySearch}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-indigo-600 hover:bg-indigo-50 border-t border-gray-100 transition-colors font-medium"
+              >
+                <Search className="w-3.5 h-3.5" />
+                Vedi tutti i risultati per &quot;{searchValue}&quot;
+              </button>
+            </div>
+          )}
+        </div>
         <button
-          onClick={() => {
-            const next = new URLSearchParams(params)
-            const val = searchRef.current?.value.trim() ?? ''
-            if (val) next.set('search', val)
-            else next.delete('search')
-            next.delete('page')
-            setParams(next)
-          }}
+          onClick={applySearch}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
           <Search size={16} />

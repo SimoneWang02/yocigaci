@@ -2,7 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getGames, getSettings } from "../../api/products";
+import {
+    getGames,
+    getSettings,
+    getSearchSuggestions,
+} from "../../api/products";
 import { logout } from "../../api/auth";
 import { adminGetNewOrdersCount } from "../../api/admin";
 import { useAuthStore } from "../../store/authStore";
@@ -15,8 +19,14 @@ export function Header() {
     const [activeGame, setActiveGame] = useState(null);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(searchValue), 300);
+        return () => clearTimeout(t);
+    }, [searchValue]);
     const navigate = useNavigate();
 
     const count = items.reduce((s, i) => s + i.quantity, 0);
@@ -32,6 +42,14 @@ export function Header() {
         queryFn: getSettings,
     });
 
+    const { data: suggestionsData } = useQuery({
+        queryKey: ["search-suggestions", debouncedSearch],
+        queryFn: () => getSearchSuggestions(debouncedSearch),
+        enabled: debouncedSearch.length >= 2,
+        staleTime: 10_000,
+    });
+    const suggestions = suggestionsData?.data ?? [];
+
     const { data: newOrdersData } = useQuery({
         queryKey: ["admin-new-orders-count"],
         queryFn: adminGetNewOrdersCount,
@@ -39,7 +57,8 @@ export function Header() {
         refetchInterval: 60_000,
     });
     const newOrdersCount = newOrdersData?.count ?? 0;
-    const cardtraderLabel = settingsData?.data?.cardtrader_label || "CardTrader";
+    const cardtraderLabel =
+        settingsData?.data?.cardtrader_label || "CardTrader";
     const cardtraderUrl =
         settingsData?.data?.cardtrader_url ||
         "https://www.cardtrader.com/en/users/yocigaci888";
@@ -55,15 +74,26 @@ export function Header() {
         navigate("/");
     };
 
+    const closeSearch = () => {
+        setSearchOpen(false);
+        setSearchValue("");
+        setDebouncedSearch("");
+    };
+
     const submitSearch = (e) => {
         e.preventDefault();
         const val = searchValue.trim();
         navigate(
             val ? `/catalogo?search=${encodeURIComponent(val)}` : "/catalogo",
         );
-        setSearchOpen(false);
+        closeSearch();
         setMobileOpen(false);
-        setSearchValue("");
+    };
+
+    const goToSuggestion = (slug) => {
+        navigate(`/prodotti/${slug}`);
+        closeSearch();
+        setMobileOpen(false);
     };
 
     return (
@@ -114,23 +144,51 @@ export function Header() {
                                                     </Link>
                                                 </div>
                                                 <div className="flex gap-8">
-                                                    {Array.from({ length: Math.max(game.navbar_columns || 1, 1) }, (_, i) => i + 1).map((col) => {
-                                                        const colCats = game.categories
-                                                            .filter((c) => (c.nav_column ?? 1) === col)
-                                                            .sort((a, b) => a.sort_order - b.sort_order)
+                                                    {Array.from(
+                                                        {
+                                                            length: Math.max(
+                                                                game.navbar_columns ||
+                                                                    1,
+                                                                1,
+                                                            ),
+                                                        },
+                                                        (_, i) => i + 1,
+                                                    ).map((col) => {
+                                                        const colCats =
+                                                            game.categories
+                                                                .filter(
+                                                                    (c) =>
+                                                                        (c.nav_column ??
+                                                                            1) ===
+                                                                        col,
+                                                                )
+                                                                .sort(
+                                                                    (a, b) =>
+                                                                        a.sort_order -
+                                                                        b.sort_order,
+                                                                );
                                                         return (
-                                                            <div key={col} className="flex-1 space-y-0.5">
-                                                                {colCats.map((cat) => (
-                                                                    <Link
-                                                                        key={cat.id}
-                                                                        to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
-                                                                        className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                                                                    >
-                                                                        {cat.name}
-                                                                    </Link>
-                                                                ))}
+                                                            <div
+                                                                key={col}
+                                                                className="flex-1 space-y-0.5"
+                                                            >
+                                                                {colCats.map(
+                                                                    (cat) => (
+                                                                        <Link
+                                                                            key={
+                                                                                cat.id
+                                                                            }
+                                                                            to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                                                                            className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                                        >
+                                                                            {
+                                                                                cat.name
+                                                                            }
+                                                                        </Link>
+                                                                    ),
+                                                                )}
                                                             </div>
-                                                        )
+                                                        );
                                                     })}
                                                 </div>
                                             </div>
@@ -163,30 +221,101 @@ export function Header() {
                                 <>
                                     <div
                                         className="fixed inset-0 z-40"
-                                        onClick={() => setSearchOpen(false)}
+                                        onClick={closeSearch}
                                     />
-                                    <form
-                                        onSubmit={submitSearch}
-                                        className="absolute right-0 top-full mt-2 z-50 flex items-center bg-white border border-gray-200 shadow-lg rounded-lg p-2 w-72"
-                                    >
-                                        <input
-                                            ref={searchInputRef}
-                                            type="search"
-                                            value={searchValue}
-                                            onChange={(e) =>
-                                                setSearchValue(e.target.value)
-                                            }
-                                            placeholder="Cerca tra tutti i prodotti..."
-                                            className="flex-1 px-3 py-1.5 text-sm focus:outline-none"
-                                        />
-                                        <button
-                                            type="submit"
-                                            className="p-2 text-gray-500 hover:text-indigo-600 cursor-pointer"
-                                            aria-label="Cerca"
+                                    <div className="absolute right-0 top-full mt-2 z-50 w-80">
+                                        <form
+                                            onSubmit={submitSearch}
+                                            className="flex items-center bg-white border border-gray-200 shadow-lg rounded-lg p-2"
                                         >
-                                            <Search className="w-5 h-5" />
-                                        </button>
-                                    </form>
+                                            <input
+                                                ref={searchInputRef}
+                                                type="search"
+                                                value={searchValue}
+                                                onChange={(e) =>
+                                                    setSearchValue(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                onKeyDown={(e) =>
+                                                    e.key === "Escape" &&
+                                                    closeSearch()
+                                                }
+                                                placeholder="Cerca tra tutti i prodotti..."
+                                                className="flex-1 px-3 py-1.5 text-sm focus:outline-none"
+                                            />
+                                            <button
+                                                type="submit"
+                                                className="p-2 text-gray-500 hover:text-indigo-600 cursor-pointer"
+                                                aria-label="Cerca"
+                                            >
+                                                <Search className="w-5 h-5" />
+                                            </button>
+                                        </form>
+
+                                        {suggestions.length > 0 && (
+                                            <div className="mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                                                {suggestions.map((s) => (
+                                                    <button
+                                                        key={s.slug}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            goToSuggestion(
+                                                                s.slug,
+                                                            )
+                                                        }
+                                                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                                                    >
+                                                        {s.primary_image ? (
+                                                            <img
+                                                                src={
+                                                                    s.primary_image
+                                                                }
+                                                                alt=""
+                                                                className="w-8 h-10 object-cover rounded flex-shrink-0"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-8 h-10 bg-gray-100 rounded flex-shrink-0" />
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm text-gray-800 font-medium truncate leading-snug">
+                                                                {s.name}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                                {s.is_preorder && (
+                                                                    <span className="text-amber-500 mr-1.5">
+                                                                        Preordine
+                                                                    </span>
+                                                                )}
+                                                                €{" "}
+                                                                {Number(s.price)
+                                                                    .toFixed(2)
+                                                                    .replace(
+                                                                        ".",
+                                                                        ",",
+                                                                    )}
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        navigate(
+                                                            `/catalogo?search=${encodeURIComponent(searchValue.trim())}`,
+                                                        );
+                                                        closeSearch();
+                                                        setMobileOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-indigo-600 hover:bg-indigo-50 border-t border-gray-100 transition-colors font-medium"
+                                                >
+                                                    <Search className="w-3.5 h-3.5" />
+                                                    Vedi tutti i risultati per
+                                                    &quot;{searchValue}&quot;
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -202,7 +331,9 @@ export function Header() {
                                     <User className="w-6 h-6" />
                                     {newOrdersCount > 0 && (
                                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                                            {newOrdersCount > 99 ? "99+" : newOrdersCount}
+                                            {newOrdersCount > 99
+                                                ? "99+"
+                                                : newOrdersCount}
                                         </span>
                                     )}
                                 </button>
@@ -217,7 +348,7 @@ export function Header() {
                                         <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white border border-gray-200 shadow-lg rounded-lg py-2">
                                             {user.role === "admin" && (
                                                 <Link
-                                                    to="/admin/homepage"
+                                                    to="/admin/dashboard"
                                                     onClick={() =>
                                                         setUserMenuOpen(false)
                                                     }
@@ -231,7 +362,9 @@ export function Header() {
                                                     <Link
                                                         to="/account/profilo"
                                                         onClick={() =>
-                                                            setUserMenuOpen(false)
+                                                            setUserMenuOpen(
+                                                                false,
+                                                            )
                                                         }
                                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                                     >
@@ -240,7 +373,9 @@ export function Header() {
                                                     <Link
                                                         to="/account/ordini"
                                                         onClick={() =>
-                                                            setUserMenuOpen(false)
+                                                            setUserMenuOpen(
+                                                                false,
+                                                            )
                                                         }
                                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                                     >
@@ -334,7 +469,7 @@ export function Header() {
                                 <>
                                     {user.role === "admin" && (
                                         <Link
-                                            to="/admin/homepage"
+                                            to="/admin/dashboard"
                                             className="block px-3 py-2 text-indigo-600"
                                             onClick={() => setMobileOpen(false)}
                                         >
@@ -346,14 +481,18 @@ export function Header() {
                                             <Link
                                                 to="/account/profilo"
                                                 className="block px-3 py-2 text-gray-700"
-                                                onClick={() => setMobileOpen(false)}
+                                                onClick={() =>
+                                                    setMobileOpen(false)
+                                                }
                                             >
                                                 Profilo
                                             </Link>
                                             <Link
                                                 to="/account/ordini"
                                                 className="block px-3 py-2 text-gray-700"
-                                                onClick={() => setMobileOpen(false)}
+                                                onClick={() =>
+                                                    setMobileOpen(false)
+                                                }
                                             >
                                                 I miei ordini
                                             </Link>

@@ -59,6 +59,32 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
+    public function suggestions(Request $request): JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $products = Product::active()
+            ->where('name', 'like', '%' . $q . '%')
+            ->with('primaryImage')
+            ->orderBy('sort_order')
+            ->limit(6)
+            ->get();
+
+        return response()->json([
+            'data' => $products->map(fn ($p) => [
+                'name'         => $p->name,
+                'slug'         => $p->slug,
+                'price'        => $p->price,
+                'is_preorder'  => $p->is_preorder,
+                'primary_image'=> $p->primaryImage?->url,
+            ]),
+        ]);
+    }
+
     public function related(string $slug): AnonymousResourceCollection
     {
         $product = Product::active()->where('slug', $slug)->firstOrFail();
