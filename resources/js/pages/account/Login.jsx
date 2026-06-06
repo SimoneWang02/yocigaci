@@ -16,7 +16,7 @@ export default function Login() {
     // Appena c'è un utente (dopo il login o se già autenticato) -> redirect.
     useEffect(() => {
         if (user) {
-            navigate(user.role === "admin" ? "/admin/homepage" : "/", {
+            navigate(user.role === "admin" ? "/admin/dashboard" : "/", {
                 replace: true,
             });
         }

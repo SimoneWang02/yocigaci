@@ -11,7 +11,7 @@ class PageController extends Controller
 {
     public function index(): JsonResponse
     {
-        $pages = Page::orderBy('slug')->get(['id', 'slug', 'title', 'updated_at']);
+        $pages = Page::orderBy('slug')->get(['id', 'slug', 'title', 'content', 'updated_at']);
 
         return response()->json(['data' => $pages]);
     }

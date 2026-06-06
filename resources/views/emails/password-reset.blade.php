@@ -58,7 +58,7 @@
             <div class="note">
                 <p>
                     <strong>Il link scade tra 60 minuti.</strong><br>
-                    Se non hai richiesto il reset della password, ignora questa email — il tuo account e al sicuro.
+                    Se non hai richiesto il reset della password, ignora questa email - il tuo account e al sicuro.
                 </p>
             </div>
 

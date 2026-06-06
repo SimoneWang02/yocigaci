@@ -2,23 +2,23 @@
 
 ## Critico
 
-- [x] **Password reset via email** — link "Hai dimenticato la password?" nel login, flusso token → nuova password
-- [ ] **Codici sconto / coupon** — percentuale o importo fisso, con limite di utilizzo e scadenza
+- [x] **Password reset via email** - link "Hai dimenticato la password?" nel login, flusso token → nuova password
+- [ ] **Codici sconto / coupon** - percentuale o importo fisso, con limite di utilizzo e scadenza
 
 ## Importante
 
-- [ ] **Dashboard vendite admin** — fatturato per periodo, ordini per stato, prodotti piu venduti
-- [x] **SEO base** — meta description e og:title/og:image per prodotti e pagine statiche
+- [x] **Dashboard vendite admin** - fatturato per periodo, ordini per stato, prodotti piu venduti
+- [x] **SEO base** - meta description e og:title/og:image per prodotti e pagine statiche
 
 ## Legale (obbligatorio per negozio italiano)
 
-- [x] **Cookie Policy** — pagina `/p/cookie` gia presente nel seeder e linkata nel footer
-- [x] **Checkbox T&C al checkout** — accettazione esplicita termini e condizioni prima del pagamento
+- [x] **Cookie Policy** - pagina `/p/cookie` gia presente nel seeder e linkata nel footer
+- [x] **Checkbox T&C al checkout** - accettazione esplicita termini e condizioni prima del pagamento
 
 ## Utile
 
-- [ ] **Wishlist** — salvataggio prodotti per acquisto futuro, persiste per utenti autenticati
-- [ ] **Prodotti visti di recente** — ultime N schede prodotto visitate, in localStorage
-- [x] **Autocomplete ricerca** — suggerimenti prodotti mentre si digita
-- [ ] **Export ordini CSV** — per contabilita admin
-- [x] **Sitemap XML** — generazione automatica per indicizzazione Google
+- [ ] **Wishlist** - salvataggio prodotti per acquisto futuro, persiste per utenti autenticati
+- [ ] **Prodotti visti di recente** - ultime N schede prodotto visitate, in localStorage
+- [x] **Autocomplete ricerca** - suggerimenti prodotti mentre si digita
+- [ ] **Export ordini CSV** - per contabilita admin
+- [x] **Sitemap XML** - generazione automatica per indicizzazione Google

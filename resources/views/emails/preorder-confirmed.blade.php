@@ -62,7 +62,7 @@
         </p>
 
         <div class="notice">
-            <strong>In attesa di disponibilità</strong> — Spediremo non appena la merce sarà disponibile. Riceverai un'email di avviso.
+            <strong>In attesa di disponibilità</strong> - Spediremo non appena la merce sarà disponibile. Riceverai un'email di avviso.
         </div>
 
         <table class="tbl">
@@ -82,7 +82,7 @@
                         @if(isset($item->product_snapshot['preorder_release_date']))
                             <span class="release-date">{{ \Carbon\Carbon::parse($item->product_snapshot['preorder_release_date'])->format('d/m/Y') }}</span>
                         @else
-                            <span style="color:#9999bb;">—</span>
+                            <span style="color:#9999bb;">-</span>
                         @endif
                     </td>
                     <td class="r">{{ $item->quantity }}</td>

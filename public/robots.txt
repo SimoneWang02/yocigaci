@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://yocigaci.it/sitemap.xml
+Sitemap: https://yocigaci.com/sitemap.xml

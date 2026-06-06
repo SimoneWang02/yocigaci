@@ -49,7 +49,7 @@
     </div>
 
     <div class="body">
-        <p class="title">Ottima notizia — sta arrivando!</p>
+        <p class="title">Ottima notizia - sta arrivando!</p>
         <p class="subtitle">
             Il tuo preordine è arrivato in magazzino e verrà spedito a breve.
         </p>

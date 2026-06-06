@@ -46,6 +46,14 @@ class OrderController extends Controller
         if ($request->type) {
             $query->where('type', $request->type);
         }
+        if ($request->search) {
+            $q = $request->search;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('order_number', 'like', "%{$q}%")
+                    ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%"));
+            });
+        }
 
         return OrderResource::collection($query->paginate(50));
     }

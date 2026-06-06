@@ -661,6 +661,8 @@ function OrderDrawer({ orderId, onClose }) {
 export default function AdminOrders() {
     const [filterStatus, setFilterStatus] = useState("");
     const [search, setSearch] = useState("");
+    const [searchInput, setSearchInput] = useState("");
+    const [page, setPage] = useState(1);
     const [selectedId, setSelectedId] = useState(null);
     const qc = useQueryClient();
 
@@ -670,28 +672,30 @@ export default function AdminOrders() {
         });
     }, []);
 
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setSearch(searchInput);
+            setPage(1);
+        }, 300);
+        return () => clearTimeout(t);
+    }, [searchInput]);
+
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-orders", filterStatus],
+        queryKey: ["admin-orders", filterStatus, search, page],
         queryFn: () =>
             adminGetOrders({
                 ...(filterStatus ? { status: filterStatus } : {}),
+                ...(search ? { search } : {}),
+                page,
             }),
     });
 
-    const filteredOrders = (data?.data ?? []).filter((o) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return (
-            o.order_number?.toLowerCase().includes(q) ||
-            o.user?.name?.toLowerCase().includes(q) ||
-            o.user?.email?.toLowerCase().includes(q)
-        );
-    });
+    const meta = data?.meta;
     const {
         sort,
         sorted: orders,
         onSort,
-    } = useTableSort(filteredOrders, "created_at", "desc");
+    } = useTableSort(data?.data ?? [], "created_at", "desc");
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -701,14 +705,14 @@ export default function AdminOrders() {
                 <div className="flex-1">
                     <Input
                         placeholder="Cerca ordine o cliente..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
                     />
                 </div>
                 <div className="flex-1">
                     <Select
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
+                        onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
                     >
                         <option value="">Tutti gli stati</option>
                         {ALL_STATUSES.map((s) => (
@@ -871,6 +875,35 @@ export default function AdminOrders() {
                             Nessun ordine trovato.
                         </p>
                     )}
+                </div>
+            )}
+
+            {meta && meta.last_page > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-gray-500">
+                        {meta.from}–{meta.to} di {meta.total} ordini
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={page <= 1}
+                            onClick={() => setPage((p) => p - 1)}
+                        >
+                            Precedente
+                        </Button>
+                        <span className="flex items-center px-3 text-sm text-gray-600">
+                            Pagina {meta.current_page} / {meta.last_page}
+                        </span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={page >= meta.last_page}
+                            onClick={() => setPage((p) => p + 1)}
+                        >
+                            Successiva
+                        </Button>
+                    </div>
                 </div>
             )}
 

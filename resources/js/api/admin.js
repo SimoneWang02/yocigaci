@@ -74,5 +74,5 @@ export const adminRefundOrder = (id, { amount, reason } = {}) =>
   api.post(`/admin/orders/${id}/refund`, { amount, reason }).then((r) => r.data)
 
 // Dashboard
-export const adminGetDashboardStats = (period) =>
-  api.get('/admin/dashboard/stats', { params: { period } }).then((r) => r.data)
+export const adminGetDashboardStats = (period, offset = 0) =>
+  api.get('/admin/dashboard/stats', { params: { period, offset } }).then((r) => r.data)

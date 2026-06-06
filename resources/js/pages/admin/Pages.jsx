@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Pencil, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGetPages, adminUpdatePage } from '../../api/admin'
@@ -25,7 +25,25 @@ function getSectionTitle(html) {
 }
 
 const textareaClass =
-    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y'
+    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y overflow-hidden'
+
+function AutoTextarea({ value, onChange }) {
+    const ref = useRef(null)
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        el.style.height = 'auto'
+        el.style.height = el.scrollHeight + 'px'
+    }, [value])
+    return (
+        <textarea
+            ref={ref}
+            value={value}
+            onChange={onChange}
+            className={textareaClass}
+        />
+    )
+}
 
 function EditModal({ page, onClose }) {
     const queryClient = useQueryClient()
@@ -47,7 +65,7 @@ function EditModal({ page, onClose }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h2 className="font-semibold text-gray-900">Modifica pagina</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -64,12 +82,7 @@ function EditModal({ page, onClose }) {
                     {intro && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Intestazione</label>
-                            <textarea
-                                value={intro}
-                                onChange={(e) => setIntro(e.target.value)}
-                                rows={3}
-                                className={textareaClass}
-                            />
+                            <AutoTextarea value={intro} onChange={(e) => setIntro(e.target.value)} />
                         </div>
                     )}
 
@@ -84,12 +97,7 @@ function EditModal({ page, onClose }) {
                                         </span>
                                     )}
                                 </label>
-                                <textarea
-                                    value={section}
-                                    onChange={(e) => updateSection(i, e.target.value)}
-                                    rows={7}
-                                    className={textareaClass}
-                                />
+                                <AutoTextarea value={section} onChange={(e) => updateSection(i, e.target.value)} />
                             </div>
                         ))
                     ) : (
@@ -97,12 +105,7 @@ function EditModal({ page, onClose }) {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Contenuto (HTML)
                             </label>
-                            <textarea
-                                value={intro}
-                                onChange={(e) => setIntro(e.target.value)}
-                                rows={18}
-                                className={textareaClass}
-                            />
+                            <AutoTextarea value={intro} onChange={(e) => setIntro(e.target.value)} />
                         </div>
                     )}
                 </div>
