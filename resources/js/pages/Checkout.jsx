@@ -241,14 +241,48 @@ function AddressForm({
 
 // Bottone di pagamento condiviso tra spedizione e ritiro in negozio.
 function PayButton({ loading }) {
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
     return (
-        <div className="pt-2">
+        <div className="pt-2 space-y-3">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 flex-shrink-0"
+                />
+                <span className="text-xs text-gray-500 leading-relaxed">
+                    Ho letto e accetto i{" "}
+                    <a
+                        href="/p/termini-e-condizioni"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-700 underline hover:text-gray-900"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Termini e Condizioni
+                    </a>{" "}
+                    e l&apos;
+                    <a
+                        href="/p/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-700 underline hover:text-gray-900"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Informativa sulla Privacy
+                    </a>
+                    .
+                </span>
+            </label>
+
             <Button
                 type="submit"
                 variant="primary"
                 size="lg"
                 className="w-full gap-2"
-                disabled={loading}
+                disabled={loading || !termsAccepted}
             >
                 {loading ? (
                     <span className="flex items-center gap-2">
@@ -280,7 +314,7 @@ function PayButton({ loading }) {
                     </>
                 )}
             </Button>
-            <p className="text-center text-xs text-gray-400 mt-2 flex items-center justify-center gap-1">
+            <p className="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
                 <Lock className="w-3 h-3" />
                 Pagamento sicuro con Stripe
             </p>

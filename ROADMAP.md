@@ -12,9 +12,9 @@
 
 ## Legale (obbligatorio per negozio italiano)
 
-- [ ] **Cookie consent banner** — GDPR + Garante Privacy, con accettazione granulare
+- [x] **Cookie Policy** — pagina `/p/cookie` gia presente nel seeder e linkata nel footer
 - [ ] **IVA e fattura** — gestione IVA sugli ordini, generazione ricevuta/fattura PDF scaricabile
-- [ ] **Checkbox T&C al checkout** — accettazione esplicita termini e condizioni prima del pagamento
+- [x] **Checkbox T&C al checkout** — accettazione esplicita termini e condizioni prima del pagamento
 
 ## Utile
 
