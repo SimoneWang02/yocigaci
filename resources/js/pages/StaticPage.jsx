@@ -30,7 +30,7 @@ export default function StaticPage() {
         <div className="max-w-3xl mx-auto px-4 py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-8">{page.title}</h1>
             <div
-                className="prose prose-gray max-w-none text-sm leading-relaxed"
+                className="page-content max-w-none"
                 dangerouslySetInnerHTML={{ __html: page.content }}
             />
         </div>

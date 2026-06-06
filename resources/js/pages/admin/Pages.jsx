@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Pencil, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGetPages, adminUpdatePage } from '../../api/admin'
@@ -6,18 +6,44 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
 
+function parseSections(html) {
+    const idx = html.search(/<h2/)
+    if (idx === -1) return { intro: html, sections: [] }
+    return {
+        intro: html.slice(0, idx).trim(),
+        sections: html.slice(idx).split(/(?=<h2)/).map(s => s.trim()).filter(Boolean),
+    }
+}
+
+function buildContent(intro, sections) {
+    return [intro, ...sections].filter(Boolean).join('\n\n')
+}
+
+function getSectionTitle(html) {
+    const m = html.match(/<h2[^>]*>(.*?)<\/h2>/)
+    return m ? m[1] : ''
+}
+
+const textareaClass =
+    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y'
+
 function EditModal({ page, onClose }) {
     const queryClient = useQueryClient()
     const [title, setTitle] = useState(page.title)
-    const [content, setContent] = useState(page.content ?? '')
+    const parsed = useMemo(() => parseSections(page.content ?? ''), [])
+    const [intro, setIntro] = useState(parsed.intro)
+    const [sections, setSections] = useState(parsed.sections)
 
     const mutation = useMutation({
-        mutationFn: () => adminUpdatePage(page.slug, { title, content }),
+        mutationFn: () => adminUpdatePage(page.slug, { title, content: buildContent(intro, sections) }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-pages'] })
             onClose()
         },
     })
+
+    const updateSection = (i, val) =>
+        setSections(prev => prev.map((s, j) => (j === i ? val : s)))
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -29,22 +55,56 @@ function EditModal({ page, onClose }) {
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Titolo</label>
                         <Input value={title} onChange={(e) => setTitle(e.target.value)} />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Contenuto (HTML)
-                        </label>
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            rows={18}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
-                        />
-                    </div>
+
+                    {intro && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Intestazione</label>
+                            <textarea
+                                value={intro}
+                                onChange={(e) => setIntro(e.target.value)}
+                                rows={3}
+                                className={textareaClass}
+                            />
+                        </div>
+                    )}
+
+                    {sections.length > 0 ? (
+                        sections.map((section, i) => (
+                            <div key={i}>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Sezione {i + 1}
+                                    {getSectionTitle(section) && (
+                                        <span className="ml-1.5 font-normal text-gray-400 text-xs">
+                                            {getSectionTitle(section)}
+                                        </span>
+                                    )}
+                                </label>
+                                <textarea
+                                    value={section}
+                                    onChange={(e) => updateSection(i, e.target.value)}
+                                    rows={7}
+                                    className={textareaClass}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Contenuto (HTML)
+                            </label>
+                            <textarea
+                                value={intro}
+                                onChange={(e) => setIntro(e.target.value)}
+                                rows={18}
+                                className={textareaClass}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-200">

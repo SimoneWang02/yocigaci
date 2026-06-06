@@ -72,3 +72,7 @@ export const adminConfirmPickup = (id) =>
   api.post(`/admin/orders/${id}/confirm-pickup`).then((r) => r.data)
 export const adminRefundOrder = (id, { amount, reason } = {}) =>
   api.post(`/admin/orders/${id}/refund`, { amount, reason }).then((r) => r.data)
+
+// Dashboard
+export const adminGetDashboardStats = (period) =>
+  api.get('/admin/dashboard/stats', { params: { period } }).then((r) => r.data)

@@ -833,12 +833,6 @@ export default function AdminHomepageSections() {
             {/* Carousel banners */}
             <CarouselSection />
 
-            {/* Link CardTrader navbar */}
-            <NavbarSettingsSection />
-
-            {/* Spedizione */}
-            <ShippingSettingsSection />
-
             {/* Sezioni prodotti */}
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-gray-900">
@@ -935,6 +929,14 @@ export default function AdminHomepageSections() {
                     </table>
                 </div>
             )}
+
+            {/* Link CardTrader navbar */}
+            <div className="mt-8">
+                <NavbarSettingsSection />
+            </div>
+
+            {/* Spedizione */}
+            <ShippingSettingsSection />
         </div>
     );
 }
