@@ -655,6 +655,88 @@ function NavbarSettingsSection() {
     );
 }
 
+// ─── Orari di apertura ───────────────────────────────────────────────────────────
+
+const DEFAULT_HOURS = [
+    { day: "Lunedi",    hours: "15:30 - 19:30" },
+    { day: "Martedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Mercoledi", hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Giovedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Venerdi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Sabato",    hours: "11:00 - 19:30" },
+    { day: "Domenica",  hours: "11:00 - 13:00, 15:30 - 19:30" },
+];
+
+function OpeningHoursSection() {
+    const qc = useQueryClient();
+    const [rows, setRows] = useState(DEFAULT_HOURS);
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setRows(data.data?.opening_hours ?? DEFAULT_HOURS);
+        setHydrated(true);
+    }
+
+    const updateHours = (index, value) => {
+        setRows((prev) => prev.map((r, i) => i === index ? { ...r, hours: value } : r));
+    };
+
+    const save = useMutation({
+        mutationFn: () => adminUpdateSettings({ opening_hours: rows }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+            qc.invalidateQueries({ queryKey: ["public-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">Orari di apertura</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Orari visualizzati nel footer del sito
+                </p>
+            </div>
+
+            <div className="space-y-2">
+                {rows.map((row, i) => (
+                    <div key={row.day} className="flex items-center gap-3">
+                        <span className="w-28 shrink-0 text-sm font-medium text-gray-700">{row.day}</span>
+                        <input
+                            type="text"
+                            value={row.hours}
+                            onChange={(e) => updateHours(i, e.target.value)}
+                            className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="es. 10:00 - 13:00, 15:00 - 19:00"
+                        />
+                    </div>
+                ))}
+            </div>
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending}
+                >
+                    {save.isPending ? "Salvataggio..." : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">Errore nel salvataggio.</span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Spedizione ──────────────────────────────────────────────────────────────────
 
 function ShippingSettingsSection() {
@@ -934,6 +1016,9 @@ export default function AdminHomepageSections() {
             <div className="mt-8">
                 <NavbarSettingsSection />
             </div>
+
+            {/* Orari di apertura */}
+            <OpeningHoursSection />
 
             {/* Spedizione */}
             <ShippingSettingsSection />

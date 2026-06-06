@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getSettings } from "../../api/products";
 
 function InstagramIcon() {
     return (
@@ -18,17 +20,25 @@ function InstagramIcon() {
     );
 }
 
-const HOURS = [
-    { day: "Lunedì",    hours: "15:30 – 19:30" },
-    { day: "Martedì",   hours: "11:00 – 13:00, 15:30 – 19:30" },
-    { day: "Mercoledì", hours: "11:00 – 13:00, 15:30 – 19:30" },
-    { day: "Giovedì",   hours: "11:00 – 13:00, 15:30 – 19:30" },
-    { day: "Venerdì",   hours: "11:00 – 13:00, 15:30 – 19:30" },
-    { day: "Sabato",    hours: "11:00 – 19:30" },
-    { day: "Domenica",  hours: "11:00 – 13:00, 15:30 – 19:30" },
+const DEFAULT_HOURS = [
+    { day: "Lunedi",    hours: "15:30 - 19:30" },
+    { day: "Martedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Mercoledi", hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Giovedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Venerdi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Sabato",    hours: "11:00 - 19:30" },
+    { day: "Domenica",  hours: "11:00 - 13:00, 15:30 - 19:30" },
 ];
 
 export function Footer() {
+    const { data: settings } = useQuery({
+        queryKey: ["public-settings"],
+        queryFn: getSettings,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const hours = settings?.data?.opening_hours ?? DEFAULT_HOURS;
+
     return (
         <footer className="bg-gray-900 text-gray-400 mt-auto">
             {/* Orari + Dove siamo */}
@@ -40,7 +50,7 @@ export function Footer() {
                         <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Orari</div>
                         <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">Quando siamo aperti</h2>
                         <ul className="mt-6 divide-y divide-gray-700 rounded-2xl bg-gray-800 ring-1 ring-gray-700">
-                            {HOURS.map(({ day, hours }) => (
+                            {hours.map(({ day, hours }) => (
                                 <li key={day} className="flex items-center justify-between px-5 py-3 text-sm">
                                     <span className="font-medium text-gray-200">{day}</span>
                                     <span className="text-gray-400">{hours}</span>
