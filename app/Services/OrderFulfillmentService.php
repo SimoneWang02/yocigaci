@@ -57,6 +57,13 @@ class OrderFulfillmentService
         $notes = $session->metadata->notes ?? null;
         $userId = ($session->metadata->user_id ?? null) ?: null;
 
+        // Stripe raccoglie sempre l'email nella sua pagina di pagamento: la recuperiamo
+        // qui per conservarla sull'ordine e poter inviare la conferma anche agli ospiti.
+        $stripeEmail = $session->customer_details->email ?? $session->customer_email ?? null;
+        if ($stripeEmail && is_array($shippingAddress) && empty($shippingAddress['email'])) {
+            $shippingAddress['email'] = $stripeEmail;
+        }
+
         // A differenza di validateCartItems() (pre-pagamento), qui il cliente ha gia'
         // pagato: prodotti disattivati o stock insufficiente NON devono mai bloccare
         // la creazione dell'ordine. Eventuali scoperti restano visibili come stock negativo.

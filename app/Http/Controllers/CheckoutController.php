@@ -20,6 +20,11 @@ class CheckoutController extends Controller
         $validated = $request->validated();
         $cartItems = $this->fulfillment->validateCartItems($validated['items']);
 
+        // La rotta e' pubblica (checkout consentito anche agli ospiti): senza il middleware
+        // auth:sanctum il token Bearer non viene interpretato, quindi risolviamo l'utente
+        // esplicitamente dal guard sanctum per collegare ordine ed email se e' loggato.
+        $user = $request->user('sanctum');
+
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
         $shipping = $subtotal >= OrderFulfillmentService::SHIPPING_FREE_THRESHOLD ? 0 : OrderFulfillmentService::SHIPPING_COST;
 
@@ -50,7 +55,7 @@ class CheckoutController extends Controller
 
         $appUrl = config('app.url');
 
-        $session = StripeSession::create([
+        $sessionParams = [
             'mode' => 'payment',
             'payment_method_types' => ['card', 'paypal'],
             'line_items' => $lineItems,
@@ -63,9 +68,15 @@ class CheckoutController extends Controller
                 ),
                 'shipping_address' => json_encode($validated['shipping_address']),
                 'notes' => $validated['notes'] ?? null,
-                'user_id' => $request->user()?->id,
+                'user_id' => $user?->id,
             ],
-        ]);
+        ];
+
+        if ($email = $user?->email) {
+            $sessionParams['customer_email'] = $email;
+        }
+
+        $session = StripeSession::create($sessionParams);
 
         return response()->json(['url' => $session->url]);
     }
