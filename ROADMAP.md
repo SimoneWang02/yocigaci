@@ -22,4 +22,4 @@
 - [ ] **Prodotti visti di recente** — ultime N schede prodotto visitate, in localStorage
 - [x] **Autocomplete ricerca** — suggerimenti prodotti mentre si digita
 - [ ] **Export ordini CSV** — per contabilita admin
-- [ ] **Sitemap XML** — generazione automatica per indicizzazione Google
+- [x] **Sitemap XML** — generazione automatica per indicizzazione Google
