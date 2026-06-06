@@ -96,8 +96,10 @@ function KpiCard({ icon: Icon, label, value, deltaValue, color = "indigo" }) {
             </div>
             <div className="min-w-0">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
-                <p className="text-2xl font-bold text-gray-900 leading-tight">{value}</p>
-                <Delta value={deltaValue} />
+                <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold text-gray-900 leading-tight">{value}</p>
+                    <Delta value={deltaValue} />
+                </div>
             </div>
         </div>
     );
