@@ -64,6 +64,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);
     Route::patch('/orders/{order}/tracking', [App\Http\Controllers\Admin\OrderController::class, 'addTracking']);
+    Route::post('/orders/{order}/refund', [App\Http\Controllers\Admin\OrderController::class, 'refund']);
     Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
     Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);
 });

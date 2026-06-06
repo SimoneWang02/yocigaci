@@ -23,6 +23,13 @@ class OrderResource extends JsonResource
             'stripe_payment_status' => $this->stripe_payment_status,
             'shipped_at' => $this->shipped_at?->toIso8601String(),
             'tracking_code' => $this->tracking_code,
+            'refunded_amount' => (float) $this->refunded_amount,
+            'refunded_at' => $this->refunded_at?->toIso8601String(),
+            'refundable_amount' => $this->refundableAmount(),
+            // L'ordine e' rimborsabile se ha un pagamento Stripe riuscito e c'e' ancora residuo.
+            'is_refundable' => $this->stripe_payment_status === 'succeeded'
+                && (bool) $this->stripe_payment_intent_id
+                && $this->refundableAmount() > 0,
             'created_at' => $this->created_at->toIso8601String(),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'user' => $this->whenLoaded('user', fn () => [

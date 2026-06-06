@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\OrderFulfillmentService;
+use App\Services\RefundService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session as StripeSession;
@@ -13,8 +14,10 @@ use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
-    public function __construct(private readonly OrderFulfillmentService $fulfillment)
-    {
+    public function __construct(
+        private readonly OrderFulfillmentService $fulfillment,
+        private readonly RefundService $refunds,
+    ) {
     }
 
     public function handle(Request $request): JsonResponse
@@ -67,9 +70,19 @@ class StripeWebhookController extends Controller
     private function handleChargeRefunded(Event $event): void
     {
         $charge = $event->data->object;
-        $intentId = $charge->payment_intent;
-        $order = Order::where('stripe_payment_intent_id', $intentId)->first();
+        $order = Order::where('stripe_payment_intent_id', $charge->payment_intent)->first();
 
-        $order?->update(['status' => 'refunded']);
+        if (! $order) {
+            return;
+        }
+
+        // amount_refunded e' cumulativo (in centesimi); refunded e' true solo a rimborso
+        // totale. Funziona sia per i rimborsi emessi dal nostro admin sia per quelli
+        // fatti direttamente dalla dashboard Stripe; applyRefund e' idempotente.
+        $this->refunds->applyRefund(
+            $order,
+            $charge->amount_refunded / 100,
+            (bool) $charge->refunded,
+        );
     }
 }

@@ -7,13 +7,18 @@ use App\Http\Resources\OrderResource;
 use App\Mail\OrderShipped;
 use App\Mail\PreorderReady;
 use App\Models\Order;
-use Illuminate\Http\JsonResponse;
+use App\Services\RefundService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Exception\ApiErrorException;
 
 class OrderController extends Controller
 {
+    public function __construct(private readonly RefundService $refunds)
+    {
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Order::with(['user'])->orderByDesc('created_at');
@@ -35,8 +40,10 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order): OrderResource
     {
+        // Gli stati di rimborso non sono impostabili a mano: derivano sempre da un
+        // rimborso Stripe reale (endpoint refund o webhook), cosi' non mentono mai.
         $request->validate([
-            'status' => ['required', 'in:pending,paid,processing,shipped,delivered,cancelled,refunded,preorder_confirmed,preorder_ready'],
+            'status' => ['required', 'in:pending,paid,processing,shipped,delivered,cancelled,preorder_confirmed,preorder_ready'],
         ]);
 
         $order->update(['status' => $request->status]);
@@ -69,5 +76,35 @@ class OrderController extends Controller
         }
 
         return new OrderResource($order->load(['items', 'user']));
+    }
+
+    /**
+     * Emette un rimborso Stripe (totale o parziale) per l'ordine.
+     *
+     * L'importo e' opzionale: se assente rimborsa tutto il residuo. Lo stato
+     * dell'ordine passa a "refunded" solo a rimborso totale completato.
+     */
+    public function refund(Request $request, Order $order): OrderResource
+    {
+        $validated = $request->validate([
+            'amount' => ['nullable', 'numeric', 'min:0.01', 'max:' . $order->refundableAmount()],
+            'reason' => ['nullable', 'in:' . implode(',', RefundService::STRIPE_REASONS)],
+        ]);
+
+        try {
+            $this->refunds->issueRefund(
+                $order,
+                $validated['amount'] ?? null,
+                $validated['reason'] ?? null,
+            );
+        } catch (\RuntimeException $e) {
+            abort(422, $e->getMessage());
+        } catch (ApiErrorException $e) {
+            // Errore lato Stripe (saldo insufficiente, charge gia' rimborsato, ecc.):
+            // lo restituiamo leggibile all'admin invece di un 500 opaco.
+            abort(422, $e->getMessage());
+        }
+
+        return new OrderResource($order->fresh()->load(['items', 'user']));
     }
 }

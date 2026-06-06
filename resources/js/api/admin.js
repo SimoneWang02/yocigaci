@@ -65,3 +65,5 @@ export const adminUpdateOrderStatus = (id, status) =>
   api.patch(`/admin/orders/${id}/status`, { status }).then((r) => r.data)
 export const adminAddTracking = (id, tracking_code) =>
   api.patch(`/admin/orders/${id}/tracking`, { tracking_code }).then((r) => r.data)
+export const adminRefundOrder = (id, { amount, reason } = {}) =>
+  api.post(`/admin/orders/${id}/refund`, { amount, reason }).then((r) => r.data)
