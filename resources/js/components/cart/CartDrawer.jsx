@@ -1,14 +1,24 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { X, Image as ImageIcon, Trash2, ShoppingCart } from 'lucide-react'
 import { useCartStore } from '../../store/cartStore'
+import { getSettings } from '../../api/products'
 import { Button } from '../ui/Button'
 
-const SHIPPING_THRESHOLD = 60
+// Fallback finche' le impostazioni admin non sono caricate.
+const DEFAULT_SHIPPING_THRESHOLD = 250
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity } = useCartStore()
+  const { data: settingsData } = useQuery({
+    queryKey: ['public-settings'],
+    queryFn: getSettings,
+  })
+  const shippingThreshold = Number(
+    settingsData?.data?.shipping_free_threshold ?? DEFAULT_SHIPPING_THRESHOLD,
+  )
   const total = items.reduce((s, i) => s + i.price * i.quantity, 0)
-  const toFreeShipping = Math.max(0, SHIPPING_THRESHOLD - total)
+  const toFreeShipping = Math.max(0, shippingThreshold - total)
 
   return (
     <>

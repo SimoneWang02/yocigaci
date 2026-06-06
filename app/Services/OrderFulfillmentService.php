@@ -6,6 +6,7 @@ use App\Mail\OrderConfirmed;
 use App\Mail\PreorderConfirmed;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,33 @@ use Stripe\Checkout\Session as StripeSession;
 
 class OrderFulfillmentService
 {
-    public const SHIPPING_FREE_THRESHOLD = 60.00;
-    public const SHIPPING_COST = 5.90;
+    // Valori di default usati quando l'admin non ha ancora configurato la spedizione.
+    public const DEFAULT_SHIPPING_COST = 15.90;
+    public const DEFAULT_SHIPPING_FREE_THRESHOLD = 250.00;
+
+    /**
+     * Costo di spedizione configurato dall'admin (Setting), con fallback al default.
+     */
+    public static function shippingCost(): float
+    {
+        return (float) Setting::getValue('shipping_cost', self::DEFAULT_SHIPPING_COST);
+    }
+
+    /**
+     * Soglia di subtotale oltre la quale la spedizione e' gratuita.
+     */
+    public static function shippingFreeThreshold(): float
+    {
+        return (float) Setting::getValue('shipping_free_threshold', self::DEFAULT_SHIPPING_FREE_THRESHOLD);
+    }
+
+    /**
+     * Calcola la spedizione per un dato subtotale: gratuita sopra la soglia.
+     */
+    public static function shippingFor(float $subtotal): float
+    {
+        return $subtotal >= self::shippingFreeThreshold() ? 0.0 : self::shippingCost();
+    }
 
     /**
      * Crea l'ordine a partire da una sessione Stripe Checkout pagata.
@@ -56,6 +82,7 @@ class OrderFulfillmentService
         $shippingAddress = json_decode($session->metadata->shipping_address ?? 'null', true);
         $notes = $session->metadata->notes ?? null;
         $userId = ($session->metadata->user_id ?? null) ?: null;
+        $deliveryMethod = $session->metadata->delivery_method ?? 'shipping';
 
         // Stripe raccoglie sempre l'email nella sua pagina di pagamento: la recuperiamo
         // qui per conservarla sull'ordine e poter inviare la conferma anche agli ospiti.
@@ -70,16 +97,18 @@ class OrderFulfillmentService
         $cartItems = $this->resolveItemsForFulfillment($rawItems);
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
-        $shipping = $subtotal >= self::SHIPPING_FREE_THRESHOLD ? 0 : self::SHIPPING_COST;
+        // Il ritiro in negozio non ha costi di spedizione.
+        $shipping = $deliveryMethod === 'pickup' ? 0.0 : self::shippingFor($subtotal);
         $total = $subtotal + $shipping;
         $hasPreorder = collect($cartItems)->contains(fn ($i) => $i['is_preorder']);
 
         try {
-            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $notes, $subtotal, $shipping, $total, $hasPreorder, $paymentIntentId, $userId) {
+            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $notes, $subtotal, $shipping, $total, $hasPreorder, $paymentIntentId, $userId) {
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => $hasPreorder ? 'preorder_confirmed' : 'paid',
                     'type' => $hasPreorder ? 'preorder' : 'standard',
+                    'delivery_method' => $deliveryMethod,
                     'subtotal' => $subtotal,
                     'shipping_cost' => $shipping,
                     'total' => $total,

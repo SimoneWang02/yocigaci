@@ -25,8 +25,11 @@ class CheckoutController extends Controller
         // esplicitamente dal guard sanctum per collegare ordine ed email se e' loggato.
         $user = $request->user('sanctum');
 
+        $deliveryMethod = $validated['delivery_method'];
+
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
-        $shipping = $subtotal >= OrderFulfillmentService::SHIPPING_FREE_THRESHOLD ? 0 : OrderFulfillmentService::SHIPPING_COST;
+        // Il ritiro in negozio non ha costi di spedizione.
+        $shipping = $deliveryMethod === 'pickup' ? 0.0 : OrderFulfillmentService::shippingFor($subtotal);
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -67,6 +70,7 @@ class CheckoutController extends Controller
                     collect($cartItems)->map(fn ($i) => ['product_id' => $i['id'], 'quantity' => $i['quantity']])->toArray()
                 ),
                 'shipping_address' => json_encode($validated['shipping_address']),
+                'delivery_method' => $deliveryMethod,
                 'notes' => $validated['notes'] ?? null,
                 'user_id' => $user?->id,
             ],

@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { PageSpinner } from '../../components/ui/Spinner'
-import { X, Package, User, MapPin, Truck, Hash, RefreshCw } from 'lucide-react'
+import { X, Package, User, MapPin, Truck, Store, Hash, RefreshCw } from 'lucide-react'
 import { useTableSort } from '../../hooks/useTableSort'
 import { SortTh } from '../../components/ui/SortTh'
 
@@ -148,19 +148,30 @@ function OrderDrawer({ orderId, onClose }) {
                 </div>
               )}
 
-              {/* Shipping address */}
+              {/* Shipping address / pickup */}
               {order.shipping_address && (
-                <div>
-                  <SectionHeader icon={MapPin} title="Indirizzo di spedizione" />
-                  <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
-                    <p className="font-semibold text-gray-800">{order.shipping_address.full_name}</p>
-                    <p>{order.shipping_address.address_line1}</p>
-                    <p>
-                      {order.shipping_address.postal_code} {order.shipping_address.city}
-                      {order.shipping_address.province && ` (${order.shipping_address.province})`}
-                    </p>
+                order.delivery_method === 'pickup' ? (
+                  <div>
+                    <SectionHeader icon={Store} title="Ritiro in negozio" />
+                    <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
+                      <p className="font-semibold text-gray-800">{order.shipping_address.full_name}</p>
+                      {order.shipping_address.phone && <p>{order.shipping_address.phone}</p>}
+                      <p className="text-gray-400">Ritiro presso il negozio</p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div>
+                    <SectionHeader icon={MapPin} title="Indirizzo di spedizione" />
+                    <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
+                      <p className="font-semibold text-gray-800">{order.shipping_address.full_name}</p>
+                      <p>{order.shipping_address.address_line1}</p>
+                      <p>
+                        {order.shipping_address.postal_code} {order.shipping_address.city}
+                        {order.shipping_address.province && ` (${order.shipping_address.province})`}
+                      </p>
+                    </div>
+                  </div>
+                )
               )}
 
               {/* Tracking */}

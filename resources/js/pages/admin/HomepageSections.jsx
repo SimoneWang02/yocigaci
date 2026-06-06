@@ -655,6 +655,96 @@ function NavbarSettingsSection() {
     );
 }
 
+// ─── Spedizione ──────────────────────────────────────────────────────────────────
+
+function ShippingSettingsSection() {
+    const qc = useQueryClient();
+    const [cost, setCost] = useState("");
+    const [threshold, setThreshold] = useState("");
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setCost(String(data.data?.shipping_cost ?? ""));
+        setThreshold(String(data.data?.shipping_free_threshold ?? ""));
+        setHydrated(true);
+    }
+
+    const valid =
+        cost !== "" &&
+        threshold !== "" &&
+        Number(cost) >= 0 &&
+        Number(threshold) >= 0;
+
+    const save = useMutation({
+        mutationFn: () =>
+            adminUpdateSettings({
+                shipping_cost: Number(cost),
+                shipping_free_threshold: Number(threshold),
+            }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+            qc.invalidateQueries({ queryKey: ["public-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Spedizione
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Costo di spedizione e soglia oltre la quale diventa gratuita
+                </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                    label="Costo spedizione (€)"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value)}
+                    placeholder="15.90"
+                />
+                <Input
+                    label="Spedizione gratuita oltre (€)"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={threshold}
+                    onChange={(e) => setThreshold(e.target.value)}
+                    placeholder="250"
+                />
+            </div>
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending || !valid}
+                >
+                    {save.isPending ? "Salvataggio…" : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function AdminHomepageSections() {
@@ -745,6 +835,9 @@ export default function AdminHomepageSections() {
 
             {/* Link CardTrader navbar */}
             <NavbarSettingsSection />
+
+            {/* Spedizione */}
+            <ShippingSettingsSection />
 
             {/* Sezioni prodotti */}
             <div className="flex items-center justify-between mb-4">

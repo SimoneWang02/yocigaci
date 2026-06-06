@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getOrder } from '../../api/orders'
 import { Badge } from '../../components/ui/Badge'
 import { PageSpinner } from '../../components/ui/Spinner'
-import { ArrowLeft, Hash, Package, MapPin, Truck, Receipt } from 'lucide-react'
+import { ArrowLeft, Hash, Package, MapPin, Truck, Store, Receipt } from 'lucide-react'
 
 const STATUS_LABELS = {
   pending: { label: 'In attesa', variant: 'default' },
@@ -42,6 +42,7 @@ export default function OrderDetail() {
 
   const status = STATUS_LABELS[order.status] ?? { label: order.status, variant: 'default' }
   const addr = order.shipping_address
+  const isPickup = order.delivery_method === 'pickup'
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -131,8 +132,8 @@ export default function OrderDetail() {
                 <span>€ {Number(order.subtotal).toFixed(2).replace('.', ',')}</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Spedizione</span>
-                <span>{Number(order.shipping_cost) === 0 ? 'Gratuita' : `€ ${Number(order.shipping_cost).toFixed(2).replace('.', ',')}`}</span>
+                <span>{isPickup ? 'Ritiro in negozio' : 'Spedizione'}</span>
+                <span>{Number(order.shipping_cost) === 0 ? (isPickup ? 'Gratuito' : 'Gratuita') : `€ ${Number(order.shipping_cost).toFixed(2).replace('.', ',')}`}</span>
               </div>
               <div className="flex justify-between items-center font-bold text-gray-900 text-base pt-2 mt-1 border-t border-gray-200">
                 <span>Totale</span>
@@ -141,17 +142,28 @@ export default function OrderDetail() {
             </div>
           </div>
 
-          {/* Shipping address */}
+          {/* Shipping address / pickup */}
           {addr && (
-            <div>
-              <SectionHeader icon={MapPin} title="Indirizzo di spedizione" />
-              <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
-                <p className="font-semibold text-gray-800">{addr.full_name}</p>
-                <p>{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ''}</p>
-                <p>{addr.postal_code} {addr.city}{addr.province ? ` (${addr.province})` : ''}</p>
-                <p>{addr.country}</p>
+            isPickup ? (
+              <div>
+                <SectionHeader icon={Store} title="Ritiro in negozio" />
+                <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
+                  <p className="font-semibold text-gray-800">{addr.full_name}</p>
+                  {addr.phone && <p>{addr.phone}</p>}
+                  <p className="text-gray-400">Ritiro presso il negozio</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <SectionHeader icon={MapPin} title="Indirizzo di spedizione" />
+                <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-600 space-y-0.5">
+                  <p className="font-semibold text-gray-800">{addr.full_name}</p>
+                  <p>{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ''}</p>
+                  <p>{addr.postal_code} {addr.city}{addr.province ? ` (${addr.province})` : ''}</p>
+                  <p>{addr.country}</p>
+                </div>
+              </div>
+            )
           )}
 
         </div>
