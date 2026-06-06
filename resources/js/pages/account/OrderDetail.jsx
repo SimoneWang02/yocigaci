@@ -6,15 +6,15 @@ import { PageSpinner } from '../../components/ui/Spinner'
 import { ArrowLeft, Hash, Package, MapPin, Truck, Store, Receipt } from 'lucide-react'
 
 const STATUS_LABELS = {
-  pending: { label: 'In attesa', variant: 'default' },
+  pending: { label: 'In Attesa', variant: 'default' },
   paid: { label: 'Pagato', variant: 'success' },
-  processing: { label: 'In preparazione', variant: 'info' },
+  processing: { label: 'In Preparazione', variant: 'info' },
   shipped: { label: 'Spedito', variant: 'success' },
   delivered: { label: 'Consegnato', variant: 'success' },
   cancelled: { label: 'Annullato', variant: 'sold_out' },
   refunded: { label: 'Rimborsato', variant: 'default' },
-  preorder_confirmed: { label: 'Preordine confermato', variant: 'preorder' },
-  preorder_ready: { label: 'Pronto per la spedizione', variant: 'info' },
+  preorder_confirmed: { label: 'Preordine Confermato', variant: 'preorder' },
+  preorder_ready: { label: 'Pronto per la Spedizione', variant: 'info' },
 }
 
 function SectionHeader({ icon: Icon, title }) {

@@ -4,4 +4,8 @@
 
 - migliorare: http://localhost/account/ordini
 
+- rimborsi?
+
+- ritiro in negozio?
+
 ## BUG
