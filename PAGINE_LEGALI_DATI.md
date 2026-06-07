@@ -72,27 +72,28 @@ Questo file contiene tutto il necessario per generare e salvare le pagine legali
 
 - **Ragione sociale / Nome e cognome del titolare\*** : Yocigaci Srl
 - **Forma giuridica** : Srl
-- **P.IVA\*** : `[DA COMPILARE]`
+- **P.IVA\*** : 03118860356
 - **Codice fiscale** (se diverso da P.IVA) : 03118860356
-- **Indirizzo sede legale\*** (via, CAP, città, provincia) : `[DA COMPILARE]`
-- **Email di contatto\*** : `[DA COMPILARE]`
-- **PEC** (obbligatoria se hai partita IVA) : `[DA COMPILARE]`
-- **Numero di telefono / WhatsApp** : `[DA COMPILARE]`
-- **Numero REA** (se iscritto alla Camera di Commercio) : `[DA COMPILARE]`
+- **Indirizzo sede legale\*** (via, CAP, città, provincia) : Via Zanichelli, 13 - 42015 Correggio (RE)
+- **Email di contatto clienti** (assistenza, resi, ordini) : assistenza.yocigaci@gmail.com
+- **Email legale / Titolare del trattamento GDPR** (da usare in Privacy Policy e intestazione T&C) : yocigacisrl@pec.it
+- **PEC** (obbligatoria se hai partita IVA) : yocigacisrl@pec.it
+- **Numero di telefono / WhatsApp** : 3713452156
+- **Numero REA** (se iscritto alla Camera di Commercio) : MO - 453439
 
 ---
 
 ### Recapiti
 
-- **Orari di assistenza** : `[DA COMPILARE]` - risposta garantita entro 24h nei giorni lavorativi
+- **Orari di assistenza** : Orari lavorativi - risposta garantita entro 24h nei giorni lavorativi
 - **Canali di contatto disponibili** : Email + WhatsApp
-- **Tempo medio di risposta** : entro 24 ore (giorni lavorativi)
+- **Tempo medio di risposta** : entro 48 ore (giorni lavorativi)
 
 ---
 
 ### Spedizioni
 
-- **Corrieri utilizzati\*** : `[DA DEFINIRE]`
+- **Corrieri utilizzati\*** : DHL
 - **Zone di spedizione\*** : solo Italia
 - **Tempi di consegna stimati\*** : indicati al momento del checkout (dipendono dal corriere e dalla destinazione)
 - **Costi di spedizione\*** : calcolati dinamicamente al checkout, impostati dall'admin nel pannello di controllo
@@ -108,7 +109,7 @@ Questo file contiene tutto il necessario per generare e salvare le pagine legali
 - **Prodotti aperti (bustine, display) sono rimborsabili?\*** : NO - prodotto perde integrità, escluso per legge (art. 59 lett. e D.Lgs. 206/2005)
 - **Condizioni per accettare un reso** : prodotto integro, sigillato, nella confezione originale
 - **Finestra temporale per richiedere un reso\*** : 14 giorni dalla data di consegna
-- **Come avviare un reso** : email a `[DA COMPILARE]` con numero ordine, descrizione prodotto, motivo e foto
+- **Come avviare un reso** : email a assistenza.yocigaci@gmail.com con numero ordine, descrizione prodotto, motivo e foto
 - **Chi paga le spese di spedizione del reso?\*** : il cliente - salvo prodotto difettoso o errore di spedizione (in quel caso a carico di Yocigaci)
 - **Tempi di rimborso\*** : entro 14 giorni dalla ricezione del prodotto restituito
 - **Metodo di rimborso** : stesso metodo di pagamento usato per l'acquisto (Stripe)
@@ -122,7 +123,7 @@ _(Per legge il cliente ha 14 giorni per recedere senza motivazione - art. 52 D.L
 
 - **I prodotti sigillati una volta aperti sono esclusi dal recesso?\*** : sì - art. 59, comma 1, lett. e D.Lgs. 206/2005
 - **Chi paga le spese di restituzione in caso di recesso?\*** : il cliente
-- **Indirizzo a cui restituire i prodotti\*** : `[DA COMPILARE]` - coincide con la sede legale
+- **Indirizzo a cui restituire i prodotti\*** : Corso Fanti, 99 - 41012 Carpi (MO)
 - **Vuoi allegare il modulo di recesso standard EU?** : sì - già incluso nella pagina `/p/diritto-di-recesso`
 
 ---
@@ -132,7 +133,7 @@ _(Per legge il cliente ha 14 giorni per recedere senza motivazione - art. 52 D.L
 - **Prezzi esposti sul sito sono IVA inclusa o esclusa?\*** : IVA inclusa
 - **Il sito vende solo a privati (B2C) o anche ad aziende (B2B)?** : solo B2C
 - **Età minima per acquistare** : 18 anni
-- **Foro competente in caso di controversia\*** : `[DA COMPILARE]` - tipicamente la città della sede legale; per i consumatori vale comunque il foro del loro domicilio (art. 66-bis D.Lgs. 206/2005)
+- **Foro competente in caso di controversia\*** : Correggio (RE) - tipicamente la città della sede legale; per i consumatori vale comunque il foro del loro domicilio (art. 66-bis D.Lgs. 206/2005)
 - **Vuoi includere una clausola di riserva variazione prezzi?** : sì - già inclusa (prezzi TCG fluttuanti)
 
 ---

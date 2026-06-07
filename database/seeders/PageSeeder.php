@@ -22,11 +22,11 @@ class PageSeeder extends Seeder
 <p>
   <strong>Yocigaci Srl</strong><br>
   Codice Fiscale: 03118860356<br>
-  P.IVA: <strong>[DA COMPILARE]</strong><br>
-  Sede legale: <strong>[DA COMPILARE]</strong><br>
-  REA: <strong>[DA COMPILARE]</strong><br>
-  Email: <strong>[DA COMPILARE]</strong><br>
-  PEC: <strong>[DA COMPILARE]</strong>
+  P.IVA: <strong>03118860356</strong><br>
+  Sede legale: <strong>Via Zanichelli, 13 - 42015 Correggio (RE)</strong><br>
+  REA: <strong>MO - 453439</strong><br>
+  Email: <strong>assistenza.yocigaci@gmail.com</strong><br>
+  PEC: <strong>yocigacisrl@pec.it</strong>
 </p>
 <p>Non è stato nominato un Responsabile della Protezione dei Dati (DPO), non ricorrendone i presupposti ai sensi dell'art. 37 GDPR.</p>
 
@@ -45,7 +45,7 @@ class PageSeeder extends Seeder
 <p>Le email di conferma ordine, spedizione e rimborso vengono inviate tramite <strong>Brevo SAS</strong> (Francia, UE), che opera come responsabile del trattamento. L'indirizzo email non viene utilizzato per finalità di marketing senza consenso esplicito.</p>
 
 <h3>2.5 Dati di navigazione</h3>
-<p>I server registrano automaticamente log tecnici (indirizzo IP, browser, pagine visitate) per finalità di sicurezza e diagnostica. Tali dati vengono conservati per un massimo di 30 giorni e non vengono incrociati con dati identificativi.</p>
+<p>I server registrano automaticamente log tecnici (indirizzo IP, browser, pagine visitate) per finalità di sicurezza e diagnostica. La base giuridica è il legittimo interesse del titolare ai sensi dell'art. 6.1.f GDPR. Tali dati vengono conservati per un massimo di 30 giorni e non vengono incrociati con dati identificativi.</p>
 
 <h2>3. Hosting</h2>
 <p>Il sito è ospitato su server di <strong>Hetzner Online GmbH</strong> (Germania, UE). Tutti i dati personali sono trattati all'interno dell'Unione Europea.</p>
@@ -75,7 +75,7 @@ class PageSeeder extends Seeder
   <li>revocare il consenso in qualsiasi momento, senza pregiudicare la liceità del trattamento anteriore alla revoca</li>
   <li>proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it)</li>
 </ul>
-<p>Per esercitare i propri diritti scrivere a: <strong>[DA COMPILARE]</strong></p>
+<p>Per esercitare i propri diritti scrivere a: <strong>yocigacisrl@pec.it</strong></p>
 HTML,
             ],
 
@@ -91,10 +91,10 @@ HTML,
 <p>
   <strong>Yocigaci Srl</strong><br>
   Codice Fiscale: 03118860356<br>
-  P.IVA: <strong>[DA COMPILARE]</strong><br>
-  Sede legale: <strong>[DA COMPILARE]</strong><br>
-  Email: <strong>[DA COMPILARE]</strong><br>
-  PEC: <strong>[DA COMPILARE]</strong>
+  P.IVA: <strong>03118860356</strong><br>
+  Sede legale: <strong>Via Zanichelli, 13 - 42015 Correggio (RE)</strong><br>
+  Email: <strong>assistenza.yocigaci@gmail.com</strong><br>
+  PEC: <strong>yocigacisrl@pec.it</strong>
 </p>
 
 <h2>2. Oggetto e accettazione</h2>
@@ -130,7 +130,7 @@ HTML,
 <p>Yocigaci Srl non è responsabile per danni indiretti, perdite di profitto o interruzioni del servizio derivanti dall'utilizzo del sito, salvo i casi di dolo o colpa grave. La responsabilità massima di Yocigaci Srl è in ogni caso limitata al valore dell'ordine in oggetto.</p>
 
 <h2>12. Risoluzione delle controversie</h2>
-<p>Per qualsiasi controversia relativa a ordini effettuati su yocigaci.com è competente il giudice del luogo di residenza o domicilio del consumatore, ai sensi dell'art. 66-bis D.Lgs. 206/2005. In via alternativa, le controversie possono essere risolte tramite la piattaforma ODR della Commissione Europea all'indirizzo <strong>ec.europa.eu/consumers/odr</strong>.</p>
+<p>Per qualsiasi controversia relativa a ordini effettuati su yocigaci.com è competente il giudice del luogo di residenza o domicilio del consumatore, ai sensi dell'art. 66-bis D.Lgs. 206/2005. In via alternativa, le controversie possono essere risolte tramite la piattaforma ODR della Commissione Europea all'indirizzo <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
 <p>Si applica la legge italiana.</p>
 HTML,
             ],
@@ -154,7 +154,7 @@ HTML,
 </ul>
 
 <h2>3. Come avviare un reso</h2>
-<p>Per avviare una richiesta di reso inviare una email a <strong>[DA COMPILARE]</strong> con:</p>
+<p>Per avviare una richiesta di reso inviare una email a <strong>assistenza.yocigaci@gmail.com</strong> con:</p>
 <ul>
   <li>Numero dell'ordine</li>
   <li>Descrizione del prodotto da restituire</li>
@@ -167,16 +167,17 @@ HTML,
 <p>Le spese di spedizione per la restituzione del prodotto sono a carico del cliente, salvo il caso in cui il reso sia dovuto a un nostro errore (prodotto difettoso, prodotto errato rispetto all'ordine). In tal caso le spese di restituzione sono a carico di Yocigaci Srl.</p>
 
 <h2>5. Rimborso</h2>
-<p>Una volta ricevuto e verificato il prodotto restituito, procederemo al rimborso entro <strong>14 giorni</strong>. Il rimborso viene effettuato tramite lo stesso metodo di pagamento utilizzato per l'acquisto (es. stessa carta o conto PayPal/Stripe).</p>
+<p>Una volta ricevuto e verificato il prodotto restituito, procederemo al rimborso entro <strong>14 giorni</strong>. Il rimborso viene effettuato tramite lo stesso metodo di pagamento utilizzato per l'acquisto (stessa carta tramite Stripe).</p>
 
 <h2>6. Prodotto difettoso o errato</h2>
 <p>Se hai ricevuto un prodotto con difetti di produzione o un prodotto diverso da quello ordinato:</p>
 <ul>
-  <li>Contattaci entro 7 giorni dalla consegna all'indirizzo <strong>[DA COMPILARE]</strong></li>
+  <li>Contattaci il prima possibile (preferibilmente entro 7 giorni dalla consegna) all'indirizzo <strong>assistenza.yocigaci@gmail.com</strong></li>
   <li>Allega foto chiare del prodotto e dell'imballo ricevuto</li>
   <li>Le spese di restituzione sono interamente a carico di Yocigaci Srl</li>
   <li>A scelta del cliente procederemo alla <strong>sostituzione</strong> con lo stesso prodotto (se disponibile) o al <strong>rimborso completo</strong></li>
 </ul>
+<p><em>Ai sensi degli artt. 128–135 D.Lgs. 206/2005 il consumatore beneficia della garanzia legale di conformità di <strong>2 anni</strong> dalla consegna. Il termine indicato sopra ha solo finalità operative e non pregiudica in alcun modo tale diritto.</em></p>
 HTML,
             ],
 
@@ -196,14 +197,14 @@ HTML,
 <h2>3. Come esercitare il recesso</h2>
 <p>Per esercitare il diritto di recesso il consumatore deve comunicare la propria decisione prima della scadenza del termine di 14 giorni inviando:</p>
 <ul>
-  <li>Una email a <strong>[DA COMPILARE]</strong></li>
+  <li>Una email a <strong>assistenza.yocigaci@gmail.com</strong></li>
   <li>Oppure compilando e inviando il modulo standard di recesso riportato in fondo a questa pagina</li>
 </ul>
 <p>La comunicazione deve contenere il numero dell'ordine e l'indicazione dei prodotti per cui si intende esercitare il recesso.</p>
 
 <h2>4. Restituzione del prodotto</h2>
 <p>Dopo aver comunicato il recesso, il consumatore deve restituire i prodotti entro <strong>14 giorni</strong> al seguente indirizzo:</p>
-<p><strong>[DA COMPILARE: indirizzo di restituzione]</strong></p>
+<p><strong>Corso Fanti, 99 - 41012 Carpi (MO)</strong></p>
 <p>I prodotti devono essere restituiti integri, sigillati e nella confezione originale. Le spese di restituzione sono a carico del consumatore.</p>
 
 <h2>5. Rimborso</h2>
@@ -213,7 +214,7 @@ HTML,
 <p>In conformità all'Allegato I, Parte B del D.Lgs. 206/2005, si mette a disposizione il seguente modulo standard:</p>
 <p><em>(Compilare e restituire il presente modulo solo se si desidera recedere dal contratto)</em></p>
 <p>
-  Destinatario: <strong>Yocigaci Srl</strong>, <strong>[DA COMPILARE: indirizzo]</strong>, <strong>[DA COMPILARE: email]</strong><br><br>
+  Destinatario: <strong>Yocigaci Srl</strong>, <strong>Corso Fanti, 99 - 41012 Carpi (MO)</strong>, <strong>assistenza.yocigaci@gmail.com</strong><br><br>
   Con la presente io/noi (*) notifichiamo il recesso dal contratto di vendita dei seguenti beni/servizi (*):<br><br>
   Ordinati il .............. / ricevuti il ..............<br><br>
   Nome del/dei consumatore/i: ..............<br><br>
@@ -235,7 +236,7 @@ HTML,
 <p>Al momento Yocigaci spedisce esclusivamente in <strong>Italia</strong> (penisola, Sardegna e Sicilia). Le spedizioni verso isole minori e zone remote potrebbero richiedere tempi aggiuntivi.</p>
 
 <h2>2. Corrieri</h2>
-<p>Le spedizioni vengono affidate a corrieri nazionali selezionati. Il corriere utilizzato per ogni spedizione viene comunicato nella email di conferma spedizione insieme al codice di tracking.</p>
+<p>Le spedizioni vengono affidate a <strong>DHL</strong>. Il corriere e il codice di tracking vengono comunicati via email al momento della spedizione.</p>
 
 <h2>3. Tempi di preparazione</h2>
 <p>Gli ordini vengono preparati e consegnati al corriere entro <strong>1–2 giorni lavorativi</strong> dalla conferma del pagamento. I giorni festivi e i weekend non sono considerati giorni lavorativi.</p>
@@ -251,7 +252,7 @@ HTML,
 <h2>6. Pacco non ricevuto o danneggiato</h2>
 <p>Se il pacco non arriva entro i tempi stimati o viene consegnato visibilmente danneggiato:</p>
 <ul>
-  <li>Contattaci entro <strong>7 giorni</strong> dalla data di consegna prevista (o dalla consegna del pacco danneggiato) scrivendo a <strong>[DA COMPILARE]</strong></li>
+  <li>Contattaci entro <strong>7 giorni</strong> dalla data di consegna prevista (o dalla consegna del pacco danneggiato) scrivendo a <strong>assistenza.yocigaci@gmail.com</strong></li>
   <li>In caso di pacco danneggiato, <strong>non rifiutare la consegna</strong> ma accetta con riserva scritta al corriere e fotografa immediatamente l'imballo e il contenuto</li>
   <li>Allega le foto alla email di segnalazione</li>
 </ul>
@@ -269,25 +270,25 @@ HTML,
 <h2>Yocigaci Srl</h2>
 <p>
   Codice Fiscale: 03118860356<br>
-  P.IVA: <strong>[DA COMPILARE]</strong><br>
-  Sede legale: <strong>[DA COMPILARE]</strong><br>
-  REA: <strong>[DA COMPILARE]</strong><br>
-  PEC: <strong>[DA COMPILARE]</strong>
+  P.IVA: <strong>03118860356</strong><br>
+  Sede legale: <strong>Via Zanichelli, 13 - 42015 Correggio (RE)</strong><br>
+  REA: <strong>MO - 453439</strong><br>
+  PEC: <strong>yocigacisrl@pec.it</strong>
 </p>
 
 <h2>Assistenza clienti</h2>
 <p>Per domande su ordini, prodotti, spedizioni o resi puoi contattarci tramite:</p>
 <ul>
-  <li><strong>Email:</strong> <strong>[DA COMPILARE]</strong></li>
-  <li><strong>WhatsApp:</strong> <strong>[DA COMPILARE]</strong></li>
+  <li><strong>Email:</strong> <strong>assistenza.yocigaci@gmail.com</strong></li>
+  <li><strong>WhatsApp:</strong> <strong>3713452156</strong></li>
 </ul>
-<p>Rispondiamo entro <strong>24 ore</strong> nei giorni lavorativi.</p>
+<p>Rispondiamo entro <strong>48 ore</strong> nei giorni lavorativi.</p>
 
 <h2>Segnalazioni e reclami</h2>
-<p>Per reclami formali o per esercitare i diritti previsti dal Codice del Consumo (reso, recesso, garanzia) scrivere a <strong>[DA COMPILARE]</strong> indicando il numero dell'ordine e la natura del problema.</p>
+<p>Per reclami formali o per esercitare i diritti previsti dal Codice del Consumo (reso, recesso, garanzia) scrivere a <strong>assistenza.yocigaci@gmail.com</strong> indicando il numero dell'ordine e la natura del problema.</p>
 
 <h2>Risoluzione alternativa delle controversie (ODR)</h2>
-<p>In caso di controversia non risolta in via amichevole, il consumatore può ricorrere alla piattaforma europea per la risoluzione online delle controversie all'indirizzo <strong>ec.europa.eu/consumers/odr</strong>.</p>
+<p>In caso di controversia non risolta in via amichevole, il consumatore può ricorrere alla piattaforma europea per la risoluzione online delle controversie all'indirizzo <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
 HTML,
             ],
 
