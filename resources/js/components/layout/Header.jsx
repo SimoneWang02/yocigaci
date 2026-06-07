@@ -119,7 +119,7 @@ export function Header() {
                                 onMouseLeave={() => setActiveGame(null)}
                             >
                                 <Link
-                                    to={`/catalogo?game=${game.slug}`}
+                                    to={`/catalogo/${game.slug}`}
                                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                                         activeGame === game.id
                                             ? "text-indigo-600"
@@ -135,7 +135,7 @@ export function Header() {
                                             <div className="max-w-7xl mx-auto px-4 py-6">
                                                 <div className="mb-4">
                                                     <Link
-                                                        to={`/catalogo?game=${game.slug}`}
+                                                        to={`/catalogo/${game.slug}`}
                                                         className="text-sm font-semibold text-indigo-700 hover:underline"
                                                     >
                                                         Tutti i prodotti{" "}
@@ -178,7 +178,7 @@ export function Header() {
                                                                             key={
                                                                                 cat.id
                                                                             }
-                                                                            to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                                                                            to={`/catalogo/${game.slug}/${cat.slug}`}
                                                                             className="block px-2 py-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
                                                                         >
                                                                             {
@@ -438,7 +438,7 @@ export function Header() {
                         {games.map((game) => (
                             <div key={game.id}>
                                 <Link
-                                    to={`/catalogo?game=${game.slug}`}
+                                    to={`/catalogo/${game.slug}`}
                                     className="block px-3 py-2 font-medium text-gray-800"
                                     onClick={() => setMobileOpen(false)}
                                 >
@@ -447,7 +447,7 @@ export function Header() {
                                 {game.categories?.map((cat) => (
                                     <Link
                                         key={cat.id}
-                                        to={`/catalogo?game=${game.slug}&category=${cat.slug}`}
+                                        to={`/catalogo/${game.slug}/${cat.slug}`}
                                         className="block px-6 py-1.5 text-sm text-gray-600"
                                         onClick={() => setMobileOpen(false)}
                                     >

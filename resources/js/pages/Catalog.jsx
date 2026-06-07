@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { getProducts, getSearchSuggestions } from '../api/products'
+import { Helmet } from 'react-helmet-async'
+import { getProducts, getGames, getSearchSuggestions } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
 import { Package, Search } from 'lucide-react'
 
 export default function Catalog() {
+  const { gameSlug, categorySlug } = useParams()
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -30,10 +32,20 @@ export default function Catalog() {
   })
   const suggestions = suggestionsData?.data ?? []
 
+  const { data: gamesData } = useQuery({
+    queryKey: ['games-nav'],
+    queryFn: () => getGames(true),
+    staleTime: 60_000,
+  })
+  const games = gamesData?.data ?? []
+
+  const currentGame = games.find((g) => g.slug === gameSlug)
+  const currentCategory = currentGame?.categories?.find((c) => c.slug === categorySlug)
+
   const filters = {
     section_id: sectionId,
-    game: params.get('game') || undefined,
-    category: params.get('category') || undefined,
+    game: gameSlug || undefined,
+    category: categorySlug || undefined,
     preorder: params.get('preorder') || undefined,
     sort: params.get('sort') || undefined,
     search: params.get('search') || undefined,
@@ -47,6 +59,18 @@ export default function Catalog() {
 
   const products = data?.data ?? []
   const meta = data?.meta ?? {}
+
+  const metaTitle = currentCategory
+    ? `${currentCategory.name} ${currentGame.name} a Carpi - Yocigaci`
+    : currentGame
+    ? `${currentGame.name} a Carpi - Yocigaci`
+    : 'Catalogo TCG a Carpi - Yocigaci'
+
+  const metaDescription = currentCategory
+    ? `Acquista ${currentCategory.name} di ${currentGame.name} a Carpi. Yocigaci è il negozio TCG di Carpi con carte, buste, mazzi e accessori.`
+    : currentGame
+    ? `Acquista prodotti ${currentGame.name} a Carpi. Yocigaci è il negozio TCG di riferimento a Carpi con carte, buste, mazzi e accessori.`
+    : 'Esplora il catalogo completo di Yocigaci: Magic The Gathering, Pokémon, One Piece e altri giochi di carte collezionabili a Carpi.'
 
   const setPage = (page) => {
     const next = new URLSearchParams(params)
@@ -72,7 +96,20 @@ export default function Catalog() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Catalogo</h1>
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+      </Helmet>
+
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+        {currentCategory
+          ? `${currentCategory.name} – ${currentGame.name}`
+          : currentGame
+          ? currentGame.name
+          : 'Catalogo'}
+      </h1>
 
       {/* Search */}
       <div className="mb-6 flex gap-2">

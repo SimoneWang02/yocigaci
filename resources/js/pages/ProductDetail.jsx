@@ -97,7 +97,7 @@ export default function ProductDetail() {
                         <>
                             <span>/</span>
                             <Link
-                                to={`/catalogo?game=${product.game.slug}`}
+                                to={`/catalogo/${product.game.slug}`}
                                 className="hover:text-indigo-600"
                             >
                                 {product.game.name}

@@ -27,13 +27,13 @@ class SitemapController extends Controller
 
         foreach ($games as $game) {
             $entries[] = [
-                'loc'        => $base . '/catalogo?game=' . $game->slug,
+                'loc'        => $base . '/catalogo/' . $game->slug,
                 'priority'   => '0.8',
                 'changefreq' => 'daily',
             ];
             foreach ($game->categories as $cat) {
                 $entries[] = [
-                    'loc'        => $base . '/catalogo?game=' . $game->slug . '&category=' . $cat->slug,
+                    'loc'        => $base . '/catalogo/' . $game->slug . '/' . $cat->slug,
                     'priority'   => '0.7',
                     'changefreq' => 'daily',
                 ];

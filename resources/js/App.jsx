@@ -143,6 +143,22 @@ export default function App() {
                             }
                         />
                         <Route
+                            path="/catalogo/:gameSlug"
+                            element={
+                                <Layout>
+                                    <Catalog />
+                                </Layout>
+                            }
+                        />
+                        <Route
+                            path="/catalogo/:gameSlug/:categorySlug"
+                            element={
+                                <Layout>
+                                    <Catalog />
+                                </Layout>
+                            }
+                        />
+                        <Route
                             path="/prodotti/:slug"
                             element={
                                 <Layout>
