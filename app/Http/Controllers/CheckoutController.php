@@ -28,7 +28,11 @@ class CheckoutController extends Controller
         $deliveryMethod = $validated['delivery_method'];
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
-        // Il ritiro in negozio non ha costi di spedizione.
+
+        if ($deliveryMethod !== 'pickup' && (OrderFulfillmentService::shippingCost() === null || OrderFulfillmentService::shippingFreeThreshold() === null)) {
+            return response()->json(['message' => 'Spedizione non configurata. Contatta l\'amministratore.'], 422);
+        }
+
         $shipping = $deliveryMethod === 'pickup' ? 0.0 : OrderFulfillmentService::shippingFor($subtotal);
 
         Stripe::setApiKey(config('services.stripe.secret'));

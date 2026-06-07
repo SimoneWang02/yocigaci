@@ -16,7 +16,7 @@ export default function Home() {
     });
 
     const sections = sectionsData?.data ?? [];
-    const carouselEnabled = carouselData?.carousel_enabled ?? true;
+    const carouselEnabled = carouselData?.carousel_enabled ?? false;
     const bannerSlides = (carouselData?.data ?? []).map((b) => ({
         id: String(b.id),
         image: b.url,

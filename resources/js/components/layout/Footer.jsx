@@ -38,6 +38,7 @@ export function Footer() {
     });
 
     const hours = settings?.data?.opening_hours ?? DEFAULT_HOURS;
+    const whatsappNumber = settings?.data?.whatsapp_number || null;
 
     return (
         <footer className="bg-gray-900 text-gray-400 mt-auto">
@@ -107,11 +108,13 @@ export function Footer() {
                     <div className="flex flex-col items-center text-center">
                         <p className="text-white font-semibold mb-3">Assistenza</p>
                         <ul className="space-y-2 text-sm">
-                            <li>
-                                <a href="https://wa.me/390000000000" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                    Assistenza WhatsApp
-                                </a>
-                            </li>
+                            {whatsappNumber && (
+                                <li>
+                                    <a href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                                        Assistenza WhatsApp
+                                    </a>
+                                </li>
+                            )}
                             <li><Link to="/account/ordini" className="hover:text-white transition-colors">Tracking Ordine</Link></li>
                             <li><Link to="/p/recapiti" className="hover:text-white transition-colors">Recapiti</Link></li>
                         </ul>

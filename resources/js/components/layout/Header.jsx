@@ -59,9 +59,7 @@ export function Header() {
     const newOrdersCount = newOrdersData?.count ?? 0;
     const cardtraderLabel =
         settingsData?.data?.cardtrader_label || "CardTrader";
-    const cardtraderUrl =
-        settingsData?.data?.cardtrader_url ||
-        "https://www.cardtrader.com/en/users/yocigaci888";
+    const cardtraderUrl = settingsData?.data?.cardtrader_url || null;
 
     useEffect(() => {
         if (searchOpen) searchInputRef.current?.focus();
@@ -196,14 +194,16 @@ export function Header() {
                                     )}
                             </div>
                         ))}
-                        <a
-                            href={cardtraderUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
-                        >
-                            {cardtraderLabel}
-                        </a>
+                        {cardtraderUrl && (
+                            <a
+                                href={cardtraderUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-md transition-colors"
+                            >
+                                {cardtraderLabel}
+                            </a>
+                        )}
                     </nav>
 
                     {/* Right actions */}
@@ -456,14 +456,16 @@ export function Header() {
                                 ))}
                             </div>
                         ))}
-                        <a
-                            href={cardtraderUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block px-3 py-2 text-gray-800"
-                        >
-                            {cardtraderLabel}
-                        </a>
+                        {cardtraderUrl && (
+                            <a
+                                href={cardtraderUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block px-3 py-2 text-gray-800"
+                            >
+                                {cardtraderLabel}
+                            </a>
+                        )}
                         <div className="pt-2 border-t border-gray-100">
                             {user ? (
                                 <>

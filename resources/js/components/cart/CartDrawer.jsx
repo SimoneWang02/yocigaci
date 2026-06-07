@@ -11,9 +11,6 @@ import { useCartStore } from "../../store/cartStore";
 import { getSettings } from "../../api/products";
 import { Button } from "../ui/Button";
 
-// Fallback finche' le impostazioni admin non sono caricate.
-const DEFAULT_SHIPPING_THRESHOLD = 250;
-
 export function CartDrawer() {
     const { items, isOpen, closeCart, removeItem, updateQuantity } =
         useCartStore();
@@ -21,12 +18,12 @@ export function CartDrawer() {
         queryKey: ["public-settings"],
         queryFn: getSettings,
     });
-    const shippingThreshold = Number(
-        settingsData?.data?.shipping_free_threshold ??
-            DEFAULT_SHIPPING_THRESHOLD,
-    );
+    const shippingThreshold = settingsData?.data?.shipping_free_threshold ?? null;
+    const shippingCost = settingsData?.data?.shipping_cost ?? null;
     const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const toFreeShipping = Math.max(0, shippingThreshold - total);
+    const toFreeShipping = shippingCost === 0
+        ? 0
+        : shippingThreshold !== null ? Math.max(0, shippingThreshold - total) : null;
     const hasMixedCart =
         items.some((i) => i.is_preorder) && items.some((i) => !i.is_preorder);
 
@@ -155,21 +152,23 @@ export function CartDrawer() {
                                 </p>
                             </div>
                         )}
-                        {toFreeShipping > 0 ? (
-                            <p className="text-xs text-center text-gray-500 bg-gray-50 rounded py-2">
-                                Aggiungi{" "}
-                                <span className="font-semibold text-indigo-600">
-                                    €{" "}
-                                    {toFreeShipping
-                                        .toFixed(2)
-                                        .replace(".", ",")}
-                                </span>{" "}
-                                per la spedizione gratuita
-                            </p>
-                        ) : (
-                            <p className="text-xs text-center text-green-600 bg-green-50 rounded py-2 font-medium">
-                                Spedizione gratuita!
-                            </p>
+                        {toFreeShipping !== null && (
+                            toFreeShipping > 0 ? (
+                                <p className="text-xs text-center text-gray-500 bg-gray-50 rounded py-2">
+                                    Aggiungi{" "}
+                                    <span className="font-semibold text-indigo-600">
+                                        €{" "}
+                                        {toFreeShipping
+                                            .toFixed(2)
+                                            .replace(".", ",")}
+                                    </span>{" "}
+                                    per la spedizione gratuita
+                                </p>
+                            ) : (
+                                <p className="text-xs text-center text-green-600 bg-green-50 rounded py-2 font-medium">
+                                    Spedizione gratuita!
+                                </p>
+                            )
                         )}
                         <div className="flex justify-between font-semibold">
                             <span>Subtotale</span>

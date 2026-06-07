@@ -1,5 +1,12 @@
 import { useState, useRef } from "react";
-import { Pencil, Trash2, X, GripVertical, Upload, ImageOff } from "lucide-react";
+import {
+    Pencil,
+    Trash2,
+    X,
+    GripVertical,
+    Upload,
+    ImageOff,
+} from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     DndContext,
@@ -387,7 +394,11 @@ function SortableBannerCard({ banner, onToggleActive, onDelete }) {
                     type="button"
                     onClick={() => onToggleActive(banner)}
                     className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${banner.is_active ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                    title={banner.is_active ? "Clicca per nascondere" : "Clicca per rendere visibile"}
+                    title={
+                        banner.is_active
+                            ? "Clicca per nascondere"
+                            : "Clicca per rendere visibile"
+                    }
                 >
                     {banner.is_active ? "Visibile" : "Nascosto"}
                 </button>
@@ -432,7 +443,9 @@ function CarouselSection() {
     const carouselEnabled = settingsData?.data?.carousel_enabled === "1";
     const rawBanners = bannersData?.data ?? [];
     const banners = localOrder
-        ? localOrder.map((id) => rawBanners.find((b) => b.id === id)).filter(Boolean)
+        ? localOrder
+              .map((id) => rawBanners.find((b) => b.id === id))
+              .filter(Boolean)
         : rawBanners;
 
     const invalidate = () => {
@@ -441,7 +454,8 @@ function CarouselSection() {
     };
 
     const toggleCarousel = useMutation({
-        mutationFn: (enabled) => adminUpdateSettings({ carousel_enabled: enabled }),
+        mutationFn: (enabled) =>
+            adminUpdateSettings({ carousel_enabled: enabled }),
         onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-settings"] }),
     });
 
@@ -451,7 +465,8 @@ function CarouselSection() {
     });
 
     const toggleActive = useMutation({
-        mutationFn: ({ id, is_active }) => adminUpdateCarouselBanner(id, { is_active }),
+        mutationFn: ({ id, is_active }) =>
+            adminUpdateCarouselBanner(id, { is_active }),
         onSuccess: invalidate,
     });
 
@@ -658,13 +673,13 @@ function NavbarSettingsSection() {
 // ─── Orari di apertura ───────────────────────────────────────────────────────────
 
 const DEFAULT_HOURS = [
-    { day: "Lunedi",    hours: "15:30 - 19:30" },
-    { day: "Martedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Lunedi", hours: "15:30 - 19:30" },
+    { day: "Martedi", hours: "11:00 - 13:00, 15:30 - 19:30" },
     { day: "Mercoledi", hours: "11:00 - 13:00, 15:30 - 19:30" },
-    { day: "Giovedi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
-    { day: "Venerdi",   hours: "11:00 - 13:00, 15:30 - 19:30" },
-    { day: "Sabato",    hours: "11:00 - 19:30" },
-    { day: "Domenica",  hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Giovedi", hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Venerdi", hours: "11:00 - 13:00, 15:30 - 19:30" },
+    { day: "Sabato", hours: "11:00 - 19:30" },
+    { day: "Domenica", hours: "11:00 - 13:00, 15:30 - 19:30" },
 ];
 
 function OpeningHoursSection() {
@@ -683,7 +698,9 @@ function OpeningHoursSection() {
     }
 
     const updateHours = (index, value) => {
-        setRows((prev) => prev.map((r, i) => i === index ? { ...r, hours: value } : r));
+        setRows((prev) =>
+            prev.map((r, i) => (i === index ? { ...r, hours: value } : r)),
+        );
     };
 
     const save = useMutation({
@@ -697,7 +714,9 @@ function OpeningHoursSection() {
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
             <div className="mb-4">
-                <h2 className="text-base font-semibold text-gray-900">Orari di apertura</h2>
+                <h2 className="text-base font-semibold text-gray-900">
+                    Orari di apertura
+                </h2>
                 <p className="text-sm text-gray-500 mt-0.5">
                     Orari visualizzati nel footer del sito
                 </p>
@@ -706,7 +725,9 @@ function OpeningHoursSection() {
             <div className="space-y-2">
                 {rows.map((row, i) => (
                     <div key={row.day} className="flex items-center gap-3">
-                        <span className="w-28 shrink-0 text-sm font-medium text-gray-700">{row.day}</span>
+                        <span className="w-28 shrink-0 text-sm font-medium text-gray-700">
+                            {row.day}
+                        </span>
                         <input
                             type="text"
                             value={row.hours}
@@ -730,7 +751,76 @@ function OpeningHoursSection() {
                     <span className="text-sm text-green-600">Salvato.</span>
                 )}
                 {save.isError && (
-                    <span className="text-sm text-red-600">Errore nel salvataggio.</span>
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── WhatsApp assistenza ─────────────────────────────────────────────────────────
+
+function WhatsAppSettingsSection() {
+    const qc = useQueryClient();
+    const [number, setNumber] = useState("");
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setNumber(data.data?.whatsapp_number ?? "");
+        setHydrated(true);
+    }
+
+    const save = useMutation({
+        mutationFn: () =>
+            adminUpdateSettings({ whatsapp_number: number.trim() || null }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+            qc.invalidateQueries({ queryKey: ["public-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Assistenza WhatsApp
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Numero visualizzato nel footer. Lascia vuoto per nascondere
+                    il link.
+                </p>
+            </div>
+
+            <Input
+                label="Numero WhatsApp"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                placeholder="393401234567"
+                maxLength={30}
+            />
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending}
+                >
+                    {save.isPending ? "Salvataggio…" : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
                 )}
             </div>
         </div>
@@ -1019,6 +1109,9 @@ export default function AdminHomepageSections() {
 
             {/* Orari di apertura */}
             <OpeningHoursSection />
+
+            {/* WhatsApp assistenza */}
+            <WhatsAppSettingsSection />
 
             {/* Spedizione */}
             <ShippingSettingsSection />

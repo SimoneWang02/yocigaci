@@ -16,32 +16,32 @@ use Stripe\Checkout\Session as StripeSession;
 
 class OrderFulfillmentService
 {
-    // Valori di default usati quando l'admin non ha ancora configurato la spedizione.
-    public const DEFAULT_SHIPPING_COST = 15.90;
-    public const DEFAULT_SHIPPING_FREE_THRESHOLD = 250.00;
-
-    /**
-     * Costo di spedizione configurato dall'admin (Setting), con fallback al default.
-     */
-    public static function shippingCost(): float
+    public static function shippingCost(): ?float
     {
-        return (float) Setting::getValue('shipping_cost', self::DEFAULT_SHIPPING_COST);
+        $v = Setting::getValue('shipping_cost');
+        return $v !== null ? (float) $v : null;
     }
 
-    /**
-     * Soglia di subtotale oltre la quale la spedizione e' gratuita.
-     */
-    public static function shippingFreeThreshold(): float
+    public static function shippingFreeThreshold(): ?float
     {
-        return (float) Setting::getValue('shipping_free_threshold', self::DEFAULT_SHIPPING_FREE_THRESHOLD);
+        $v = Setting::getValue('shipping_free_threshold');
+        return $v !== null ? (float) $v : null;
     }
 
     /**
      * Calcola la spedizione per un dato subtotale: gratuita sopra la soglia.
+     * Lancia eccezione se la spedizione non e' stata configurata dall'admin.
      */
     public static function shippingFor(float $subtotal): float
     {
-        return $subtotal >= self::shippingFreeThreshold() ? 0.0 : self::shippingCost();
+        $cost = self::shippingCost();
+        $threshold = self::shippingFreeThreshold();
+
+        if ($cost === null || $threshold === null) {
+            throw new \RuntimeException('Impostazioni di spedizione non configurate.');
+        }
+
+        return $subtotal >= $threshold ? 0.0 : $cost;
     }
 
     /**

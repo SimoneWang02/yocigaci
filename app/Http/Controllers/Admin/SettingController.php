@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,10 +32,11 @@ class SettingController extends Controller
         return response()->json([
             'data' => [
                 'carousel_enabled' => $settings['carousel_enabled'] ?? '1',
-                'cardtrader_label' => Setting::getValue('cardtrader_label', 'CardTrader'),
-                'cardtrader_url' => Setting::getValue('cardtrader_url', 'https://www.cardtrader.com/en/users/yocigaci888'),
-                'shipping_cost' => (float) Setting::getValue('shipping_cost', OrderFulfillmentService::DEFAULT_SHIPPING_COST),
-                'shipping_free_threshold' => (float) Setting::getValue('shipping_free_threshold', OrderFulfillmentService::DEFAULT_SHIPPING_FREE_THRESHOLD),
+                'cardtrader_label' => Setting::getValue('cardtrader_label'),
+                'cardtrader_url' => Setting::getValue('cardtrader_url'),
+                'shipping_cost' => Setting::getValue('shipping_cost') !== null ? (float) Setting::getValue('shipping_cost') : null,
+                'shipping_free_threshold' => Setting::getValue('shipping_free_threshold') !== null ? (float) Setting::getValue('shipping_free_threshold') : null,
+                'whatsapp_number' => Setting::getValue('whatsapp_number'),
                 'opening_hours' => $openingHours,
             ],
         ]);
@@ -46,10 +46,11 @@ class SettingController extends Controller
     {
         $data = $request->validate([
             'carousel_enabled' => 'sometimes|boolean',
-            'cardtrader_label' => 'sometimes|string|max:50',
-            'cardtrader_url' => 'sometimes|url|max:500',
+            'cardtrader_label' => 'sometimes|nullable|string|max:50',
+            'cardtrader_url' => 'sometimes|nullable|url|max:500',
             'shipping_cost' => 'sometimes|numeric|min:0|max:9999',
             'shipping_free_threshold' => 'sometimes|numeric|min:0|max:99999',
+            'whatsapp_number' => 'sometimes|nullable|string|max:30',
             'opening_hours' => 'sometimes|array|size:7',
             'opening_hours.*.day' => 'required|string|max:20',
             'opening_hours.*.hours' => 'required|string|max:100',
@@ -60,6 +61,8 @@ class SettingController extends Controller
                 $value = $value ? '1' : '0';
             } elseif ($key === 'opening_hours') {
                 $value = json_encode($value);
+            } elseif ($value === null) {
+                $value = '';
             }
             Setting::setValue($key, $value);
         }

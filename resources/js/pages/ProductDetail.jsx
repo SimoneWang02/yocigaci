@@ -79,7 +79,7 @@ export default function ProductDetail() {
                 <meta property="og:type" content="product" />
                 <meta
                     property="og:url"
-                    content={`https://yocigaci.com/prodotti/${product.slug}`}
+                    content={`${window.location.origin}/prodotti/${product.slug}`}
                 />
                 {metaImage && <meta property="og:image" content={metaImage} />}
             </Helmet>

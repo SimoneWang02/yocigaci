@@ -22,10 +22,6 @@ import {
     Trash2,
 } from "lucide-react";
 
-// Fallback usati finche' le impostazioni admin non sono caricate.
-const DEFAULT_SHIPPING_THRESHOLD = 250;
-const DEFAULT_SHIPPING_COST = 15.9;
-
 const EMPTY_FORM = {
     full_name: "",
     phone: "",
@@ -426,12 +422,9 @@ export default function Checkout() {
         queryKey: ["public-settings"],
         queryFn: getSettings,
     });
-    const shippingThreshold = Number(
-        settingsData?.data?.shipping_free_threshold ?? DEFAULT_SHIPPING_THRESHOLD,
-    );
-    const shippingCost = Number(
-        settingsData?.data?.shipping_cost ?? DEFAULT_SHIPPING_COST,
-    );
+    const shippingThreshold = settingsData?.data?.shipping_free_threshold ?? null;
+    const shippingCost = settingsData?.data?.shipping_cost ?? null;
+    const shippingConfigured = shippingThreshold !== null && shippingCost !== null;
 
     const isPickup = deliveryMethod === "pickup";
     const hasMixedCart =
@@ -439,10 +432,10 @@ export default function Checkout() {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
     const shipping = isPickup
         ? 0
-        : subtotal >= shippingThreshold
-          ? 0
-          : shippingCost;
-    const total = subtotal + shipping;
+        : shippingConfigured
+          ? subtotal >= shippingThreshold ? 0 : shippingCost
+          : null;
+    const total = subtotal + (shipping ?? 0);
 
     const chooseDelivery = (method) => {
         setDeliveryMethod(method);
@@ -492,6 +485,10 @@ export default function Checkout() {
     }
 
     const startCheckout = async (address, shouldSave) => {
+        if (!isPickup && !shippingConfigured) {
+            setError("Spedizione non configurata. Contatta l'amministratore.");
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
@@ -595,7 +592,13 @@ export default function Checkout() {
                                 onClick={() => chooseDelivery("shipping")}
                                 icon={Truck}
                                 title="Spedizione"
-                                subtitle={`Gratuita oltre € ${shippingThreshold.toFixed(2).replace(".", ",")}`}
+                                subtitle={
+                                    !shippingConfigured
+                                        ? "Non configurata"
+                                        : shippingCost === 0
+                                          ? "Spedizione gratuita"
+                                          : `Gratuita oltre € ${Number(shippingThreshold).toFixed(2).replace(".", ",")}`
+                                }
                             />
                             <DeliveryOption
                                 selected={isPickup}
@@ -723,7 +726,7 @@ export default function Checkout() {
                             </span>
                         </div>
 
-                        {!isPickup && (
+                        {!isPickup && shippingConfigured && (
                             <ShippingProgress
                                 subtotal={subtotal}
                                 threshold={shippingThreshold}
@@ -794,11 +797,13 @@ export default function Checkout() {
                                             : ""
                                     }
                                 >
-                                    {shipping === 0
-                                        ? isPickup
-                                            ? "Gratuito"
-                                            : "Gratuita"
-                                        : `€ ${shipping.toFixed(2).replace(".", ",")}`}
+                                    {shipping === null
+                                        ? "—"
+                                        : shipping === 0
+                                          ? isPickup
+                                              ? "Gratuito"
+                                              : "Gratuita"
+                                          : `€ ${Number(shipping).toFixed(2).replace(".", ",")}`}
                                 </span>
                             </div>
                         </div>
