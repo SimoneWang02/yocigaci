@@ -34,8 +34,10 @@ class DashboardController extends Controller
         $prevAvgOrder    = $prevOrdersCount > 0 ? round($prevRevenue / $prevOrdersCount, 2) : 0.0;
 
         // Ordini da gestire (globale, indipendente dal periodo)
-        $pendingShipping = Order::where('status', 'paid')->where('delivery_method', 'shipping')->count();
-        $pendingPickup   = Order::where('status', 'ready_for_pickup')->count();
+        $ordersToShip    = Order::where('status', 'paid')->count();
+        $ordersToPickup  = Order::where('status', 'ready_for_pickup')->count();
+        $ordersPreorder  = Order::whereIn('status', ['preorder_confirmed', 'preorder_ready'])->count();
+        $ordersCompleted = Order::whereIn('status', ['shipped', 'picked_up'])->count();
 
         $expiredPreorders = Product::where('is_active', true)
             ->where('is_preorder', true)
@@ -51,8 +53,10 @@ class DashboardController extends Controller
             'prev_revenue'      => $prevRevenue,
             'prev_orders_count' => $prevOrdersCount,
             'prev_avg_order'    => $prevAvgOrder,
-            'pending_shipping'  => $pendingShipping,
-            'pending_pickup'    => $pendingPickup,
+            'orders_to_ship'    => $ordersToShip,
+            'orders_to_pickup'  => $ordersToPickup,
+            'orders_preorder'   => $ordersPreorder,
+            'orders_completed'  => $ordersCompleted,
             'expired_preorders' => $expiredPreorders,
             'chart'             => $this->chartData($from, $to, $chartGroupBy),
         ]);

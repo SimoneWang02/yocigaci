@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     adminGetOrders,
@@ -659,7 +660,8 @@ function OrderDrawer({ orderId, onClose }) {
 }
 
 export default function AdminOrders() {
-    const [filterStatus, setFilterStatus] = useState("");
+    const [searchParams] = useSearchParams();
+    const [filterStatus, setFilterStatus] = useState(() => searchParams.get("status") ?? "");
     const [search, setSearch] = useState("");
     const [searchInput, setSearchInput] = useState("");
     const [page, setPage] = useState(1);
