@@ -4,13 +4,53 @@ import { trackOrder } from "../api/orders";
 import { Truck, Package, Search, ExternalLink, CheckCircle, Clock } from "lucide-react";
 
 const STATUS_CONFIG = {
-    paid:               { label: "Pagato",              color: "text-blue-700",  bg: "bg-blue-50",  border: "border-blue-200" },
-    shipped:            { label: "Spedito",             color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
-    ready_for_pickup:   { label: "Pronto al ritiro",    color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
-    picked_up:          { label: "Ritirato",            color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
-    refunded:           { label: "Rimborsato",          color: "text-gray-600",  bg: "bg-gray-50",  border: "border-gray-200" },
+    paid:               { label: "Pagato",               color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-200" },
+    shipped:            { label: "Spedito",              color: "text-green-700",  bg: "bg-green-50",  border: "border-green-200" },
+    ready_for_pickup:   { label: "Pronto al ritiro",     color: "text-amber-700",  bg: "bg-amber-50",  border: "border-amber-200" },
+    picked_up:          { label: "Ritirato",             color: "text-green-700",  bg: "bg-green-50",  border: "border-green-200" },
+    refunded:           { label: "Rimborsato",           color: "text-gray-600",   bg: "bg-gray-50",   border: "border-gray-200" },
     preorder_confirmed: { label: "Preordine Confermato", color: "text-violet-700", bg: "bg-violet-50", border: "border-violet-200" },
 };
+
+function DirectDhlTracking() {
+    const [code, setCode] = useState("");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!code.trim()) return;
+        window.open(
+            `https://www.dhl.com/it-it/home/tracking.html?tracking-id=${encodeURIComponent(code.trim())}`,
+            "_blank",
+            "noopener,noreferrer"
+        );
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+            <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Truck className="w-4 h-4 text-gray-400" />
+                Hai gia' il codice DHL?
+            </p>
+            <div className="flex gap-2">
+                <input
+                    type="text"
+                    placeholder="Es. 1234567890"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-mono placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <button
+                    type="submit"
+                    disabled={!code.trim()}
+                    className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold text-sm rounded-xl px-4 py-2.5 transition-colors flex-shrink-0"
+                >
+                    Traccia
+                    <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+            </div>
+        </form>
+    );
+}
 
 export default function OrderTracking() {
     const [form, setForm] = useState({ order_number: "", email: "" });
@@ -26,11 +66,13 @@ export default function OrderTracking() {
     };
 
     const order = data?.data;
-    const statusCfg = order ? (STATUS_CONFIG[order.status] ?? { label: order.status_label, color: "text-gray-600", bg: "bg-gray-50", border: "border-gray-200" }) : null;
+    const statusCfg = order
+        ? (STATUS_CONFIG[order.status] ?? { label: order.status_label, color: "text-gray-600", bg: "bg-gray-50", border: "border-gray-200" })
+        : null;
 
     return (
         <div className="min-h-[70vh] flex flex-col items-center justify-start pt-16 px-4 pb-16">
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-md space-y-4">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 mb-4">
@@ -42,7 +84,7 @@ export default function OrderTracking() {
                     </p>
                 </div>
 
-                {/* Form */}
+                {/* Form ricerca ordine */}
                 <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -88,8 +130,7 @@ export default function OrderTracking() {
 
                 {/* Risultato */}
                 {order && statusCfg && (
-                    <div className="mt-6 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                        {/* status bar */}
+                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                         <div className={`px-5 py-4 flex items-center justify-between ${statusCfg.bg} border-b ${statusCfg.border}`}>
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Stato ordine</p>
@@ -99,7 +140,6 @@ export default function OrderTracking() {
                         </div>
 
                         <div className="p-5 space-y-4">
-                            {/* Data */}
                             <div className="flex items-center gap-3 text-sm text-gray-600">
                                 <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                 <span>
@@ -110,7 +150,6 @@ export default function OrderTracking() {
                                 </span>
                             </div>
 
-                            {/* Spedito */}
                             {order.shipped_at && (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -123,7 +162,6 @@ export default function OrderTracking() {
                                 </div>
                             )}
 
-                            {/* Tracking DHL */}
                             {order.tracking_code && (
                                 <div className="flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-3 min-w-0">
@@ -144,7 +182,6 @@ export default function OrderTracking() {
                                 </div>
                             )}
 
-                            {/* Ritiro in negozio */}
                             {order.delivery_method === "pickup" && !order.tracking_code && (
                                 <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
                                     <Package className="w-4 h-4 flex-shrink-0" />
@@ -154,6 +191,16 @@ export default function OrderTracking() {
                         </div>
                     </div>
                 )}
+
+                {/* Separatore */}
+                <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-xs text-gray-400 font-medium">oppure</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Tracciamento diretto DHL */}
+                <DirectDhlTracking />
             </div>
         </div>
     );
