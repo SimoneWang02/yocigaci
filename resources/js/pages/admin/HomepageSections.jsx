@@ -504,7 +504,8 @@ function CarouselSection() {
                         Banner Carousel
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Immagini mostrate nel carousel in cima alla homepage
+                        Immagini mostrate nel carousel in cima alla homepage.
+                        Risoluzione (21/9).
                     </p>
                 </div>
 
@@ -860,7 +861,8 @@ function SupportEmailSection() {
                 </h2>
                 <p className="text-sm text-gray-500 mt-0.5">
                     Indirizzo mostrato nel footer delle email transazionali.
-                    Lascia vuoto per usare il valore predefinito (assistenza.yocigaci@gmail.com).
+                    Lascia vuoto per usare il valore predefinito
+                    (assistenza.yocigaci@gmail.com).
                 </p>
             </div>
 
