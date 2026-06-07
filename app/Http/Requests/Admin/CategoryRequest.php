@@ -14,14 +14,17 @@ class CategoryRequest extends FormRequest
     public function rules(): array
     {
         $categoryId = $this->route('category')?->id;
+        $isUpdate = $categoryId !== null;
 
         return [
-            'game_id' => ['required', 'exists:games,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:categories,slug,' . $categoryId],
-            'is_active' => ['boolean'],
-            'sort_order' => ['integer', 'min:0'],
-            'nav_column' => ['integer', 'min:1'],
+            'game_id' => $isUpdate ? ['sometimes', 'exists:games,id'] : ['required', 'exists:games,id'],
+            'name' => $isUpdate ? ['sometimes', 'string', 'max:255'] : ['required', 'string', 'max:255'],
+            'slug' => $isUpdate
+                ? ['sometimes', 'string', 'max:255', 'unique:categories,slug,' . $categoryId]
+                : ['required', 'string', 'max:255', 'unique:categories,slug'],
+            'is_active' => ['sometimes', 'boolean'],
+            'sort_order' => ['sometimes', 'integer', 'min:0'],
+            'nav_column' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 }
