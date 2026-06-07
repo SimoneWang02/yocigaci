@@ -5,7 +5,6 @@ import {
     Image as ImageIcon,
     Trash2,
     ShoppingCart,
-    Clock,
 } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { getSettings } from "../../api/products";
@@ -24,9 +23,6 @@ export function CartDrawer() {
     const toFreeShipping = shippingCost === 0
         ? 0
         : shippingThreshold !== null ? Math.max(0, shippingThreshold - total) : null;
-    const hasMixedCart =
-        items.some((i) => i.is_preorder) && items.some((i) => !i.is_preorder);
-
     return (
         <>
             {isOpen && (
@@ -142,16 +138,6 @@ export function CartDrawer() {
                 {/* Footer */}
                 {items.length > 0 && (
                     <div className="p-4 border-t border-gray-100 space-y-3">
-                        {hasMixedCart && (
-                            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
-                                <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                                <p className="text-xs text-amber-800 leading-snug">
-                                    Il carrello contiene preordini:
-                                    l&apos;intero ordine verra&apos; spedito
-                                    quando tutti i prodotti saranno disponibili.
-                                </p>
-                            </div>
-                        )}
                         {toFreeShipping !== null && (
                             toFreeShipping > 0 ? (
                                 <p className="text-xs text-center text-gray-500 bg-gray-50 rounded py-2">

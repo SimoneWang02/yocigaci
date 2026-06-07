@@ -16,6 +16,7 @@ export default function ProductDetail() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [qty, setQty] = useState(1);
     const [added, setAdded] = useState(false);
+    const [mixedCartError, setMixedCartError] = useState(false);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["product", slug],
@@ -57,7 +58,12 @@ export default function ProductDetail() {
 
     const handleAdd = () => {
         if (reachedMax) return;
-        addItem(product, qty);
+        const result = addItem(product, qty);
+        if (result?.ok === false && result.reason === 'mixed_cart') {
+            setMixedCartError(true);
+            setTimeout(() => setMixedCartError(false), 4000);
+            return;
+        }
         openCart();
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
@@ -278,6 +284,19 @@ export default function ProductDetail() {
                                     <p className="text-xs text-amber-600 mt-2 text-center">
                                         Hai già la quantità massima disponibile
                                         nel carrello
+                                    </p>
+                                )}
+                                {mixedCartError && (
+                                    <p className="text-xs text-red-600 mt-2 text-center">
+                                        Non puoi aggiungere{" "}
+                                        {product.is_preorder
+                                            ? "un preordine"
+                                            : "un prodotto"}{" "}
+                                        al carrello: contiene già{" "}
+                                        {product.is_preorder
+                                            ? "prodotti disponibili"
+                                            : "preordini"}
+                                        . Svuota il carrello prima di procedere.
                                     </p>
                                 )}
                             </>

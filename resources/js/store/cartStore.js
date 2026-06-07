@@ -11,11 +11,24 @@ export const useCartStore = create(
       closeCart: () => set({ isOpen: false }),
 
       addItem: (product, quantity = 1) => {
-        // Per i prodotti non in preordine la quantità non può superare lo stock
-        const cap = (qty) =>
-          product.is_preorder ? qty : Math.min(qty, product.stock)
         const items = get().items
         const existing = items.find((i) => i.id === product.id)
+
+        // Controlla conflitto preordine/normale solo se il prodotto non è già nel carrello
+        if (!existing && items.length > 0) {
+          const cartHasPreorder = items.some((i) => i.is_preorder)
+          const cartHasRegular = items.some((i) => !i.is_preorder)
+          if (product.is_preorder && cartHasRegular) {
+            return { ok: false, reason: 'mixed_cart' }
+          }
+          if (!product.is_preorder && cartHasPreorder) {
+            return { ok: false, reason: 'mixed_cart' }
+          }
+        }
+
+        const cap = (qty) =>
+          product.is_preorder ? qty : Math.min(qty, product.stock)
+
         if (existing) {
           set({
             items: items.map((i) =>
@@ -27,6 +40,7 @@ export const useCartStore = create(
         } else {
           set({ items: [...items, { ...product, quantity: cap(quantity) }] })
         }
+        return { ok: true }
       },
 
       removeItem: (productId) =>
