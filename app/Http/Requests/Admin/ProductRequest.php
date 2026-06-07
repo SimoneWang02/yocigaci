@@ -14,7 +14,7 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         $productId = $this->route('product')?->id;
-        $req = $this->isMethod('POST') ? 'required' : 'sometimes|required';
+        $req = $this->isMethod('POST') ? 'required' : 'sometimes';
 
         return [
             'game_id' => [$req, 'exists:games,id'],
