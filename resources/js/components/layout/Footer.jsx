@@ -190,7 +190,7 @@ export function Footer() {
                             )}
                             <li>
                                 <Link
-                                    to="/account/ordini"
+                                    to="/tracking"
                                     className="hover:text-white transition-colors"
                                 >
                                     Tracking Ordine

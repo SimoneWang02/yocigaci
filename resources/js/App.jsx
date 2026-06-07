@@ -34,6 +34,7 @@ import AdminHomepageSections from "./pages/admin/HomepageSections";
 import AdminPages from "./pages/admin/Pages";
 import AdminDashboard from "./pages/admin/Dashboard";
 import StaticPage from "./pages/StaticPage";
+import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -187,6 +188,14 @@ export default function App() {
                             element={
                                 <Layout>
                                     <OrderConfirmation />
+                                </Layout>
+                            }
+                        />
+                        <Route
+                            path="/tracking"
+                            element={
+                                <Layout>
+                                    <OrderTracking />
                                 </Layout>
                             }
                         />

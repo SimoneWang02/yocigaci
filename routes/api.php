@@ -35,6 +35,9 @@ Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']);
 // Stripe webhook - escluso da CSRF e auth
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
+// Tracking pubblico
+Route::post('/orders/track', [\App\Http\Controllers\OrderTrackingController::class, 'track']);
+
 // Autenticate
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
