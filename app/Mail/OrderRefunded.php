@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -32,6 +33,9 @@ class OrderRefunded extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'emails.order-refunded');
+        return new Content(
+            view: 'emails.order-refunded',
+            with: ['supportEmail' => Setting::getValue('support_email', 'assistenza.yocigaci@gmail.com')],
+        );
     }
 }

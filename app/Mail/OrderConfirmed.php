@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -22,6 +23,9 @@ class OrderConfirmed extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'emails.order-confirmed');
+        return new Content(
+            view: 'emails.order-confirmed',
+            with: ['supportEmail' => Setting::getValue('support_email', 'assistenza.yocigaci@gmail.com')],
+        );
     }
 }
