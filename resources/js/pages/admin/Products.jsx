@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Pencil, Trash2, AlertTriangle, PackageMinus } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock } from "../../api/admin";
+import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock, adminIncrementStock } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
@@ -49,6 +49,10 @@ export default function AdminProducts() {
     });
     const decreaseStock = useMutation({
         mutationFn: (id) => adminDecrementStock(id),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
+    });
+    const increaseStock = useMutation({
+        mutationFn: (id) => adminIncrementStock(id),
         onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
     });
 
@@ -169,10 +173,30 @@ export default function AdminProducts() {
                                             .replace(".", ",")}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        {p.is_preorder || p.stock === 0 ? (
+                                        {p.is_preorder ? (
                                             <span className="text-gray-400">-</span>
                                         ) : (
-                                            <span className="text-gray-700">{p.stock}</span>
+                                            <div className="inline-flex items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    disabled={p.stock <= 0 || decreaseStock.isPending || increaseStock.isPending}
+                                                    onClick={() => decreaseStock.mutate(p.id)}
+                                                    title="Diminuisci stock di 1"
+                                                >
+                                                    -
+                                                </button>
+                                                <span className="w-8 text-center font-medium text-gray-700">{p.stock}</span>
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    disabled={decreaseStock.isPending || increaseStock.isPending}
+                                                    onClick={() => increaseStock.mutate(p.id)}
+                                                    title="Aumenta stock di 1"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-center">
@@ -187,19 +211,6 @@ export default function AdminProducts() {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2 justify-end">
-                                            {!p.is_preorder && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    aria-label="Diminuisci stock"
-                                                    title="Diminuisci stock di 1"
-                                                    className="!px-2"
-                                                    disabled={p.stock <= 0 || decreaseStock.isPending}
-                                                    onClick={() => decreaseStock.mutate(p.id)}
-                                                >
-                                                    <PackageMinus className="w-4 h-4" />
-                                                </Button>
-                                            )}
                                             <Link
                                                 to={`/admin/prodotti/${p.id}/modifica`}
                                             >

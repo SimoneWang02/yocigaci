@@ -21,6 +21,7 @@ export const adminCreateProduct = (data) => api.post('/admin/products', data).th
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data).then((r) => r.data)
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`).then((r) => r.data)
 export const adminDecrementStock = (id) => api.patch(`/admin/products/${id}/decrement-stock`).then((r) => r.data)
+export const adminIncrementStock = (id) => api.patch(`/admin/products/${id}/increment-stock`).then((r) => r.data)
 export const adminUploadImage = (id, file) => {
   const form = new FormData()
   form.append('image', file)

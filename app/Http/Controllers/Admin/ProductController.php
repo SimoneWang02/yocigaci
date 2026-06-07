@@ -59,6 +59,17 @@ class ProductController extends Controller
         return response()->json(['stock' => $product->stock]);
     }
 
+    public function incrementStock(Product $product): JsonResponse
+    {
+        if ($product->is_preorder) {
+            return response()->json(['message' => 'Impossibile incrementare lo stock.'], 422);
+        }
+
+        $product->increment('stock');
+
+        return response()->json(['stock' => $product->stock]);
+    }
+
     public function destroy(Product $product): JsonResponse
     {
         foreach ($product->images as $image) {

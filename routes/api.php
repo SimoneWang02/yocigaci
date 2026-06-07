@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/categories/reorder', [App\Http\Controllers\Admin\CategoryController::class, 'reorder']);
     Route::apiResource('/products', App\Http\Controllers\Admin\ProductController::class);
     Route::patch('/products/{product}/decrement-stock', [App\Http\Controllers\Admin\ProductController::class, 'decrementStock']);
+    Route::patch('/products/{product}/increment-stock', [App\Http\Controllers\Admin\ProductController::class, 'incrementStock']);
     Route::post('/products/{product}/images', [App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
     Route::patch('/products/{product}/images/reorder', [App\Http\Controllers\Admin\ProductController::class, 'reorderImages']);
     Route::delete('/products/{product}/images/{imageId}', [App\Http\Controllers\Admin\ProductController::class, 'deleteImage']);
