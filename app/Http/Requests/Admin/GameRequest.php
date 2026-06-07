@@ -24,7 +24,6 @@ class GameRequest extends FormRequest
         return [
             'name' => $nameRules,
             'slug' => $slugRules,
-            'navbar_columns' => ['integer', 'min:1', 'max:4'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ];

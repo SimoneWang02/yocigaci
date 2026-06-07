@@ -143,13 +143,7 @@ export function Header() {
                                                 </div>
                                                 <div className="flex gap-8">
                                                     {Array.from(
-                                                        {
-                                                            length: Math.max(
-                                                                game.navbar_columns ||
-                                                                    1,
-                                                                1,
-                                                            ),
-                                                        },
+                                                        { length: 2 },
                                                         (_, i) => i + 1,
                                                     ).map((col) => {
                                                         const colCats =

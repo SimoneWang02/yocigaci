@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Pokémon',
                 'slug' => 'pokemon',
-                'navbar_columns' => 2,
                 'sort_order' => 1,
                 'categories' => [
                     ['name' => 'Booster Box', 'slug' => 'pokemon-booster-box'],
@@ -34,7 +33,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'One Piece',
                 'slug' => 'one-piece',
-                'navbar_columns' => 2,
                 'sort_order' => 2,
                 'categories' => [
                     ['name' => 'Booster Box', 'slug' => 'one-piece-booster-box'],
@@ -45,7 +43,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Magic: The Gathering',
                 'slug' => 'magic',
-                'navbar_columns' => 2,
                 'sort_order' => 3,
                 'categories' => [
                     ['name' => 'Booster Box', 'slug' => 'magic-booster-box'],
@@ -56,7 +53,6 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Riftbound',
                 'slug' => 'riftbound',
-                'navbar_columns' => 1,
                 'sort_order' => 4,
                 'categories' => [
                     ['name' => 'Booster Box', 'slug' => 'riftbound-booster-box'],

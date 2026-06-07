@@ -13,7 +13,6 @@ class GameResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'navbar_columns' => $this->navbar_columns,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Game extends Model
 {
-    protected $fillable = ['name', 'slug', 'navbar_columns', 'is_active', 'sort_order'];
+    protected $fillable = ['name', 'slug', 'is_active', 'sort_order'];
 
     protected $casts = ['is_active' => 'boolean'];
 

@@ -305,7 +305,7 @@ function GameSection({
     onCancelEdit,
     onReorder,
 }) {
-    const numCols = game.navbar_columns ?? 1;
+    const numCols = 2;
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     );
@@ -322,7 +322,7 @@ function GameSection({
                 .map((c) => c.id);
         }
         return result;
-    }, [categories, numCols]);
+    }, [categories]);
 
     const findColInItems = (id, items) => {
         for (let col = 1; col <= numCols; col++) {
