@@ -1,7 +1,11 @@
 ## TODO
 
-- assistenza whatsapp, bisogna mettere il numero giusto
+- prodotti, icona +1
 
-- controllare i fallbacks e robe hard coded
+- carrello, non si possono mischiare prodotti con preordini
+
+- migliorare dashboard
+
+- "tracking ordine" nel footer, simile a JPY
 
 ## BUG

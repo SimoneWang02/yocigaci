@@ -65,7 +65,7 @@ export default function Login() {
                         <img
                             src="/images/square_logo.svg"
                             alt="Yocigaci"
-                            className="h-16 w-auto"
+                            className="h-36 w-auto"
                         />
                     </Link>
                 </div>

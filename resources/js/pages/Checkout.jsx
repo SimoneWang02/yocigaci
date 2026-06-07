@@ -422,9 +422,11 @@ export default function Checkout() {
         queryKey: ["public-settings"],
         queryFn: getSettings,
     });
-    const shippingThreshold = settingsData?.data?.shipping_free_threshold ?? null;
+    const shippingThreshold =
+        settingsData?.data?.shipping_free_threshold ?? null;
     const shippingCost = settingsData?.data?.shipping_cost ?? null;
-    const shippingConfigured = shippingThreshold !== null && shippingCost !== null;
+    const shippingConfigured =
+        shippingThreshold !== null && shippingCost !== null;
 
     const isPickup = deliveryMethod === "pickup";
     const hasMixedCart =
@@ -433,7 +435,9 @@ export default function Checkout() {
     const shipping = isPickup
         ? 0
         : shippingConfigured
-          ? subtotal >= shippingThreshold ? 0 : shippingCost
+          ? subtotal >= shippingThreshold
+              ? 0
+              : shippingCost
           : null;
     const total = subtotal + (shipping ?? 0);
 
@@ -772,7 +776,9 @@ export default function Checkout() {
                             <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mb-3">
                                 <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                                 <p className="text-xs text-amber-800 leading-snug">
-                                    Il carrello contiene preordini: l&apos;intero ordine verra&apos; spedito quando tutti i prodotti saranno disponibili.
+                                    Il carrello contiene preordini:
+                                    l&apos;intero ordine verra&apos; spedito
+                                    quando tutti i prodotti saranno disponibili.
                                 </p>
                             </div>
                         )}
@@ -798,7 +804,7 @@ export default function Checkout() {
                                     }
                                 >
                                     {shipping === null
-                                        ? "—"
+                                        ? "-"
                                         : shipping === 0
                                           ? isPickup
                                               ? "Gratuito"
