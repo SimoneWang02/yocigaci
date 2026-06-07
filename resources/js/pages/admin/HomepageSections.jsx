@@ -827,6 +827,73 @@ function WhatsAppSettingsSection() {
     );
 }
 
+// ─── Email di assistenza ─────────────────────────────────────────────────────────
+
+function SupportEmailSection() {
+    const qc = useQueryClient();
+    const [email, setEmail] = useState("");
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setEmail(data.data?.support_email ?? "assistenza.yocigaci@gmail.com");
+        setHydrated(true);
+    }
+
+    const save = useMutation({
+        mutationFn: () =>
+            adminUpdateSettings({ support_email: email.trim() || null }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Email di assistenza
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Indirizzo mostrato nel footer delle email transazionali.
+                    Lascia vuoto per usare il valore predefinito (assistenza.yocigaci@gmail.com).
+                </p>
+            </div>
+
+            <Input
+                label="Email assistenza"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="assistenza.yocigaci@gmail.com"
+                maxLength={100}
+            />
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending}
+                >
+                    {save.isPending ? "Salvataggio…" : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Spedizione ──────────────────────────────────────────────────────────────────
 
 function ShippingSettingsSection() {
@@ -1115,6 +1182,9 @@ export default function AdminHomepageSections() {
 
             {/* Spedizione */}
             <ShippingSettingsSection />
+
+            {/* Email di assistenza */}
+            <SupportEmailSection />
         </div>
     );
 }

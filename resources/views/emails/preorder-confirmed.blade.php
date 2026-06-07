@@ -100,7 +100,7 @@
     </div>
 
     <div class="footer">
-        <p>© {{ date('Y') }} Yocigaci &nbsp;·&nbsp; Per assistenza: <a href="mailto:assistenza-yocigaci@gmail.com">assistenza-yocigaci@gmail.com</a></p>
+        <p>© {{ date('Y') }} Yocigaci &nbsp;·&nbsp; Per assistenza: <a href="mailto:{{ \App\Models\Setting::getValue('support_email', 'assistenza.yocigaci@gmail.com') }}">{{ \App\Models\Setting::getValue('support_email', 'assistenza.yocigaci@gmail.com') }}</a></p>
     </div>
 
 </div>

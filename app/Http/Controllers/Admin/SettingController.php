@@ -37,6 +37,7 @@ class SettingController extends Controller
                 'shipping_cost' => Setting::getValue('shipping_cost') !== null ? (float) Setting::getValue('shipping_cost') : null,
                 'shipping_free_threshold' => Setting::getValue('shipping_free_threshold') !== null ? (float) Setting::getValue('shipping_free_threshold') : null,
                 'whatsapp_number' => Setting::getValue('whatsapp_number'),
+                'support_email' => Setting::getValue('support_email', 'assistenza.yocigaci@gmail.com'),
                 'opening_hours' => $openingHours,
             ],
         ]);
@@ -51,6 +52,7 @@ class SettingController extends Controller
             'shipping_cost' => 'sometimes|numeric|min:0|max:9999',
             'shipping_free_threshold' => 'sometimes|numeric|min:0|max:99999',
             'whatsapp_number' => 'sometimes|nullable|string|max:30',
+            'support_email' => 'sometimes|nullable|email|max:100',
             'opening_hours' => 'sometimes|array|size:7',
             'opening_hours.*.day' => 'required|string|max:20',
             'opening_hours.*.hours' => 'required|string|max:100',
