@@ -58,8 +58,9 @@
         <div class="tracking-box">
             <p class="tracking-label">Codice di tracciamento</p>
             <p class="tracking-code">{{ $order->tracking_code }}</p>
+            <a href="https://www.dhl.com/it-it/home/tracking.html?tracking-id={{ $order->tracking_code }}" style="display:inline-block;margin-top:16px;background:#15803d;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 24px;border-radius:8px;letter-spacing:0.3px;">Traccia su DHL</a>
         </div>
-        <p class="info-text">Usa il codice sopra sul sito del corriere per seguire la spedizione in tempo reale. Di solito le consegne avvengono entro <strong style="color:#1a1a2e;">2–5 giorni lavorativi</strong>.</p>
+        <p class="info-text">Clicca il pulsante sopra per seguire la spedizione in tempo reale. Di solito le consegne avvengono entro <strong style="color:#1a1a2e;">2-5 giorni lavorativi</strong>.</p>
         @else
         <p class="info-text" style="margin-top: 16px;">Ti invieremo il codice di tracciamento non appena sarà disponibile. Di solito le consegne avvengono entro <strong style="color:#1a1a2e;">2–5 giorni lavorativi</strong>.</p>
         @endif

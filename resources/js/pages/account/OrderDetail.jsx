@@ -106,11 +106,21 @@ export default function OrderDetail() {
                     {order.tracking_code && (
                         <div>
                             <SectionHeader icon={Truck} title="Tracciamento" />
-                            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                                <Truck className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                <span className="text-sm font-mono font-semibold text-green-800">
-                                    {order.tracking_code}
-                                </span>
+                            <div className="flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <Truck className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                    <span className="text-sm font-mono font-semibold text-green-800 truncate">
+                                        {order.tracking_code}
+                                    </span>
+                                </div>
+                                <a
+                                    href={`https://www.dhl.com/it-it/home/tracking.html?tracking-id=${order.tracking_code}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-shrink-0 text-xs font-semibold text-green-700 border border-green-300 bg-white rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors"
+                                >
+                                    Traccia su DHL
+                                </a>
                             </div>
                         </div>
                     )}
