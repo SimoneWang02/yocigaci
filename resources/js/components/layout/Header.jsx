@@ -57,6 +57,68 @@ export function Header() {
         refetchInterval: 60_000,
     });
     const newOrdersCount = newOrdersData?.count ?? 0;
+
+    const prevOrdersCountRef = useRef(null);
+    const tabBlinkRef = useRef(null);
+    const originalTitleRef = useRef(document.title);
+
+    const triggerOrderNotification = (count = newOrdersCount || 1) => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const playNote = (freq, startTime, duration) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.5, startTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+            for (let i = 0; i < 3; i++) {
+                const offset = i * 1.5;
+                playNote(587, ctx.currentTime + offset, 0.6);
+                playNote(880, ctx.currentTime + offset + 0.18, 0.8);
+            }
+        } catch (_) {}
+
+        if (tabBlinkRef.current) clearInterval(tabBlinkRef.current);
+        let blink = false;
+        originalTitleRef.current = document.title;
+        tabBlinkRef.current = setInterval(() => {
+            document.title = blink
+                ? originalTitleRef.current
+                : `(${count}) Nuovo ordine!`;
+            blink = !blink;
+        }, 800);
+    };
+
+    useEffect(() => {
+        if (prevOrdersCountRef.current === null) {
+            prevOrdersCountRef.current = newOrdersCount;
+            return;
+        }
+        if (newOrdersCount > prevOrdersCountRef.current) {
+            triggerOrderNotification(newOrdersCount);
+        }
+        prevOrdersCountRef.current = newOrdersCount;
+    }, [newOrdersCount]);
+
+    // ferma il blink quando la finestra torna in focus
+    useEffect(() => {
+        const stopBlink = () => {
+            if (tabBlinkRef.current) {
+                clearInterval(tabBlinkRef.current);
+                tabBlinkRef.current = null;
+                document.title = originalTitleRef.current;
+            }
+        };
+        window.addEventListener("focus", stopBlink);
+        return () => window.removeEventListener("focus", stopBlink);
+    }, []);
     const cardtraderLabel =
         settingsData?.data?.cardtrader_label || "CardTrader";
     const cardtraderUrl = settingsData?.data?.cardtrader_url || null;

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SERVER="ubuntu@51.91.159.151"
+SERVER="deploy@204.168.218.197"
 APP_DIR="/var/www/yocigaci"
 
 echo "==> Deploy yocigaci.com"
