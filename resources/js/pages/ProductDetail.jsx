@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet-async";
 import { getProduct, getRelatedProducts } from "../api/products";
 import { useCartStore } from "../store/cartStore";
 import { Badge } from "../components/ui/Badge";
+import { parseProductName, LanguageBadge } from "../components/ui/LanguageBadge";
 import { Button } from "../components/ui/Button";
 import { PageSpinner } from "../components/ui/Spinner";
 import ProductCarousel from "../components/home/ProductCarousel";
@@ -69,6 +70,7 @@ export default function ProductDetail() {
         setTimeout(() => setAdded(false), 2000);
     };
 
+    const { cleanName, langCode } = parseProductName(product.name);
     const metaTitle = `${product.name} - Yocigaci`;
     const metaDescription = product.description
         ? product.description.slice(0, 155)
@@ -112,7 +114,7 @@ export default function ProductDetail() {
                     )}
                     <span>/</span>
                     <span className="text-gray-800 truncate">
-                        {product.name}
+                        {cleanName}
                     </span>
                 </nav>
 
@@ -169,8 +171,9 @@ export default function ProductDetail() {
                             )}
                         </div>
 
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                            {product.name}
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3 flex-wrap">
+                            {cleanName}
+                            {langCode && <LanguageBadge code={langCode} />}
                         </h1>
 
                         <p className="text-4xl font-extrabold text-indigo-700 mb-1">

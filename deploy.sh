@@ -31,11 +31,14 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+echo "--> Storage link"
+php artisan storage:link --force
+
 echo "--> Maintenance off"
 php artisan up
 
 echo "--> Permessi"
-sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chown -R deploy:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 
 echo "--> Riavvio worker"

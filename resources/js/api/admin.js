@@ -25,9 +25,7 @@ export const adminIncrementStock = (id) => api.patch(`/admin/products/${id}/incr
 export const adminUploadImage = (id, file) => {
   const form = new FormData()
   form.append('image', file)
-  return api.post(`/admin/products/${id}/images`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }).then((r) => r.data)
+  return api.post(`/admin/products/${id}/images`, form).then((r) => r.data)
 }
 export const adminReorderImages = (id, order) =>
   api.patch(`/admin/products/${id}/images/reorder`, { order }).then((r) => r.data)
@@ -46,7 +44,7 @@ export const adminGetCarouselBanners = () => api.get('/admin/carousel-banners').
 export const adminUploadCarouselBanner = (file) => {
   const form = new FormData()
   form.append('image', file)
-  return api.post('/admin/carousel-banners', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data)
+  return api.post('/admin/carousel-banners', form).then((r) => r.data)
 }
 export const adminUpdateCarouselBanner = (id, data) => api.patch(`/admin/carousel-banners/${id}`, data).then((r) => r.data)
 export const adminDeleteCarouselBanner = (id) => api.delete(`/admin/carousel-banners/${id}`).then((r) => r.data)

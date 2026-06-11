@@ -8,6 +8,7 @@ import { getSettings } from "../api/products";
 import { getAddresses, saveAddress, deleteAddress } from "../api/addresses";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { parseProductName, LanguageBadge } from "../components/ui/LanguageBadge";
 import {
     ShoppingCart,
     Lock,
@@ -771,7 +772,9 @@ export default function Checkout() {
                         )}
 
                         <div className="space-y-3 mb-4">
-                            {items.map((item) => (
+                            {items.map((item) => {
+                                const { cleanName, langCode } = parseProductName(item.name);
+                                return (
                                 <div key={item.id} className="flex gap-3">
                                     {item.primary_image?.url ? (
                                         <img
@@ -783,9 +786,12 @@ export default function Checkout() {
                                         <div className="w-11 h-14 bg-gray-100 rounded-lg flex-shrink-0" />
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-gray-800 font-medium leading-snug truncate">
-                                            {item.name}
-                                        </p>
+                                        <div className="flex items-center gap-1 min-w-0 mb-0.5">
+                                            <p className="text-xs text-gray-800 font-medium leading-snug truncate">
+                                                {cleanName}
+                                            </p>
+                                            {langCode && <LanguageBadge code={langCode} />}
+                                        </div>
                                         {item.is_preorder && (
                                             <span className="inline-block text-xs text-amber-600 bg-amber-50 rounded px-1 py-0.5 mt-0.5">
                                                 Preordine
@@ -802,7 +808,8 @@ export default function Checkout() {
                                             .replace(".", ",")}
                                     </p>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {hasMixedCart && (
