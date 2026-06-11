@@ -171,12 +171,12 @@ export default function ProductDetail() {
                         </div>
 
                         <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                            {product.name}
                             {product.language && (
-                                <span className="inline-flex align-middle mr-2">
+                                <span className="inline-flex align-middle ml-2">
                                     <LanguageBadge code={product.language} />
                                 </span>
                             )}
-                            {product.name}
                         </h1>
 
                         <p className="text-4xl font-extrabold text-indigo-700 mb-1">
