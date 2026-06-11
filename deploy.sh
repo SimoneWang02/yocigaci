@@ -31,6 +31,9 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+echo "--> Maintenance off"
+php artisan up
+
 echo "--> Permessi"
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
@@ -38,9 +41,6 @@ sudo chmod -R 775 storage bootstrap/cache
 echo "--> Riavvio worker"
 php artisan queue:restart
 sudo supervisorctl restart yocigaci-worker:*
-
-echo "--> Maintenance off"
-php artisan up
 
 echo "==> Deploy completato"
 REMOTE
