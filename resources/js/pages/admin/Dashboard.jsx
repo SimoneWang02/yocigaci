@@ -168,7 +168,8 @@ export default function AdminDashboard() {
         prev_avg_order = 0,
         orders_to_ship = 0,
         orders_to_pickup = 0,
-        orders_preorder = 0,
+        orders_preorder_ship = 0,
+        orders_preorder_pickup = 0,
         orders_completed = 0,
         expired_preorders = [],
         chart = [],
@@ -222,7 +223,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Ordini da gestire */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Link
                     to="/admin/ordini?status=paid"
                     className="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:bg-gray-50 transition-colors"
@@ -256,7 +257,7 @@ export default function AdminDashboard() {
                     </div>
                 </Link>
                 <Link
-                    to="/admin/ordini?status=preorder_confirmed"
+                    to="/admin/ordini?status=preorder_confirmed&delivery_method=shipping"
                     className="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:bg-gray-50 transition-colors"
                 >
                     <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
@@ -264,10 +265,26 @@ export default function AdminDashboard() {
                     </div>
                     <div className="min-w-0">
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                            Preordini
+                            Preordini Sped.
                         </p>
                         <p className="text-2xl font-bold text-gray-900 leading-tight">
-                            {orders_preorder}
+                            {orders_preorder_ship}
+                        </p>
+                    </div>
+                </Link>
+                <Link
+                    to="/admin/ordini?status=preorder_confirmed&delivery_method=pickup"
+                    className="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+                >
+                    <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+                        <Store className="w-5 h-5 text-violet-500" />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                            Preordini Ritiro
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900 leading-tight">
+                            {orders_preorder_pickup}
                         </p>
                     </div>
                 </Link>

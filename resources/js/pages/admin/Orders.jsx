@@ -662,6 +662,7 @@ function OrderDrawer({ orderId, onClose }) {
 export default function AdminOrders() {
     const [searchParams] = useSearchParams();
     const [filterStatus, setFilterStatus] = useState(() => searchParams.get("status") ?? "");
+    const [filterDelivery, setFilterDelivery] = useState(() => searchParams.get("delivery_method") ?? "");
     const [search, setSearch] = useState("");
     const [searchInput, setSearchInput] = useState("");
     const [page, setPage] = useState(1);
@@ -683,10 +684,11 @@ export default function AdminOrders() {
     }, [searchInput]);
 
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-orders", filterStatus, search, page],
+        queryKey: ["admin-orders", filterStatus, filterDelivery, search, page],
         queryFn: () =>
             adminGetOrders({
                 ...(filterStatus ? { status: filterStatus } : {}),
+                ...(filterDelivery ? { delivery_method: filterDelivery } : {}),
                 ...(search ? { search } : {}),
                 page,
             }),

@@ -46,6 +46,9 @@ class OrderController extends Controller
         if ($request->type) {
             $query->where('type', $request->type);
         }
+        if ($request->delivery_method) {
+            $query->where('delivery_method', $request->delivery_method);
+        }
         if ($request->search) {
             $q = $request->search;
             $query->where(function ($sub) use ($q) {

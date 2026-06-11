@@ -34,10 +34,13 @@ class DashboardController extends Controller
         $prevAvgOrder    = $prevOrdersCount > 0 ? round($prevRevenue / $prevOrdersCount, 2) : 0.0;
 
         // Ordini da gestire (globale, indipendente dal periodo)
-        $ordersToShip    = Order::where('status', 'paid')->count();
-        $ordersToPickup  = Order::where('status', 'ready_for_pickup')->count();
-        $ordersPreorder  = Order::whereIn('status', ['preorder_confirmed', 'preorder_ready'])->count();
-        $ordersCompleted = Order::whereIn('status', ['shipped', 'picked_up'])->count();
+        $ordersToShip          = Order::where('status', 'paid')->count();
+        $ordersToPickup        = Order::where('status', 'ready_for_pickup')->count();
+        $preorderBase          = Order::whereIn('status', ['preorder_confirmed', 'preorder_ready']);
+        $ordersPreorder        = (clone $preorderBase)->count();
+        $ordersPreorderShip    = (clone $preorderBase)->where('delivery_method', 'shipping')->count();
+        $ordersPreorderPickup  = (clone $preorderBase)->where('delivery_method', 'pickup')->count();
+        $ordersCompleted       = Order::whereIn('status', ['shipped', 'picked_up'])->count();
 
         $expiredPreorders = Product::where('is_active', true)
             ->where('is_preorder', true)
@@ -53,10 +56,12 @@ class DashboardController extends Controller
             'prev_revenue'      => $prevRevenue,
             'prev_orders_count' => $prevOrdersCount,
             'prev_avg_order'    => $prevAvgOrder,
-            'orders_to_ship'    => $ordersToShip,
-            'orders_to_pickup'  => $ordersToPickup,
-            'orders_preorder'   => $ordersPreorder,
-            'orders_completed'  => $ordersCompleted,
+            'orders_to_ship'         => $ordersToShip,
+            'orders_to_pickup'       => $ordersToPickup,
+            'orders_preorder'        => $ordersPreorder,
+            'orders_preorder_ship'   => $ordersPreorderShip,
+            'orders_preorder_pickup' => $ordersPreorderPickup,
+            'orders_completed'       => $ordersCompleted,
             'expired_preorders' => $expiredPreorders,
             'chart'             => $this->chartData($from, $to, $chartGroupBy),
         ]);
