@@ -60,7 +60,7 @@ export function CartDrawer() {
                         </div>
                     ) : (
                         items.map((item) => {
-                            const { cleanName, langCode } = parseProductName(item.name);
+                            const { cleanName, langCode, langPosition } = parseProductName(item.name);
                             return (
                             <div
                                 key={item.id}
@@ -82,10 +82,11 @@ export function CartDrawer() {
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 min-w-0">
+                                        {langCode && langPosition === 'prefix' && <LanguageBadge code={langCode} />}
                                         <p className="text-sm font-medium text-gray-800 truncate">
                                             {cleanName}
                                         </p>
-                                        {langCode && <LanguageBadge code={langCode} />}
+                                        {langCode && langPosition === 'suffix' && <LanguageBadge code={langCode} />}
                                     </div>
                                     {item.is_preorder && (
                                         <span className="text-xs text-amber-600 font-medium">

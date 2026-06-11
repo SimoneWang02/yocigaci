@@ -773,7 +773,7 @@ export default function Checkout() {
 
                         <div className="space-y-3 mb-4">
                             {items.map((item) => {
-                                const { cleanName, langCode } = parseProductName(item.name);
+                                const { cleanName, langCode, langPosition } = parseProductName(item.name);
                                 return (
                                 <div key={item.id} className="flex gap-3">
                                     {item.primary_image?.url ? (
@@ -787,10 +787,11 @@ export default function Checkout() {
                                     )}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1 min-w-0 mb-0.5">
+                                            {langCode && langPosition === 'prefix' && <LanguageBadge code={langCode} />}
                                             <p className="text-xs text-gray-800 font-medium leading-snug truncate">
                                                 {cleanName}
                                             </p>
-                                            {langCode && <LanguageBadge code={langCode} />}
+                                            {langCode && langPosition === 'suffix' && <LanguageBadge code={langCode} />}
                                         </div>
                                         {item.is_preorder && (
                                             <span className="inline-block text-xs text-amber-600 bg-amber-50 rounded px-1 py-0.5 mt-0.5">

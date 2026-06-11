@@ -70,7 +70,7 @@ export default function ProductDetail() {
         setTimeout(() => setAdded(false), 2000);
     };
 
-    const { cleanName, langCode } = parseProductName(product.name);
+    const { cleanName, langCode, langPosition } = parseProductName(product.name);
     const metaTitle = `${product.name} - Yocigaci`;
     const metaDescription = product.description
         ? product.description.slice(0, 155)
@@ -172,8 +172,13 @@ export default function ProductDetail() {
                         </div>
 
                         <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                            {langCode && langPosition === 'prefix' && (
+                                <span className="inline-flex align-middle mr-2">
+                                    <LanguageBadge code={langCode} />
+                                </span>
+                            )}
                             {cleanName}
-                            {langCode && (
+                            {langCode && langPosition === 'suffix' && (
                                 <span className="inline-flex align-middle ml-2">
                                     <LanguageBadge code={langCode} />
                                 </span>
