@@ -37,6 +37,7 @@ class ProductRequest extends FormRequest
         return [
             'game_id' => [$req, 'exists:games,id'],
             'category_id' => [$req, 'exists:categories,id'],
+            'language' => ['nullable', 'string', 'max:10'],
             'name' => [$req, 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => [$req, 'numeric', 'min:0'],

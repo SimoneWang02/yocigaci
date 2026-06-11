@@ -15,6 +15,7 @@ import {
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
+import { LANGUAGES } from "../../components/ui/LanguageBadge";
 import { PageSpinner } from "../../components/ui/Spinner";
 
 export default function ProductForm() {
@@ -27,6 +28,7 @@ export default function ProductForm() {
     const [form, setForm] = useState({
         game_id: "",
         category_id: "",
+        language: "ENG",
         name: "",
         description: "",
         price: "",
@@ -64,6 +66,7 @@ export default function ProductForm() {
             setForm({
                 game_id: String(p.game?.id ?? p.game_id ?? ""),
                 category_id: String(p.category?.id ?? p.category_id ?? ""),
+                language: p.language ?? "ENG",
                 name: p.name ?? "",
                 description: p.description ?? "",
                 price: String(p.price ?? ""),
@@ -186,7 +189,7 @@ export default function ProductForm() {
                             required
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <Select
                             label="Gioco"
                             value={form.game_id}
@@ -216,6 +219,20 @@ export default function ProductForm() {
                             {categories.map((c) => (
                                 <option key={c.id} value={c.id}>
                                     {c.name}
+                                </option>
+                            ))}
+                        </Select>
+                        <Select
+                            label="Lingua"
+                            value={form.language}
+                            onChange={(e) =>
+                                setForm({ ...form, language: e.target.value })
+                            }
+                        >
+                            <option value="">Nessuna</option>
+                            {LANGUAGES.map((l) => (
+                                <option key={l.code} value={l.code}>
+                                    {l.code} - {l.label}
                                 </option>
                             ))}
                         </Select>

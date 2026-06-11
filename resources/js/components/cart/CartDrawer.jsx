@@ -7,7 +7,7 @@ import {
     ShoppingCart,
 } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
-import { parseProductName, LanguageBadge } from "../ui/LanguageBadge";
+import { LanguageBadge } from "../ui/LanguageBadge";
 import { getSettings } from "../../api/products";
 import { Button } from "../ui/Button";
 
@@ -59,9 +59,7 @@ export function CartDrawer() {
                             <p>Il carrello è vuoto</p>
                         </div>
                     ) : (
-                        items.map((item) => {
-                            const { cleanName, langCode, langPosition } = parseProductName(item.name);
-                            return (
+                        items.map((item) => (
                             <div
                                 key={item.id}
                                 className="flex gap-3 py-3 border-b border-gray-100 last:border-0"
@@ -69,7 +67,7 @@ export function CartDrawer() {
                                 {item.primary_image?.url ? (
                                     <img
                                         src={item.primary_image.url}
-                                        alt={cleanName}
+                                        alt={item.name}
                                         className="w-16 h-20 object-cover rounded"
                                     />
                                 ) : (
@@ -82,11 +80,10 @@ export function CartDrawer() {
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 min-w-0">
-                                        {langCode && langPosition === 'prefix' && <LanguageBadge code={langCode} />}
+                                        {item.language && <LanguageBadge code={item.language} />}
                                         <p className="text-sm font-medium text-gray-800 truncate">
-                                            {cleanName}
+                                            {item.name}
                                         </p>
-                                        {langCode && langPosition === 'suffix' && <LanguageBadge code={langCode} />}
                                     </div>
                                     {item.is_preorder && (
                                         <span className="text-xs text-amber-600 font-medium">
@@ -138,7 +135,7 @@ export function CartDrawer() {
                                     </div>
                                 </div>
                             </div>
-                        );})
+                        ))
                     )}
                 </div>
 

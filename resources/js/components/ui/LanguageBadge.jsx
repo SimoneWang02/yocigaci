@@ -8,27 +8,19 @@ import KR from 'country-flag-icons/react/3x2/KR';
 import CN from 'country-flag-icons/react/3x2/CN';
 import PT from 'country-flag-icons/react/3x2/PT';
 
-const FLAG_MAP = {
-    ITA: { Flag: IT, label: 'Italiano' },
-    ENG: { Flag: GB, label: 'English' },
-    JAP: { Flag: JP, label: 'Japanese' },
-    FRA: { Flag: FR, label: 'Français' },
-    DEU: { Flag: DE, label: 'Deutsch' },
-    ESP: { Flag: ES, label: 'Español' },
-    KOR: { Flag: KR, label: '한국어' },
-    CHN: { Flag: CN, label: '中文' },
-    POR: { Flag: PT, label: 'Português' },
-};
+export const LANGUAGES = [
+    { code: 'ENG', label: 'English',    Flag: GB },
+    { code: 'ITA', label: 'Italiano',   Flag: IT },
+    { code: 'JAP', label: 'Japanese',   Flag: JP },
+    { code: 'FRA', label: 'Français',   Flag: FR },
+    { code: 'DEU', label: 'Deutsch',    Flag: DE },
+    { code: 'ESP', label: 'Español',    Flag: ES },
+    { code: 'KOR', label: '한국어',      Flag: KR },
+    { code: 'CHN', label: '中文',        Flag: CN },
+    { code: 'POR', label: 'Português',  Flag: PT },
+];
 
-export function parseProductName(name) {
-    // suffisso: "Charizard ex [ENG]"
-    let match = name?.match(/^(.*?)\s*\[([A-Z]{2,4})\]\s*$/);
-    if (match) return { cleanName: match[1].trim(), langCode: match[2], langPosition: 'suffix' };
-    // prefisso: "[ENG] Charizard ex"
-    match = name?.match(/^\[([A-Z]{2,4})\]\s*(.*?)\s*$/);
-    if (match) return { cleanName: match[2].trim(), langCode: match[1], langPosition: 'prefix' };
-    return { cleanName: name ?? '', langCode: null, langPosition: null };
-}
+const FLAG_MAP = Object.fromEntries(LANGUAGES.map((l) => [l.code, l]));
 
 export function LanguageBadge({ code }) {
     const entry = FLAG_MAP[code];

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Image as ImageIcon, Check } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { Badge } from "../ui/Badge";
-import { parseProductName, LanguageBadge } from "../ui/LanguageBadge";
+import { LanguageBadge } from "../ui/LanguageBadge";
 
 export function ProductCard({ product }) {
     const { addItem, openCart } = useCartStore();
@@ -12,7 +12,7 @@ export function ProductCard({ product }) {
 
     const images = product.images ?? [product.primary_image].filter(Boolean);
     const currentImage = images[imageIdx];
-    const { cleanName, langCode, langPosition } = parseProductName(product.name);
+
 
     const handleAddToCart = () => {
         addItem(product);
@@ -67,17 +67,12 @@ export function ProductCard({ product }) {
             <div className="flex flex-1 flex-col px-2 pt-4">
                 <Link to={`/prodotti/${product.slug}`}>
                     <h3 className="mb-2 line-clamp-2 text-center text-sm font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600">
-                        {langCode && langPosition === 'prefix' && (
+                        {product.language && (
                             <span className="inline-flex align-middle mr-1.5">
-                                <LanguageBadge code={langCode} />
+                                <LanguageBadge code={product.language} />
                             </span>
                         )}
-                        {cleanName}
-                        {langCode && langPosition === 'suffix' && (
-                            <span className="inline-flex align-middle ml-1.5">
-                                <LanguageBadge code={langCode} />
-                            </span>
-                        )}
+                        {product.name}
                     </h3>
                 </Link>
 
