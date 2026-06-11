@@ -1,6 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getGames } from "../../api/products";
+import { getGames, getProductFacets } from "../../api/products";
+import { LANGUAGES } from "../ui/LanguageBadge";
 
 export function ProductFilters() {
     const navigate = useNavigate();
@@ -13,10 +14,33 @@ export function ProductFilters() {
     });
     const games = data?.data ?? [];
 
+    const currentLanguage = params.get("language") ?? "";
+    const currentSort = params.get("sort") ?? "";
+    const isPreorder = params.get("preorder") === "true";
+    const currentGame = gameSlug ?? "";
+    const currentCategory = categorySlug ?? "";
+
+    const facetParams = {
+        game: currentGame || undefined,
+        category: currentCategory || undefined,
+        preorder: isPreorder ? "true" : undefined,
+        search: params.get("search") || undefined,
+    };
+
+    const { data: facetsData } = useQuery({
+        queryKey: ["product-facets", facetParams],
+        queryFn: () => getProductFacets(facetParams),
+        staleTime: 30_000,
+    });
+    const gameCounts = facetsData?.games ?? {};
+    const categoryCounts = facetsData?.categories ?? {};
+    const languageCounts = facetsData?.languages ?? {};
+
     const preservedQuery = () => {
         const next = new URLSearchParams();
         if (params.get("sort")) next.set("sort", params.get("sort"));
         if (params.get("preorder")) next.set("preorder", params.get("preorder"));
+        if (params.get("language")) next.set("language", params.get("language"));
         return next.toString();
     };
 
@@ -41,16 +65,14 @@ export function ProductFilters() {
         setParams(next);
     };
 
-    const currentGame = gameSlug ?? "";
-    const currentCategory = categorySlug ?? "";
-    const currentSort = params.get("sort") ?? "";
-    const isPreorder = params.get("preorder") === "true";
-
     const selectedGame = games.find((g) => g.slug === currentGame);
     const categories = selectedGame?.categories ?? [];
 
+    const availableLanguages = LANGUAGES.filter((l) => languageCounts[l.code] > 0);
+
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-5">
+            {/* Gioco */}
             <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                     Gioco
@@ -58,22 +80,26 @@ export function ProductFilters() {
                 <div className="space-y-1">
                     <button
                         onClick={() => selectGame("")}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${!currentGame ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${!currentGame ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
                     >
-                        Tutti
+                        <span>Tutti</span>
                     </button>
                     {games.map((game) => (
                         <button
                             key={game.id}
                             onClick={() => selectGame(game.slug)}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${currentGame === game.slug ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${currentGame === game.slug ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
                         >
-                            {game.name}
+                            <span>{game.name}</span>
+                            {gameCounts[game.id] != null && (
+                                <span className="text-xs text-gray-400">({gameCounts[game.id]})</span>
+                            )}
                         </button>
                     ))}
                 </div>
             </div>
 
+            {/* Categoria */}
             {categories.length > 0 && (
                 <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -82,23 +108,54 @@ export function ProductFilters() {
                     <div className="space-y-1">
                         <button
                             onClick={() => selectCategory("")}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${!currentCategory ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${!currentCategory ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
                         >
-                            Tutte
+                            <span>Tutte</span>
                         </button>
                         {categories.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => selectCategory(cat.slug)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${currentCategory === cat.slug ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${currentCategory === cat.slug ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
                             >
-                                {cat.name}
+                                <span>{cat.name}</span>
+                                {categoryCounts[cat.id] != null && (
+                                    <span className="text-xs text-gray-400">({categoryCounts[cat.id]})</span>
+                                )}
                             </button>
                         ))}
                     </div>
                 </div>
             )}
 
+            {/* Lingua */}
+            {availableLanguages.length > 0 && (
+                <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        Lingua
+                    </p>
+                    <div className="space-y-1">
+                        <button
+                            onClick={() => setQueryParam("language", "")}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${!currentLanguage ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                        >
+                            <span>Tutte</span>
+                        </button>
+                        {availableLanguages.map((l) => (
+                            <button
+                                key={l.code}
+                                onClick={() => setQueryParam("language", currentLanguage === l.code ? "" : l.code)}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${currentLanguage === l.code ? "bg-indigo-50 text-indigo-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                            >
+                                <span>{l.label}</span>
+                                <span className="text-xs text-gray-400">({languageCounts[l.code]})</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Ordinamento */}
             <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                     Ordinamento
@@ -111,10 +168,11 @@ export function ProductFilters() {
                     <option value="">Rilevanza</option>
                     <option value="price_asc">Prezzo crescente</option>
                     <option value="price_desc">Prezzo decrescente</option>
-                    <option value="newest">Più recenti</option>
+                    <option value="newest">Piu recenti</option>
                 </select>
             </div>
 
+            {/* Preordini */}
             <div>
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -125,9 +183,7 @@ export function ProductFilters() {
                         }
                         className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                     />
-                    <span className="text-sm text-gray-700">
-                        Solo Preordini
-                    </span>
+                    <span className="text-sm text-gray-700">Solo Preordini</span>
                 </label>
             </div>
         </div>

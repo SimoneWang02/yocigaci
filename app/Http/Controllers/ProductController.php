@@ -29,6 +29,9 @@ class ProductController extends Controller
         if ($request->category) {
             $query->byCategory($request->category);
         }
+        if ($request->language) {
+            $query->where('language', $request->language);
+        }
         if ($request->preorder) {
             $query->preorders();
         }
@@ -100,6 +103,33 @@ class ProductController extends Controller
             ->get();
 
         return ProductResource::collection($related);
+    }
+
+    public function facets(Request $request): JsonResponse
+    {
+        $base = fn() => Product::active();
+
+        $gameCounts = $base()->selectRaw('game_id, count(*) as count')
+            ->groupBy('game_id')->pluck('count', 'game_id');
+
+        $catQuery = $base();
+        if ($request->game) $catQuery->byGame($request->game);
+        $categoryCounts = $catQuery->selectRaw('category_id, count(*) as count')
+            ->groupBy('category_id')->pluck('count', 'category_id');
+
+        $langQuery = $base();
+        if ($request->game)     $langQuery->byGame($request->game);
+        if ($request->category) $langQuery->byCategory($request->category);
+        if ($request->preorder) $langQuery->preorders();
+        if ($request->search)   $langQuery->where('name', 'like', '%' . $request->search . '%');
+        $languageCounts = $langQuery->selectRaw('language, count(*) as count')
+            ->whereNotNull('language')->groupBy('language')->pluck('count', 'language');
+
+        return response()->json([
+            'games'      => $gameCounts,
+            'categories' => $categoryCounts,
+            'languages'  => $languageCounts,
+        ]);
     }
 
     public function games(Request $request): AnonymousResourceCollection

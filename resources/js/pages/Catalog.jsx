@@ -46,6 +46,7 @@ export default function Catalog() {
     section_id: sectionId,
     game: gameSlug || undefined,
     category: categorySlug || undefined,
+    language: params.get('language') || undefined,
     preorder: params.get('preorder') || undefined,
     sort: params.get('sort') || undefined,
     search: params.get('search') || undefined,
