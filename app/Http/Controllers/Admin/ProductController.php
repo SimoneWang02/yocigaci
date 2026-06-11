@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -31,9 +32,22 @@ class ProductController extends Controller
         return ProductResource::collection($query->paginate(50));
     }
 
+    private function uniqueSlug(string $name, ?int $excludeId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $i = 2;
+        while (Product::where('slug', $slug)->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+        return $slug;
+    }
+
     public function store(ProductRequest $request): ProductResource
     {
-        return new ProductResource(Product::create($request->validated()));
+        $data = $request->validated();
+        $data['slug'] = $this->uniqueSlug($data['name']);
+        return new ProductResource(Product::create($data));
     }
 
     public function show(Product $product): ProductResource

@@ -28,7 +28,6 @@ export default function ProductForm() {
         game_id: "",
         category_id: "",
         name: "",
-        slug: "",
         description: "",
         price: "",
         stock: 0,
@@ -66,7 +65,6 @@ export default function ProductForm() {
                 game_id: String(p.game?.id ?? p.game_id ?? ""),
                 category_id: String(p.category?.id ?? p.category_id ?? ""),
                 name: p.name ?? "",
-                slug: p.slug ?? "",
                 description: p.description ?? "",
                 price: String(p.price ?? ""),
                 stock: p.stock ?? 0,
@@ -80,17 +78,6 @@ export default function ProductForm() {
 
     const games = gamesData?.data ?? [];
     const categories = categoriesData?.data ?? [];
-
-    const autoSlug = (name) =>
-        name
-            .toLowerCase()
-            .replace(/[àáâãäå]/g, "a")
-            .replace(/[èéêë]/g, "e")
-            .replace(/[ìíîï]/g, "i")
-            .replace(/[òóôõö]/g, "o")
-            .replace(/[ùúûü]/g, "u")
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-|-$/g, "");
 
     const handleGameChange = (gameId) => {
         setForm((f) => ({ ...f, game_id: gameId, category_id: "" }));
@@ -194,11 +181,7 @@ export default function ProductForm() {
                             label="Nome prodotto"
                             value={form.name}
                             onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    name: e.target.value,
-                                    slug: autoSlug(e.target.value),
-                                })
+                                setForm({ ...form, name: e.target.value })
                             }
                             required
                         />
