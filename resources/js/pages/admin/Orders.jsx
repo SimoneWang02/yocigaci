@@ -215,6 +215,24 @@ function OrderDrawer({ orderId, onClose }) {
                                                 </p>
                                             </div>
                                         ))}
+                                        {Number(order.discount_amount) > 0 && (
+                                            <div className="flex justify-between items-center px-4 py-2 text-sm text-green-700">
+                                                <span>
+                                                    Sconto coupon
+                                                    {order.coupon_code
+                                                        ? ` (${order.coupon_code})`
+                                                        : ""}
+                                                </span>
+                                                <span>
+                                                    −€{" "}
+                                                    {Number(
+                                                        order.discount_amount,
+                                                    )
+                                                        .toFixed(2)
+                                                        .replace(".", ",")}
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between items-center px-4 py-3 bg-white">
                                             <span className="text-sm font-bold text-gray-900">
                                                 Totale ordine

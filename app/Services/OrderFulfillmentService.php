@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\OrderConfirmed;
 use App\Mail\PreorderConfirmed;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
@@ -83,6 +84,8 @@ class OrderFulfillmentService
         $notes = $session->metadata->notes ?? null;
         $userId = ($session->metadata->user_id ?? null) ?: null;
         $deliveryMethod = $session->metadata->delivery_method ?? 'shipping';
+        $couponCode = ($session->metadata->coupon_code ?? null) ?: null;
+        $discountAmount = (float) ($session->metadata->discount_amount ?? 0);
 
         // Stripe raccoglie sempre l'email nella sua pagina di pagamento: la recuperiamo
         // qui per conservarla sull'ordine e poter inviare la conferma anche agli ospiti.
@@ -99,11 +102,11 @@ class OrderFulfillmentService
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
         // Il ritiro in negozio non ha costi di spedizione.
         $shipping = $deliveryMethod === 'pickup' ? 0.0 : self::shippingFor($subtotal);
-        $total = $subtotal + $shipping;
+        $total = max(0.0, $subtotal + $shipping - $discountAmount);
         $hasPreorder = collect($cartItems)->contains(fn ($i) => $i['is_preorder']);
 
         try {
-            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $notes, $subtotal, $shipping, $total, $hasPreorder, $paymentIntentId, $userId) {
+            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $notes, $subtotal, $shipping, $discountAmount, $total, $hasPreorder, $paymentIntentId, $userId, $couponCode) {
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => $hasPreorder ? 'preorder_confirmed' : 'paid',
@@ -111,9 +114,11 @@ class OrderFulfillmentService
                     'delivery_method' => $deliveryMethod,
                     'subtotal' => $subtotal,
                     'shipping_cost' => $shipping,
+                    'discount_amount' => $discountAmount,
                     'total' => $total,
                     'shipping_address' => $shippingAddress,
                     'notes' => $notes,
+                    'coupon_code' => $couponCode,
                     'stripe_payment_intent_id' => $paymentIntentId,
                     'stripe_payment_status' => 'succeeded',
                 ]);
@@ -149,6 +154,10 @@ class OrderFulfillmentService
             }
 
             throw $e;
+        }
+
+        if ($couponCode) {
+            Coupon::where('code', $couponCode)->increment('used_count');
         }
 
         $this->sendConfirmationEmail($order, $shippingAddress, $userId);

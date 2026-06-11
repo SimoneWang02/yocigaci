@@ -29,7 +29,8 @@ class CheckoutRequest extends FormRequest
             'shipping_address.postal_code' => ['required_if:delivery_method,shipping', 'nullable', 'string'],
             'shipping_address.province' => ['required_if:delivery_method,shipping', 'nullable', 'string'],
             'shipping_address.country' => ['required_if:delivery_method,shipping', 'nullable', 'string'],
-            'notes' => ['nullable', 'string'],
+            'notes'        => ['nullable', 'string'],
+            'coupon_code'  => ['nullable', 'string', 'max:50'],
         ];
     }
 }

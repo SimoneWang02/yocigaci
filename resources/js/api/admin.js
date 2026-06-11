@@ -77,3 +77,9 @@ export const adminRefundOrder = (id, { amount, reason } = {}) =>
 // Dashboard
 export const adminGetDashboardStats = (period, offset = 0) =>
   api.get('/admin/dashboard/stats', { params: { period, offset } }).then((r) => r.data)
+
+// Coupons
+export const adminGetCoupons = () => api.get('/admin/coupons').then((r) => r.data)
+export const adminCreateCoupon = (data) => api.post('/admin/coupons', data).then((r) => r.data)
+export const adminUpdateCoupon = (id, data) => api.put(`/admin/coupons/${id}`, data).then((r) => r.data)
+export const adminDeleteCoupon = (id) => api.delete(`/admin/coupons/${id}`).then((r) => r.data)

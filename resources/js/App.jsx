@@ -32,6 +32,7 @@ import AdminGames from "./pages/admin/Games";
 import AdminCategories from "./pages/admin/Categories";
 import AdminHomepageSections from "./pages/admin/HomepageSections";
 import AdminPages from "./pages/admin/Pages";
+import AdminCoupons from "./pages/admin/Coupons";
 import AdminDashboard from "./pages/admin/Dashboard";
 import StaticPage from "./pages/StaticPage";
 import OrderTracking from "./pages/OrderTracking";
@@ -70,6 +71,7 @@ const ADMIN_LINKS = [
     { to: "/admin/categorie", label: "Categorie" },
     { to: "/admin/prodotti", label: "Prodotti" },
     { to: "/admin/ordini", label: "Ordini" },
+    { to: "/admin/coupon", label: "Coupon" },
     { to: "/admin/pagine", label: "Pagine" },
 ];
 
@@ -315,6 +317,16 @@ export default function App() {
                                 <AdminRoute>
                                     <AdminLayout>
                                         <AdminHomepageSections />
+                                    </AdminLayout>
+                                </AdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/coupon"
+                            element={
+                                <AdminRoute>
+                                    <AdminLayout>
+                                        <AdminCoupons />
                                     </AdminLayout>
                                 </AdminRoute>
                             }

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
+use App\Models\Coupon;
 use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session as StripeSession;
+use Stripe\Coupon as StripeCoupon;
 use Stripe\Stripe;
 
 class CheckoutController extends Controller
@@ -34,6 +36,17 @@ class CheckoutController extends Controller
         }
 
         $shipping = $deliveryMethod === 'pickup' ? 0.0 : OrderFulfillmentService::shippingFor($subtotal);
+
+        // Coupon validation
+        $couponCode = $validated['coupon_code'] ?? null;
+        $discountAmount = 0.0;
+        if ($couponCode) {
+            $coupon = Coupon::where('code', strtoupper($couponCode))->first();
+            if (! $coupon || ! $coupon->isValid()) {
+                return response()->json(['message' => 'Coupon non valido o scaduto.'], 422);
+            }
+            $discountAmount = $coupon->calculateDiscount($subtotal);
+        }
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -77,8 +90,20 @@ class CheckoutController extends Controller
                 'delivery_method' => $deliveryMethod,
                 'notes' => $validated['notes'] ?? null,
                 'user_id' => $user?->id,
+                'coupon_code' => $couponCode,
+                'discount_amount' => $discountAmount > 0 ? (string) $discountAmount : null,
             ],
         ];
+
+        if ($discountAmount > 0) {
+            $stripeCoupon = StripeCoupon::create([
+                'amount_off' => (int) round($discountAmount * 100),
+                'currency'   => 'eur',
+                'duration'   => 'once',
+                'name'       => 'Coupon: ' . strtoupper($couponCode),
+            ]);
+            $sessionParams['discounts'] = [['coupon' => $stripeCoupon->id]];
+        }
 
         if ($email = $user?->email) {
             $sessionParams['customer_email'] = $email;

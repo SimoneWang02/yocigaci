@@ -31,6 +31,7 @@ Route::post('/auth/reset-password', [PasswordResetController::class, 'reset']);
 // Checkout (pubblico - funziona anche per guest)
 Route::post('/checkout/create-session', [CheckoutController::class, 'createSession']);
 Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']);
+Route::post('/coupons/validate', [\App\Http\Controllers\CouponController::class, 'validate']);
 
 // Stripe webhook - escluso da CSRF e auth
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
@@ -81,4 +82,5 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/orders/{order}/refund', [App\Http\Controllers\Admin\OrderController::class, 'refund']);
     Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
     Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);
+    Route::apiResource('/coupons', App\Http\Controllers\Admin\CouponController::class)->except(['show']);
 });
