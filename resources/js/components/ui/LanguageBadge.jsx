@@ -21,9 +21,13 @@ const FLAG_MAP = {
 };
 
 export function parseProductName(name) {
-    const match = name?.match(/^(.*?)\s*\[([A-Z]{2,4})\]\s*$/);
-    if (!match) return { cleanName: name ?? '', langCode: null };
-    return { cleanName: match[1].trim(), langCode: match[2] };
+    // suffisso: "Charizard ex [ENG]"
+    let match = name?.match(/^(.*?)\s*\[([A-Z]{2,4})\]\s*$/);
+    if (match) return { cleanName: match[1].trim(), langCode: match[2] };
+    // prefisso: "[ENG] Charizard ex"
+    match = name?.match(/^\[([A-Z]{2,4})\]\s*(.*?)\s*$/);
+    if (match) return { cleanName: match[2].trim(), langCode: match[1] };
+    return { cleanName: name ?? '', langCode: null };
 }
 
 export function LanguageBadge({ code }) {
