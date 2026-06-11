@@ -265,7 +265,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="min-w-0">
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                            Preordini Sped.
+                            Preordini Spedizione
                         </p>
                         <p className="text-2xl font-bold text-gray-900 leading-tight">
                             {orders_preorder_ship}
