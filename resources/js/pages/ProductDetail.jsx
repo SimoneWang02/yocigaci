@@ -171,9 +171,13 @@ export default function ProductDetail() {
                             )}
                         </div>
 
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3 flex-wrap">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4">
                             {cleanName}
-                            {langCode && <LanguageBadge code={langCode} />}
+                            {langCode && (
+                                <span className="inline-flex align-middle ml-2">
+                                    <LanguageBadge code={langCode} />
+                                </span>
+                            )}
                         </h1>
 
                         <p className="text-4xl font-extrabold text-indigo-700 mb-1">

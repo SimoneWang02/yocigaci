@@ -66,16 +66,14 @@ export function ProductCard({ product }) {
             {/* Titolo, prezzo, CTA - senza riquadro */}
             <div className="flex flex-1 flex-col px-2 pt-4">
                 <Link to={`/prodotti/${product.slug}`}>
-                    <div className="mb-2">
-                        <h3 className="line-clamp-2 text-center text-sm font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600">
-                            {cleanName}
-                        </h3>
+                    <h3 className="mb-2 line-clamp-2 text-center text-sm font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600">
+                        {cleanName}
                         {langCode && (
-                            <div className="flex justify-center mt-1">
+                            <span className="inline-flex align-middle ml-1.5">
                                 <LanguageBadge code={langCode} />
-                            </div>
+                            </span>
                         )}
-                    </div>
+                    </h3>
                 </Link>
 
                 <div className="mt-auto">

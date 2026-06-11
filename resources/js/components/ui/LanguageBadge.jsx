@@ -33,7 +33,7 @@ export function LanguageBadge({ code }) {
     return (
         <span
             title={label}
-            className="inline-flex items-center flex-shrink-0 rounded-sm overflow-hidden shadow-sm ring-1 ring-black/10"
+            className="inline-flex items-center flex-shrink-0 ring-1 ring-black/10"
             style={{ width: 20, height: 14 }}
         >
             <Flag className="w-full h-full" />
