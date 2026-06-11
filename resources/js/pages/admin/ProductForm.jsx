@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { X, ArrowLeft } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +37,7 @@ export default function ProductForm() {
         preorder_note: "",
     });
     const [images, setImages] = useState([]);
+    const [pendingFiles, setPendingFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
@@ -96,6 +97,14 @@ export default function ProductForm() {
     };
 
     const handleUpload = async (files) => {
+        if (!isEdit) {
+            const entries = files.map((file) => ({
+                file,
+                previewUrl: URL.createObjectURL(file),
+            }));
+            setPendingFiles((prev) => [...prev, ...entries]);
+            return;
+        }
         setUploading(true);
         try {
             for (const file of files) {
@@ -106,6 +115,13 @@ export default function ProductForm() {
             setUploading(false);
         }
     };
+
+    const handleRemovePending = useCallback((index) => {
+        setPendingFiles((prev) => {
+            URL.revokeObjectURL(prev[index].previewUrl);
+            return prev.filter((_, i) => i !== index);
+        });
+    }, []);
 
     const handleDeleteImage = async (imageId) => {
         await adminDeleteImage(id, imageId);
@@ -131,7 +147,11 @@ export default function ProductForm() {
                 await adminUpdateProduct(id, payload);
             } else {
                 const res = await adminCreateProduct(payload);
-                navigate(`/admin/prodotti/${res.data.id}/modifica`);
+                const newId = res.data.id;
+                for (const { file } of pendingFiles) {
+                    await adminUploadImage(newId, file);
+                }
+                navigate(`/admin/prodotti/${newId}/modifica`);
                 return;
             }
             qc.invalidateQueries(["admin-products"]);
@@ -308,62 +328,85 @@ export default function ProductForm() {
                     )}
                 </div>
 
-                {/* Images - solo in edit mode */}
-                {isEdit && (
-                    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-                        <h2 className="font-semibold text-gray-800">
-                            Immagini
-                        </h2>
-                        <p className="text-xs text-gray-500">
-                            La prima immagine (ordine più basso) è quella
-                            principale.
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                            {images.map((img, idx) => (
-                                <div key={img.id} className="relative group">
-                                    <img
-                                        src={img.url}
-                                        alt=""
-                                        className="w-20 h-24 object-cover rounded-lg border border-gray-200"
-                                    />
-                                    {idx === 0 && (
-                                        <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded">
-                                            principale
-                                        </span>
-                                    )}
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            window.confirm("Eliminare?") &&
-                                            handleDeleteImage(img.id)
-                                        }
-                                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => fileRef.current?.click()}
-                                className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
-                                disabled={uploading}
-                            >
-                                {uploading ? "..." : "+"}
-                            </button>
-                            <input
-                                ref={fileRef}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                className="hidden"
-                                onChange={(e) =>
-                                    handleUpload([...e.target.files])
-                                }
-                            />
-                        </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+                    <h2 className="font-semibold text-gray-800">Immagini</h2>
+                    <p className="text-xs text-gray-500">
+                        {isEdit
+                            ? "La prima immagine (ordine più basso) è quella principale."
+                            : "Le immagini verranno caricate al salvataggio del prodotto."}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                        {isEdit
+                            ? images.map((img, idx) => (
+                                  <div
+                                      key={img.id}
+                                      className="relative group"
+                                  >
+                                      <img
+                                          src={img.url}
+                                          alt=""
+                                          className="w-20 h-24 object-cover rounded-lg border border-gray-200"
+                                      />
+                                      {idx === 0 && (
+                                          <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded">
+                                              principale
+                                          </span>
+                                      )}
+                                      <button
+                                          type="button"
+                                          onClick={() =>
+                                              window.confirm("Eliminare?") &&
+                                              handleDeleteImage(img.id)
+                                          }
+                                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                          <X className="w-3 h-3" />
+                                      </button>
+                                  </div>
+                              ))
+                            : pendingFiles.map((entry, idx) => (
+                                  <div key={idx} className="relative group">
+                                      <img
+                                          src={entry.previewUrl}
+                                          alt=""
+                                          className="w-20 h-24 object-cover rounded-lg border border-gray-200"
+                                      />
+                                      {idx === 0 && (
+                                          <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded">
+                                              principale
+                                          </span>
+                                      )}
+                                      <button
+                                          type="button"
+                                          onClick={() =>
+                                              handleRemovePending(idx)
+                                          }
+                                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                          <X className="w-3 h-3" />
+                                      </button>
+                                  </div>
+                              ))}
+                        <button
+                            type="button"
+                            onClick={() => fileRef.current?.click()}
+                            className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
+                            disabled={uploading}
+                        >
+                            {uploading ? "..." : "+"}
+                        </button>
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) =>
+                                handleUpload([...e.target.files])
+                            }
+                        />
                     </div>
-                )}
+                </div>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
 
