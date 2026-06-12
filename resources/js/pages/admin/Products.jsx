@@ -1,36 +1,73 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Pencil, Trash2, AlertTriangle, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock, adminIncrementStock } from "../../api/admin";
+import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock, adminIncrementStock, adminGetGames, adminGetCategories } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
-import { adminGetGames } from "../../api/admin";
 import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
 
 export default function AdminProducts() {
     const qc = useQueryClient();
-    const [filterGame, setFilterGame] = useState("");
-    const [search, setSearch] = useState("");
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const search = searchParams.get("search") ?? "";
+    const filterGame = searchParams.get("game_id") ?? "";
+    const filterCategory = searchParams.get("category_id") ?? "";
+
+    const setParam = (key, value) => {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            if (value) {
+                next.set(key, value);
+            } else {
+                next.delete(key);
+            }
+            return next;
+        });
+    };
+
+    const handleGameChange = (value) => {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            if (value) {
+                next.set("game_id", value);
+            } else {
+                next.delete("game_id");
+            }
+            next.delete("category_id");
+            return next;
+        });
+    };
+
+    const handleReset = () => setSearchParams({});
+
+    const hasFilters = search || filterGame || filterCategory;
 
     const { data: gamesData } = useQuery({
         queryKey: ["admin-games"],
         queryFn: adminGetGames,
     });
+    const { data: categoriesData } = useQuery({
+        queryKey: ["admin-categories", filterGame],
+        queryFn: () => adminGetCategories({ game_id: filterGame }),
+        enabled: !!filterGame,
+    });
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-products", filterGame, search],
+        queryKey: ["admin-products", filterGame, filterCategory, search],
         queryFn: () =>
             adminGetProducts({
                 ...(filterGame ? { game_id: filterGame } : {}),
+                ...(filterCategory ? { category_id: filterCategory } : {}),
                 ...(search ? { search } : {}),
             }),
     });
 
     const games = gamesData?.data ?? [];
+    const categories = categoriesData?.data ?? [];
     const rawProducts = data?.data ?? [];
     const { sort, sorted: products, onSort } = useTableSort(rawProducts, 'name');
 
@@ -104,23 +141,50 @@ export default function AdminProducts() {
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-                <Input
-                    placeholder="Cerca prodotto..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <Select
-                    value={filterGame}
-                    onChange={(e) => setFilterGame(e.target.value)}
+            <div className="flex gap-3 mb-4 items-end">
+                <div className="flex-1">
+                    <Input
+                        placeholder="Cerca prodotto..."
+                        value={search}
+                        onChange={(e) => setParam("search", e.target.value)}
+                    />
+                </div>
+                <div className="flex-1">
+                    <Select
+                        value={filterGame}
+                        onChange={(e) => handleGameChange(e.target.value)}
+                    >
+                        <option value="">Tutti i giochi</option>
+                        {games.map((g) => (
+                            <option key={g.id} value={g.id}>
+                                {g.name}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+                <div className="flex-1">
+                    <Select
+                        value={filterCategory}
+                        onChange={(e) => setParam("category_id", e.target.value)}
+                        disabled={!filterGame}
+                    >
+                        <option value="">Tutte le categorie</option>
+                        {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.name}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleReset}
+                    disabled={!hasFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
                 >
-                    <option value="">Tutti i giochi</option>
-                    {games.map((g) => (
-                        <option key={g.id} value={g.id}>
-                            {g.name}
-                        </option>
-                    ))}
-                </Select>
+                    <X className="w-3.5 h-3.5" />
+                    Reset
+                </button>
             </div>
 
             {isLoading ? (

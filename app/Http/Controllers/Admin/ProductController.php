@@ -22,6 +22,9 @@ class ProductController extends Controller
         if ($request->game_id) {
             $query->where('game_id', $request->game_id);
         }
+        if ($request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }

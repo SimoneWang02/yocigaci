@@ -141,7 +141,11 @@ export default function ProductForm() {
                 for (const { file } of pendingFiles) {
                     await adminUploadImage(newId, file);
                 }
-                navigate(`/admin/prodotti/${newId}/modifica`);
+                qc.invalidateQueries(["admin-products"]);
+                const params = new URLSearchParams();
+                if (form.game_id) params.set("game_id", form.game_id);
+                if (form.category_id) params.set("category_id", form.category_id);
+                navigate(`/admin/prodotti?${params.toString()}`);
                 return;
             }
             qc.invalidateQueries(["admin-products"]);
