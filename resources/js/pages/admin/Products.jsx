@@ -180,7 +180,7 @@ export default function AdminProducts() {
                     type="button"
                     onClick={handleReset}
                     disabled={!hasFilters}
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
                 >
                     <X className="w-3.5 h-3.5" />
                     Reset
