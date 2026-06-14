@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Image as ImageIcon, Check, Frown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +14,10 @@ import ProductCarousel from "../components/home/ProductCarousel";
 export default function ProductDetail() {
     const { slug } = useParams();
     const { addItem, openCart, items } = useCartStore();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [slug]);
     const [selectedImage, setSelectedImage] = useState(0);
     const [qty, setQty] = useState(1);
     const [added, setAdded] = useState(false);
