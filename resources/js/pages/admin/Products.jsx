@@ -16,6 +16,8 @@ export default function AdminProducts() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [editingStockId, setEditingStockId] = useState(null);
     const [stockDraft, setStockDraft] = useState("");
+    const [editingNameId, setEditingNameId] = useState(null);
+    const [nameDraft, setNameDraft] = useState("");
 
     const search = searchParams.get("search") ?? "";
     const filterGame = searchParams.get("game_id") ?? "";
@@ -104,10 +106,31 @@ export default function AdminProducts() {
             setEditingStockId(null);
         },
     });
+    const setName = useMutation({
+        mutationFn: ({ id, name }) => adminUpdateProduct(id, { name }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-products"] });
+            setEditingNameId(null);
+        },
+    });
 
     const startEditStock = (p) => {
         setEditingStockId(p.id);
         setStockDraft(String(p.stock));
+    };
+
+    const startEditName = (p) => {
+        setEditingNameId(p.id);
+        setNameDraft(p.name);
+    };
+
+    const commitName = (id) => {
+        const trimmed = nameDraft.trim();
+        if (trimmed) {
+            setName.mutate({ id, name: trimmed });
+        } else {
+            setEditingNameId(null);
+        }
     };
 
     const commitStock = (id) => {
@@ -259,9 +282,28 @@ export default function AdminProducts() {
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <p className="font-medium text-gray-800">
-                                            {p.name}
-                                        </p>
+                                        {editingNameId === p.id ? (
+                                            <input
+                                                type="text"
+                                                className="w-full text-sm font-medium border border-blue-400 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                value={nameDraft}
+                                                onChange={(e) => setNameDraft(e.target.value)}
+                                                onBlur={() => commitName(p.id)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") commitName(p.id);
+                                                    if (e.key === "Escape") setEditingNameId(null);
+                                                }}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <p
+                                                className="font-medium text-gray-800 cursor-text hover:bg-blue-50 hover:text-blue-700 rounded px-1 -mx-1 transition-colors"
+                                                onClick={() => startEditName(p)}
+                                                title="Clicca per modificare il nome"
+                                            >
+                                                {p.name}
+                                            </p>
+                                        )}
                                         {p.is_preorder && (
                                             <Badge variant="preorder">
                                                 Preordine
