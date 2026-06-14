@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Pencil, Trash2, AlertTriangle, X } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle, X, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminGetProducts, adminDeleteProduct, adminUpdateProduct, adminDecrementStock, adminIncrementStock, adminGetGames, adminGetCategories } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
@@ -13,15 +14,18 @@ import { SortTh } from "../../components/ui/SortTh";
 export default function AdminProducts() {
     const qc = useQueryClient();
     const [searchParams, setSearchParams] = useSearchParams();
+    const [editingStockId, setEditingStockId] = useState(null);
+    const [stockDraft, setStockDraft] = useState("");
 
     const search = searchParams.get("search") ?? "";
     const filterGame = searchParams.get("game_id") ?? "";
     const filterCategory = searchParams.get("category_id") ?? "";
+    const filterActive = searchParams.get("is_active") ?? "";
 
     const setParam = (key, value) => {
         setSearchParams((prev) => {
             const next = new URLSearchParams(prev);
-            if (value) {
+            if (value !== "" && value !== null && value !== undefined) {
                 next.set(key, value);
             } else {
                 next.delete(key);
@@ -45,7 +49,7 @@ export default function AdminProducts() {
 
     const handleReset = () => setSearchParams({});
 
-    const hasFilters = search || filterGame || filterCategory;
+    const hasFilters = search || filterGame || filterCategory || filterActive !== "";
 
     const { data: gamesData } = useQuery({
         queryKey: ["admin-games"],
@@ -57,12 +61,13 @@ export default function AdminProducts() {
         enabled: !!filterGame,
     });
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-products", filterGame, filterCategory, search],
+        queryKey: ["admin-products", filterGame, filterCategory, search, filterActive],
         queryFn: () =>
             adminGetProducts({
                 ...(filterGame ? { game_id: filterGame } : {}),
                 ...(filterCategory ? { category_id: filterCategory } : {}),
                 ...(search ? { search } : {}),
+                ...(filterActive !== "" ? { is_active: filterActive === "1" } : {}),
             }),
     });
 
@@ -92,6 +97,32 @@ export default function AdminProducts() {
         mutationFn: (id) => adminIncrementStock(id),
         onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
     });
+    const setStock = useMutation({
+        mutationFn: ({ id, stock }) => adminUpdateProduct(id, { stock }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-products"] });
+            setEditingStockId(null);
+        },
+    });
+
+    const startEditStock = (p) => {
+        setEditingStockId(p.id);
+        setStockDraft(String(p.stock));
+    };
+
+    const commitStock = (id) => {
+        const val = parseInt(stockDraft, 10);
+        if (!isNaN(val) && val >= 0) {
+            setStock.mutate({ id, stock: val });
+        } else {
+            setEditingStockId(null);
+        }
+    };
+
+    const stockRowClass = (p) => {
+        if (!p.is_preorder && p.stock === 0) return "bg-red-50";
+        return "";
+    };
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -176,6 +207,16 @@ export default function AdminProducts() {
                         ))}
                     </Select>
                 </div>
+                <div className="flex-1">
+                    <Select
+                        value={filterActive}
+                        onChange={(e) => setParam("is_active", e.target.value)}
+                    >
+                        <option value="">Tutti gli stati</option>
+                        <option value="1">Attivi</option>
+                        <option value="0">Nascosti</option>
+                    </Select>
+                </div>
                 <button
                     type="button"
                     onClick={handleReset}
@@ -205,7 +246,7 @@ export default function AdminProducts() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {products.map((p) => (
-                                <tr key={p.id} className="hover:bg-gray-50">
+                                <tr key={p.id} className={`hover:bg-gray-50 ${stockRowClass(p)}`}>
                                     <td className="px-4 py-3">
                                         {p.primary_image?.url ? (
                                             <img
@@ -244,17 +285,40 @@ export default function AdminProducts() {
                                                 <button
                                                     type="button"
                                                     className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                                    disabled={p.stock <= 0 || decreaseStock.isPending || increaseStock.isPending}
+                                                    disabled={p.stock <= 0 || decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
                                                     onClick={() => decreaseStock.mutate(p.id)}
                                                     title="Diminuisci stock di 1"
                                                 >
                                                     -
                                                 </button>
-                                                <span className="w-8 text-center font-medium text-gray-700">{p.stock}</span>
+                                                {editingStockId === p.id ? (
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        className="w-12 text-center text-sm font-medium border border-blue-400 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                        value={stockDraft}
+                                                        onChange={(e) => setStockDraft(e.target.value)}
+                                                        onBlur={() => commitStock(p.id)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "Enter") commitStock(p.id);
+                                                            if (e.key === "Escape") setEditingStockId(null);
+                                                        }}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="w-8 text-center font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded transition-colors"
+                                                        onClick={() => startEditStock(p)}
+                                                        title="Clicca per modificare lo stock"
+                                                    >
+                                                        {p.stock}
+                                                    </button>
+                                                )}
                                                 <button
                                                     type="button"
                                                     className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                                    disabled={decreaseStock.isPending || increaseStock.isPending}
+                                                    disabled={decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
                                                     onClick={() => increaseStock.mutate(p.id)}
                                                     title="Aumenta stock di 1"
                                                 >
@@ -275,6 +339,21 @@ export default function AdminProducts() {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2 justify-end">
+                                            <a
+                                                href={`/prodotti/${p.slug}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    aria-label="Vedi sul sito"
+                                                    title="Vedi sul sito"
+                                                    className="!px-2"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                            </a>
                                             <Link
                                                 to={`/admin/prodotti/${p.id}/modifica`}
                                             >
