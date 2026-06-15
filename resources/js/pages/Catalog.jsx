@@ -96,6 +96,7 @@ export default function Catalog() {
   }
 
   return (
+    <div className="bg-white">
     <div className="max-w-7xl mx-auto px-4 py-8">
       <Helmet>
         <title>{metaTitle}</title>
@@ -222,6 +223,7 @@ export default function Catalog() {
           )}
         </div>
       </div>
+    </div>
     </div>
   )
 }

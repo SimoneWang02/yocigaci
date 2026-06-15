@@ -33,9 +33,6 @@ export function ProductCard({ product }) {
                 onMouseLeave={() => setImageIdx(0)}
             >
                 <div className="relative flex h-48 items-end justify-center">
-                    {/* Ombra/pedana morbida sotto il prodotto */}
-                    <div className="absolute bottom-2 left-1/2 h-5 w-2/3 -translate-x-1/2 rounded-[50%] bg-black/25 blur-lg transition-all duration-300 group-hover:w-3/4 group-hover:bg-black/30" />
-
                     {currentImage?.url ? (
                         <img
                             src={currentImage.url}

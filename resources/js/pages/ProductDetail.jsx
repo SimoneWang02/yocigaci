@@ -94,6 +94,7 @@ export default function ProductDetail() {
                 />
                 {metaImage && <meta property="og:image" content={metaImage} />}
             </Helmet>
+            <div className="bg-white">
             <div className="max-w-6xl mx-auto px-4 py-10">
                 {/* Breadcrumb */}
                 <nav className="text-sm text-gray-500 mb-6 flex gap-1">
@@ -129,7 +130,7 @@ export default function ProductDetail() {
                                 <img
                                     src={images[selectedImage].url}
                                     alt={product.name}
-                                    className="max-h-[70vh] max-w-full w-auto object-contain drop-shadow-xl"
+                                    className="max-h-[70vh] max-w-full w-auto object-contain"
                                 />
                             ) : (
                                 <div className="aspect-[3/4] w-full flex items-center justify-center rounded-2xl bg-gray-100 text-gray-300">
@@ -332,6 +333,7 @@ export default function ProductDetail() {
                         />
                     </div>
                 )}
+            </div>
             </div>
         </>
     );
