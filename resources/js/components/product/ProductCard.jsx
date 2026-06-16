@@ -54,11 +54,10 @@ export function ProductCard({ product }) {
 
                     {/* Badge */}
                     <div className="absolute left-0 top-0 flex flex-col gap-1">
-                        {product.is_preorder && (
-                            <Badge variant="preorder">Preordine</Badge>
-                        )}
-                        {isOutOfStock && (
+                        {isOutOfStock ? (
                             <Badge variant="sold_out">Esaurito</Badge>
+                        ) : product.is_preorder && (
+                            <Badge variant="preorder">Preordine</Badge>
                         )}
                     </div>
                 </div>
