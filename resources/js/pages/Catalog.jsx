@@ -175,7 +175,7 @@ export default function Catalog() {
         {/* Sidebar */}
         {!sectionId && (
           <aside className="hidden md:block w-60 flex-shrink-0">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+            <div>
               <ProductFilters />
             </div>
           </aside>

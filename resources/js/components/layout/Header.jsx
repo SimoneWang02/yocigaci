@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
     getGames,
@@ -17,6 +17,7 @@ export function Header() {
     const { items, openCart } = useCartStore();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [activeGame, setActiveGame] = useState(null);
+    const [mobileOpenGame, setMobileOpenGame] = useState(null);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -493,23 +494,44 @@ export function Header() {
                     <div className="md:hidden py-4 border-t border-gray-100 space-y-1">
                         {games.map((game) => (
                             <div key={game.id}>
-                                <Link
-                                    to={`/catalogo/${game.slug}`}
-                                    className="block px-3 py-2 font-medium text-gray-800"
-                                    onClick={() => setMobileOpen(false)}
-                                >
-                                    {game.name}
-                                </Link>
-                                {game.categories?.map((cat) => (
+                                <div className="flex items-center">
                                     <Link
-                                        key={cat.id}
-                                        to={`/catalogo/${game.slug}/${cat.slug}`}
-                                        className="block px-6 py-1.5 text-sm text-gray-600"
+                                        to={`/catalogo/${game.slug}`}
+                                        className="flex-1 px-3 py-2 font-medium text-gray-800"
                                         onClick={() => setMobileOpen(false)}
                                     >
-                                        {cat.name}
+                                        {game.name}
                                     </Link>
-                                ))}
+                                    {game.categories?.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setMobileOpenGame(
+                                                    mobileOpenGame === game.id
+                                                        ? null
+                                                        : game.id,
+                                                )
+                                            }
+                                            className="p-2 text-gray-500 cursor-pointer"
+                                            aria-label="Espandi categorie"
+                                        >
+                                            <ChevronDown
+                                                className={`w-4 h-4 transition-transform ${mobileOpenGame === game.id ? "rotate-180" : ""}`}
+                                            />
+                                        </button>
+                                    )}
+                                </div>
+                                {mobileOpenGame === game.id &&
+                                    game.categories?.map((cat) => (
+                                        <Link
+                                            key={cat.id}
+                                            to={`/catalogo/${game.slug}/${cat.slug}`}
+                                            className="block px-6 py-1.5 text-sm text-gray-600"
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            {cat.name}
+                                        </Link>
+                                    ))}
                             </div>
                         ))}
                         {cardtraderUrl && (
