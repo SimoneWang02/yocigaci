@@ -24,6 +24,7 @@ export default function ProductForm() {
     const qc = useQueryClient();
     const isEdit = !!id;
     const fileRef = useRef(null);
+    const descriptionRef = useRef(null);
 
     const [form, setForm] = useState({
         game_id: "",
@@ -43,6 +44,13 @@ export default function ProductForm() {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const el = descriptionRef.current;
+        if (!el) return;
+        el.style.height = "auto";
+        el.style.height = el.scrollHeight + "px";
+    }, [form.description]);
 
     const { data: gamesData } = useQuery({
         queryKey: ["admin-games"],
@@ -248,6 +256,7 @@ export default function ProductForm() {
                             Descrizione
                         </label>
                         <textarea
+                            ref={descriptionRef}
                             value={form.description}
                             onChange={(e) =>
                                 setForm({
@@ -256,6 +265,7 @@ export default function ProductForm() {
                                 })
                             }
                             rows={4}
+                            style={{ resize: "none", overflow: "hidden" }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
