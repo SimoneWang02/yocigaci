@@ -158,6 +158,7 @@ export function Header() {
     };
 
     return (
+        <>
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
@@ -489,9 +490,18 @@ export function Header() {
                     </div>
                 </div>
 
-                {/* Mobile menu */}
-                {mobileOpen && (
-                    <div className="md:hidden py-4 border-t border-gray-100 space-y-1">
+            </div>
+        </header>
+
+        {/* Mobile menu overlay */}
+        {mobileOpen && (
+            <>
+                <div
+                    className="fixed inset-0 top-16 z-40 bg-black/20 md:hidden"
+                    onClick={() => setMobileOpen(false)}
+                />
+                <div className="fixed top-16 left-0 right-0 z-50 md:hidden bg-white border-t border-gray-100 shadow-lg overflow-y-auto max-h-[calc(100dvh-4rem)]">
+                    <div className="py-4 space-y-1">
                         {games.map((game) => (
                             <div key={game.id}>
                                 <div className="flex items-center">
@@ -608,8 +618,9 @@ export function Header() {
                             )}
                         </div>
                     </div>
-                )}
-            </div>
-        </header>
+                </div>
+            </>
+        )}
+        </>
     );
 }
