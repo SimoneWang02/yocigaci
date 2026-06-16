@@ -50,7 +50,7 @@ export function ProductFilters() {
     };
 
     const selectGame = (slug) => {
-        navigate(buildPath(slug ? `/catalogo/${slug}` : "/catalogo"));
+        navigate(slug ? `/catalogo/${slug}` : "/catalogo");
     };
 
     const selectCategory = (catSlug) => {
