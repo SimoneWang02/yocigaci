@@ -47,7 +47,7 @@ class ProductController extends Controller
             default => $sectionId ? 'hsp.sort_order' : 'sort_order',
         };
 
-        $query->orderBy($column, $direction);
+        $query->orderBy($column, $direction)->orderBy('products.id');
 
         return ProductResource::collection($query->paginate(24));
     }
