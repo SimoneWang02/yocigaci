@@ -279,7 +279,7 @@ export function Header() {
                                         className="fixed inset-0 z-40"
                                         onClick={closeSearch}
                                     />
-                                    <div className="absolute right-0 top-full mt-2 z-50 w-80">
+                                    <div className="absolute right-0 top-full mt-2 z-50 w-[28rem]">
                                         <form
                                             onSubmit={submitSearch}
                                             className="flex items-center bg-white border border-gray-200 shadow-lg rounded-lg p-2"
