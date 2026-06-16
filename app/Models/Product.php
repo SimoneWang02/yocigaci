@@ -7,17 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\OrderItem;
 
 class Product extends Model
 {
     protected $fillable = [
         'game_id', 'category_id', 'language', 'name', 'slug', 'description',
-        'price', 'stock', 'is_preorder', 'preorder_release_date',
+        'price', 'stock', 'is_preorder', 'is_limited', 'preorder_release_date',
         'preorder_note', 'is_active', 'sort_order',
     ];
 
     protected $casts = [
         'is_preorder' => 'boolean',
+        'is_limited' => 'boolean',
         'is_active' => 'boolean',
         'preorder_release_date' => 'date',
         'price' => 'decimal:2',
@@ -66,5 +68,19 @@ class Product extends Model
     public function scopeByCategory(Builder $q, string $categorySlug): Builder
     {
         return $q->whereHas('category', fn ($c) => $c->where('slug', $categorySlug));
+    }
+
+    public function userAlreadyPurchased(?int $userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        return OrderItem::where('product_id', $this->id)
+            ->whereHas('order', fn ($q) => $q
+                ->where('user_id', $userId)
+                ->where('status', '!=', 'refunded')
+            )
+            ->exists();
     }
 }

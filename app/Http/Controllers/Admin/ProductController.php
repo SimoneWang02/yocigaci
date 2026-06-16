@@ -67,7 +67,7 @@ class ProductController extends Controller
 
     public function decrementStock(Product $product): JsonResponse
     {
-        if ($product->is_preorder || $product->stock <= 0) {
+        if ($product->stock <= 0) {
             return response()->json(['message' => 'Impossibile decrementare lo stock.'], 422);
         }
 
@@ -78,10 +78,6 @@ class ProductController extends Controller
 
     public function incrementStock(Product $product): JsonResponse
     {
-        if ($product->is_preorder) {
-            return response()->json(['message' => 'Impossibile incrementare lo stock.'], 422);
-        }
-
         $product->increment('stock');
 
         return response()->json(['stock' => $product->stock]);

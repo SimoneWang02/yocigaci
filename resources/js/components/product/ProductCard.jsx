@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Image as ImageIcon, Check } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
+import { useAuthStore } from "../../store/authStore";
 import { Badge } from "../ui/Badge";
 import { LanguageBadge } from "../ui/LanguageBadge";
 
 export function ProductCard({ product }) {
     const { addItem, openCart } = useCartStore();
+    const { user } = useAuthStore();
     const [added, setAdded] = useState(false);
     const [imageIdx, setImageIdx] = useState(0);
 
@@ -21,7 +23,9 @@ export function ProductCard({ product }) {
         setTimeout(() => setAdded(false), 1500);
     };
 
-    const isOutOfStock = !product.is_preorder && product.stock === 0;
+    const isOutOfStock = product.stock === 0;
+    const limitedNotLoggedIn = product.is_limited && !user;
+    const limitedAlreadyBought = product.is_limited && product.user_already_purchased;
 
     return (
         <div className="group relative flex h-full flex-col">
@@ -88,6 +92,20 @@ export function ProductCard({ product }) {
                         >
                             Esaurito
                         </button>
+                    ) : limitedAlreadyBought ? (
+                        <button
+                            disabled
+                            className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-2 text-sm text-gray-400"
+                        >
+                            Già acquistato
+                        </button>
+                    ) : limitedNotLoggedIn ? (
+                        <Link
+                            to={`/prodotti/${product.slug}`}
+                            className="block w-full rounded-lg py-2 text-sm font-medium text-center bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                        >
+                            Accedi per acquistare
+                        </Link>
                     ) : (
                         <button
                             onClick={handleAddToCart}

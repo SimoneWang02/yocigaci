@@ -6,6 +6,7 @@ use App\Mail\OrderConfirmed;
 use App\Mail\PreorderConfirmed;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
@@ -139,9 +140,7 @@ class OrderFulfillmentService
                         'total_price' => $item['price'] * $item['quantity'],
                     ]);
 
-                    if (! $item['is_preorder']) {
-                        Product::where('id', $item['id'])->decrement('stock', $item['quantity']);
-                    }
+                    Product::where('id', $item['id'])->decrement('stock', $item['quantity']);
                 }
 
                 return $order;
@@ -171,7 +170,7 @@ class OrderFulfillmentService
      * @param  array<int, array{product_id: int, quantity: int}>  $rawItems
      * @return array<int, array<string, mixed>>
      */
-    public function validateCartItems(array $rawItems): array
+    public function validateCartItems(array $rawItems, ?User $user = null): array
     {
         $productIds = array_column($rawItems, 'product_id');
         $products = Product::whereIn('id', $productIds)->active()->get()->keyBy('id');
@@ -184,8 +183,20 @@ class OrderFulfillmentService
                 abort(422, "Prodotto #{$rawItem['product_id']} non disponibile.");
             }
 
-            if (! $product->is_preorder && $product->stock < $rawItem['quantity']) {
+            if ($product->stock < $rawItem['quantity']) {
                 abort(422, "Stock insufficiente per \"{$product->name}\".");
+            }
+
+            if ($product->is_limited) {
+                if (! $user) {
+                    abort(401, "Devi essere loggato per acquistare \"{$product->name}\".");
+                }
+                if ($rawItem['quantity'] > 1) {
+                    abort(422, "Puoi acquistare al massimo 1 unità di \"{$product->name}\".");
+                }
+                if ($product->userAlreadyPurchased($user->id)) {
+                    abort(422, "Hai già acquistato \"{$product->name}\".");
+                }
             }
 
             $items[] = $this->mapProduct($product, $rawItem['quantity']);

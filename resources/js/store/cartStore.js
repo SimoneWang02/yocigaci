@@ -26,8 +26,7 @@ export const useCartStore = create(
           }
         }
 
-        const cap = (qty) =>
-          product.is_preorder ? qty : Math.min(qty, product.stock)
+        const cap = (qty) => Math.min(qty, product.is_limited ? 1 : product.stock)
 
         if (existing) {
           set({
@@ -53,12 +52,7 @@ export const useCartStore = create(
           set({
             items: get().items.map((i) =>
               i.id === productId
-                ? {
-                    ...i,
-                    quantity: i.is_preorder
-                      ? quantity
-                      : Math.min(quantity, i.stock),
-                  }
+                ? { ...i, quantity: Math.min(quantity, i.is_limited ? 1 : i.stock) }
                 : i
             ),
           })

@@ -18,8 +18,13 @@ class ProductResource extends JsonResource
             'price' => (float) $this->price,
             'stock' => $this->stock,
             'is_preorder' => $this->is_preorder,
+            'is_limited' => $this->is_limited,
             'preorder_release_date' => $this->preorder_release_date?->toDateString(),
             'preorder_note' => $this->preorder_note,
+            'user_already_purchased' => $this->when(
+                $this->is_limited,
+                fn () => $this->userAlreadyPurchased(auth('sanctum')->id())
+            ),
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'game' => new GameResource($this->whenLoaded('game')),

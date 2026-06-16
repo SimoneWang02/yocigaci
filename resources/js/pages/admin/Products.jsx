@@ -143,7 +143,7 @@ export default function AdminProducts() {
     };
 
     const stockRowClass = (p) => {
-        if (!p.is_preorder && p.stock === 0) return "bg-red-50";
+        if (p.stock === 0) return "bg-red-50";
         return "";
     };
 
@@ -320,54 +320,50 @@ export default function AdminProducts() {
                                             .replace(".", ",")}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        {p.is_preorder ? (
-                                            <span className="text-gray-400">-</span>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-1.5">
+                                        <div className="inline-flex items-center gap-1.5">
+                                            <button
+                                                type="button"
+                                                className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                disabled={p.stock <= 0 || decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
+                                                onClick={() => decreaseStock.mutate(p.id)}
+                                                title="Diminuisci stock di 1"
+                                            >
+                                                -
+                                            </button>
+                                            {editingStockId === p.id ? (
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className="w-12 text-center text-sm font-medium border border-blue-400 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    value={stockDraft}
+                                                    onChange={(e) => setStockDraft(e.target.value)}
+                                                    onBlur={() => commitStock(p.id)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") commitStock(p.id);
+                                                        if (e.key === "Escape") setEditingStockId(null);
+                                                    }}
+                                                    autoFocus
+                                                />
+                                            ) : (
                                                 <button
                                                     type="button"
-                                                    className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                                    disabled={p.stock <= 0 || decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
-                                                    onClick={() => decreaseStock.mutate(p.id)}
-                                                    title="Diminuisci stock di 1"
+                                                    className="w-8 text-center font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded transition-colors"
+                                                    onClick={() => startEditStock(p)}
+                                                    title="Clicca per modificare lo stock"
                                                 >
-                                                    -
+                                                    {p.stock}
                                                 </button>
-                                                {editingStockId === p.id ? (
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        className="w-12 text-center text-sm font-medium border border-blue-400 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                        value={stockDraft}
-                                                        onChange={(e) => setStockDraft(e.target.value)}
-                                                        onBlur={() => commitStock(p.id)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === "Enter") commitStock(p.id);
-                                                            if (e.key === "Escape") setEditingStockId(null);
-                                                        }}
-                                                        autoFocus
-                                                    />
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        className="w-8 text-center font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded transition-colors"
-                                                        onClick={() => startEditStock(p)}
-                                                        title="Clicca per modificare lo stock"
-                                                    >
-                                                        {p.stock}
-                                                    </button>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                                    disabled={decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
-                                                    onClick={() => increaseStock.mutate(p.id)}
-                                                    title="Aumenta stock di 1"
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
-                                        )}
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="w-8 h-8 flex items-center justify-center rounded text-base font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                disabled={decreaseStock.isPending || increaseStock.isPending || editingStockId === p.id}
+                                                onClick={() => increaseStock.mutate(p.id)}
+                                                title="Aumenta stock di 1"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <button

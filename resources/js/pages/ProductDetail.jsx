@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Image as ImageIcon, Check, Frown } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Image as ImageIcon, Check, Frown, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { getProduct, getRelatedProducts } from "../api/products";
 import { useCartStore } from "../store/cartStore";
+import { useAuthStore } from "../store/authStore";
 import { Badge } from "../components/ui/Badge";
 import { LanguageBadge } from "../components/ui/LanguageBadge";
 import { Button } from "../components/ui/Button";
@@ -13,7 +14,9 @@ import ProductCarousel from "../components/home/ProductCarousel";
 
 export default function ProductDetail() {
     const { slug } = useParams();
+    const navigate = useNavigate();
     const { addItem, openCart, items } = useCartStore();
+    const { user } = useAuthStore();
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -52,14 +55,16 @@ export default function ProductDetail() {
         );
 
     const images = product.images ?? [];
-    const isOutOfStock = !product.is_preorder && product.stock === 0;
+    const isOutOfStock = product.stock === 0;
 
     // Quantità già presente nel carrello e massimo ancora aggiungibile
     const inCart = items.find((i) => i.id === product.id)?.quantity ?? 0;
-    const maxAddable = product.is_preorder
-        ? Infinity
-        : Math.max(0, product.stock - inCart);
-    const reachedMax = !product.is_preorder && maxAddable <= 0;
+    const stockCap = product.is_limited ? 1 : product.stock;
+    const maxAddable = Math.max(0, stockCap - inCart);
+    const reachedMax = maxAddable <= 0;
+
+    const limitedNotLoggedIn = product.is_limited && !user;
+    const limitedAlreadyBought = product.is_limited && product.user_already_purchased;
 
     const handleAdd = () => {
         if (reachedMax) return;
@@ -166,6 +171,9 @@ export default function ProductDetail() {
                             {product.is_preorder && (
                                 <Badge variant="preorder">Preordine</Badge>
                             )}
+                            {product.is_limited && (
+                                <Badge variant="limited">Limitato</Badge>
+                            )}
                             {isOutOfStock && (
                                 <Badge variant="sold_out">Esaurito</Badge>
                             )}
@@ -218,7 +226,7 @@ export default function ProductDetail() {
                                 </div>
                             )}
 
-                        {!isOutOfStock && !product.is_preorder && (
+                        {!isOutOfStock && (
                             <p className="text-sm text-green-600 mb-4 flex items-center gap-1.5">
                                 <Check className="w-4 h-4" strokeWidth={2.5} />
                                 {product.stock}{" "}
@@ -228,7 +236,7 @@ export default function ProductDetail() {
                             </p>
                         )}
 
-                        {!isOutOfStock && (
+                        {!isOutOfStock && !product.is_limited && (
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="flex items-center border border-gray-300 rounded-lg">
                                     <button
@@ -254,11 +262,18 @@ export default function ProductDetail() {
                                         +
                                     </button>
                                 </div>
-                                {!product.is_preorder && inCart > 0 && (
+                                {inCart > 0 && (
                                     <span className="text-xs text-gray-500">
                                         {inCart} già nel carrello
                                     </span>
                                 )}
+                            </div>
+                        )}
+
+                        {product.is_limited && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                                <ShieldCheck className="w-4 h-4 shrink-0 text-indigo-500" />
+                                <span>Acquistabile solo <strong>una per account</strong></span>
                             </div>
                         )}
 
@@ -270,6 +285,24 @@ export default function ProductDetail() {
                                 className="w-full"
                             >
                                 Esaurito
+                            </Button>
+                        ) : limitedAlreadyBought ? (
+                            <Button
+                                variant="secondary"
+                                size="lg"
+                                disabled
+                                className="w-full"
+                            >
+                                Già acquistato
+                            </Button>
+                        ) : limitedNotLoggedIn ? (
+                            <Button
+                                onClick={() => navigate("/login")}
+                                variant="primary"
+                                size="lg"
+                                className="w-full"
+                            >
+                                Accedi per acquistare
                             </Button>
                         ) : (
                             <>

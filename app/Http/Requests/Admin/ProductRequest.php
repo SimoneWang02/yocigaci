@@ -43,6 +43,7 @@ class ProductRequest extends FormRequest
             'price' => [$req, 'numeric', 'min:0'],
             'stock' => [$req, 'integer', 'min:0'],
             'is_preorder' => ['boolean'],
+            'is_limited' => ['boolean'],
             'preorder_release_date' => ['nullable', 'date', 'required_if:is_preorder,true'],
             'preorder_note' => ['nullable', 'string', 'max:255'],
             'is_active' => ['boolean'],

@@ -20,12 +20,13 @@ class CheckoutController extends Controller
     public function createSession(CheckoutRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $cartItems = $this->fulfillment->validateCartItems($validated['items']);
 
         // La rotta e' pubblica (checkout consentito anche agli ospiti): senza il middleware
         // auth:sanctum il token Bearer non viene interpretato, quindi risolviamo l'utente
         // esplicitamente dal guard sanctum per collegare ordine ed email se e' loggato.
         $user = $request->user('sanctum');
+
+        $cartItems = $this->fulfillment->validateCartItems($validated['items'], $user);
 
         $deliveryMethod = $validated['delivery_method'];
 

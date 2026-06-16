@@ -34,6 +34,7 @@ export default function ProductForm() {
         price: "",
         stock: 0,
         is_preorder: false,
+        is_limited: false,
         preorder_release_date: "",
         preorder_note: "",
     });
@@ -72,6 +73,7 @@ export default function ProductForm() {
                 price: String(p.price ?? ""),
                 stock: p.stock ?? 0,
                 is_preorder: p.is_preorder ?? false,
+                is_limited: p.is_limited ?? false,
                 preorder_release_date: p.preorder_release_date ?? "",
                 preorder_note: p.preorder_note ?? "",
             });
@@ -283,7 +285,6 @@ export default function ProductForm() {
                             onChange={(e) =>
                                 setForm({ ...form, stock: e.target.value })
                             }
-                            disabled={form.is_preorder}
                         />
                     </div>
                     <div className="flex gap-8">
@@ -295,13 +296,28 @@ export default function ProductForm() {
                                     setForm({
                                         ...form,
                                         is_preorder: e.target.checked,
-                                        stock: 0,
                                     })
                                 }
                                 className="w-4 h-4 text-indigo-600 rounded border-gray-300"
                             />
                             <span className="text-sm font-medium text-gray-700">
                                 Preordine
+                            </span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={form.is_limited}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        is_limited: e.target.checked,
+                                    })
+                                }
+                                className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                            />
+                            <span className="text-sm font-medium text-gray-700">
+                                Limitato 1 ad account
                             </span>
                         </label>
                     </div>
