@@ -5,13 +5,49 @@
     $primaryImageUrl = $product->primaryImage?->url ?? $product->images->first()?->url;
     $allImages = $product->images->pluck('url')->filter()->values()->all();
 
+    $langLabels = [
+        'ENG' => 'Inglese', 'ITA' => 'Italiano', 'JAP' => 'Giapponese',
+        'FRA' => 'Francese', 'DEU' => 'Tedesco', 'ESP' => 'Spagnolo',
+        'KOR' => 'Coreano', 'CHN' => 'Cinese', 'POR' => 'Portoghese',
+    ];
+    $langBcp47 = [
+        'ENG' => 'en', 'ITA' => 'it', 'JAP' => 'ja',
+        'FRA' => 'fr', 'DEU' => 'de', 'ESP' => 'es',
+        'KOR' => 'ko', 'CHN' => 'zh', 'POR' => 'pt',
+    ];
+    $langLabel = $product->language ? ($langLabels[$product->language] ?? null) : null;
+    $langBcp = $product->language ? ($langBcp47[$product->language] ?? null) : null;
+
+    $titleParts = [$product->name];
+    if ($langLabel) $titleParts[] = $langLabel;
+    $title = implode(' - ', $titleParts)
+        . ($product->game ? ' | ' . $product->game->name : '')
+        . ' | Yocigaci Carpi';
+
     $availability = $product->is_preorder
         ? 'https://schema.org/PreOrder'
         : ($product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock');
 
-    $metaDescription = $product->description
-        ? mb_substr($product->description, 0, 155)
-        : "Acquista {$product->name} su Yocigaci, negozio TCG a Carpi. {$priceFormatted}.";
+    if ($product->description) {
+        $descSnippet = mb_substr(strip_tags($product->description), 0, 110);
+        if (mb_strlen($product->description) > 110) $descSnippet .= '...';
+        $metaDescription = $descSnippet . ' Acquista su Yocigaci, negozio TCG a Carpi.';
+    } else {
+        $langSuffix = $langLabel ? " in {$langLabel}" : '';
+        $metaDescription = "Acquista {$product->name}{$langSuffix} su Yocigaci, negozio TCG a Carpi. {$priceFormatted}.";
+    }
+
+    $seller = [
+        '@type' => 'Organization',
+        'name' => 'Yocigaci',
+        'url' => $base,
+        'address' => [
+            '@type' => 'PostalAddress',
+            'addressLocality' => 'Carpi',
+            'addressRegion' => 'MO',
+            'addressCountry' => 'IT',
+        ],
+    ];
 
     $jsonLdProduct = array_filter([
         '@context' => 'https://schema.org',
@@ -19,6 +55,7 @@
         'name' => $product->name,
         'description' => $product->description ?: $metaDescription,
         'image' => $allImages ?: ($primaryImageUrl ? [$primaryImageUrl] : null),
+        'inLanguage' => $langBcp,
         'brand' => $product->game ? ['@type' => 'Brand', 'name' => $product->game->name] : null,
         'category' => $product->category?->name,
         'offers' => [
@@ -28,7 +65,7 @@
             'price' => $price,
             'availability' => $availability,
             'itemCondition' => 'https://schema.org/NewCondition',
-            'seller' => ['@type' => 'Organization', 'name' => 'Yocigaci'],
+            'seller' => $seller,
         ],
     ]);
 
@@ -52,16 +89,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $product->name }} - Yocigaci</title>
+    <title>{{ $title }}</title>
     <meta name="description" content="{{ $metaDescription }}">
     <link rel="canonical" href="{{ $base }}/prodotti/{{ $product->slug }}">
 
     <meta property="og:type" content="product">
-    <meta property="og:title" content="{{ $product->name }} - Yocigaci">
+    <meta property="og:title" content="{{ $title }}">
     <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="{{ $base }}/prodotti/{{ $product->slug }}">
+    <meta property="og:locale" content="it_IT">
+    <meta property="og:site_name" content="Yocigaci">
     @if($primaryImageUrl)
     <meta property="og:image" content="{{ $primaryImageUrl }}">
+    @endif
+
+    <meta name="twitter:card" content="{{ $primaryImageUrl ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $title }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
+    @if($primaryImageUrl)
+    <meta name="twitter:image" content="{{ $primaryImageUrl }}">
     @endif
 
     <script type="application/ld+json">{!! json_encode($jsonLdProduct, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -127,6 +173,9 @@
                 @endif
                 @if($product->category)
                     <span class="badge badge-game">{{ $product->category->name }}</span>
+                @endif
+                @if($langLabel)
+                    <span class="badge badge-game">{{ $langLabel }}</span>
                 @endif
             </div>
 
