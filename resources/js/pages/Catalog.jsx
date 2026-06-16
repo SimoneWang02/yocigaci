@@ -107,7 +107,7 @@ export default function Catalog() {
 
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
         {currentCategory
-          ? `${currentCategory.name} – ${currentGame.name}`
+          ? `${currentGame.name} – ${currentCategory.name}`
           : currentGame
           ? currentGame.name
           : 'Catalogo'}
