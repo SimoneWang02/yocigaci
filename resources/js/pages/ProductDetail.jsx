@@ -84,6 +84,47 @@ export default function ProductDetail() {
         ? product.description.slice(0, 155)
         : `Acquista ${product.name} su Yocigaci, negozio TCG a Carpi. € ${Number(product.price).toFixed(2).replace(".", ",")}.`;
     const metaImage = product.primary_image?.url ?? product.images?.[0]?.url;
+    const productUrl = `${window.location.origin}/prodotti/${product.slug}`;
+
+    const availability = product.is_preorder
+        ? "https://schema.org/PreOrder"
+        : product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock";
+
+    const jsonLdProduct = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.description || metaDescription,
+        image: images.map((img) => img.url).filter(Boolean),
+        ...(product.game && { brand: { "@type": "Brand", name: product.game.name } }),
+        ...(product.category && { category: product.category.name }),
+        offers: {
+            "@type": "Offer",
+            url: productUrl,
+            priceCurrency: "EUR",
+            price: Number(product.price).toFixed(2),
+            availability,
+            itemCondition: "https://schema.org/NewCondition",
+            seller: { "@type": "Organization", name: "Yocigaci" },
+        },
+    };
+
+    const breadcrumbItems = [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${window.location.origin}/` },
+        { "@type": "ListItem", position: 2, name: "Catalogo", item: `${window.location.origin}/catalogo` },
+        ...(product.game
+            ? [{ "@type": "ListItem", position: 3, name: product.game.name, item: `${window.location.origin}/catalogo/${product.game.slug}` }]
+            : []),
+        { "@type": "ListItem", position: product.game ? 4 : 3, name: product.name },
+    ];
+
+    const jsonLdBreadcrumb = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbItems,
+    };
 
     return (
         <>
@@ -93,11 +134,10 @@ export default function ProductDetail() {
                 <meta property="og:title" content={metaTitle} />
                 <meta property="og:description" content={metaDescription} />
                 <meta property="og:type" content="product" />
-                <meta
-                    property="og:url"
-                    content={`${window.location.origin}/prodotti/${product.slug}`}
-                />
+                <meta property="og:url" content={productUrl} />
                 {metaImage && <meta property="og:image" content={metaImage} />}
+                <script type="application/ld+json">{JSON.stringify(jsonLdProduct)}</script>
+                <script type="application/ld+json">{JSON.stringify(jsonLdBreadcrumb)}</script>
             </Helmet>
             <div className="bg-white">
             <div className="max-w-6xl mx-auto px-4 py-10">
