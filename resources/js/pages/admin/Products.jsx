@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Pencil, Trash2, AlertTriangle, X, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,6 @@ import { Badge } from "../../components/ui/Badge";
 import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
-import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
 
 export default function AdminProducts() {
@@ -23,6 +22,11 @@ export default function AdminProducts() {
     const filterGame = searchParams.get("game_id") ?? "";
     const filterCategory = searchParams.get("category_id") ?? "";
     const filterActive = searchParams.get("is_active") ?? "";
+    const sortBy = searchParams.get("sort_by") ?? "";
+    const sortDir = searchParams.get("sort_dir") ?? "asc";
+    const page = parseInt(searchParams.get("page") ?? "1", 10);
+
+    const sort = { column: sortBy || null, dir: sortDir };
 
     const setParam = (key, value) => {
         setSearchParams((prev) => {
@@ -32,6 +36,29 @@ export default function AdminProducts() {
             } else {
                 next.delete(key);
             }
+            next.delete("page");
+            return next;
+        });
+    };
+
+    const setPage = (p) => {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            if (p > 1) next.set("page", p);
+            else next.delete("page");
+            return next;
+        });
+    };
+
+    const onSort = (column) => {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            const currentSortBy = prev.get("sort_by");
+            const currentSortDir = prev.get("sort_dir") ?? "asc";
+            const newDir = currentSortBy === column && currentSortDir === "asc" ? "desc" : "asc";
+            next.set("sort_by", column);
+            next.set("sort_dir", newDir);
+            next.delete("page");
             return next;
         });
     };
@@ -45,6 +72,7 @@ export default function AdminProducts() {
                 next.delete("game_id");
             }
             next.delete("category_id");
+            next.delete("page");
             return next;
         });
     };
@@ -63,23 +91,25 @@ export default function AdminProducts() {
         enabled: !!filterGame,
     });
     const { data, isLoading } = useQuery({
-        queryKey: ["admin-products", filterGame, filterCategory, search, filterActive],
+        queryKey: ["admin-products", filterGame, filterCategory, search, filterActive, sortBy, sortDir, page],
         queryFn: () =>
             adminGetProducts({
                 ...(filterGame ? { game_id: filterGame } : {}),
                 ...(filterCategory ? { category_id: filterCategory } : {}),
                 ...(search ? { search } : {}),
                 ...(filterActive !== "" ? { is_active: filterActive === "1" } : {}),
+                ...(sortBy ? { sort_by: sortBy, sort_dir: sortDir } : {}),
+                ...(page > 1 ? { page } : {}),
             }),
     });
 
     const games = gamesData?.data ?? [];
     const categories = categoriesData?.data ?? [];
-    const rawProducts = data?.data ?? [];
-    const { sort, sorted: products, onSort } = useTableSort(rawProducts, 'name');
+    const products = data?.data ?? [];
+    const meta = data?.meta ?? {};
 
     const today = new Date().toISOString().slice(0, 10);
-    const expiredPreorders = rawProducts.filter(
+    const expiredPreorders = products.filter(
         (p) => p.is_preorder && p.preorder_release_date && p.preorder_release_date < today,
     );
 
@@ -146,6 +176,12 @@ export default function AdminProducts() {
         if (p.stock === 0) return "bg-red-50";
         return "";
     };
+
+    const pageNumbers = meta.last_page
+        ? Array.from({ length: meta.last_page }, (_, i) => i + 1).filter(
+              (p) => p === 1 || p === meta.last_page || Math.abs(p - meta.current_page) <= 2,
+          )
+        : [];
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -429,6 +465,42 @@ export default function AdminProducts() {
                         <p className="text-center py-12 text-gray-400">
                             Nessun prodotto trovato.
                         </p>
+                    )}
+                    {meta.last_page > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                            <p className="text-sm text-gray-500">
+                                {meta.from}-{meta.to} di {meta.total} prodotti
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    disabled={meta.current_page <= 1}
+                                    onClick={() => setPage(meta.current_page - 1)}
+                                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Precedente
+                                </button>
+                                {pageNumbers.map((p, idx) => (
+                                    <Fragment key={p}>
+                                        {idx > 0 && pageNumbers[idx - 1] !== p - 1 && (
+                                            <span className="px-1 text-gray-400 text-sm">...</span>
+                                        )}
+                                        <button
+                                            onClick={() => setPage(p)}
+                                            className={`w-8 h-8 text-sm rounded-lg transition-colors ${p === meta.current_page ? "bg-indigo-600 text-white" : "hover:bg-gray-50 border border-gray-200"}`}
+                                        >
+                                            {p}
+                                        </button>
+                                    </Fragment>
+                                ))}
+                                <button
+                                    disabled={meta.current_page >= meta.last_page}
+                                    onClick={() => setPage(meta.current_page + 1)}
+                                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Successivo
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </div>
             )}

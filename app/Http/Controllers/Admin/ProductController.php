@@ -17,7 +17,7 @@ class ProductController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Product::with(['primaryImage', 'game', 'category'])->orderBy('sort_order');
+        $query = Product::with(['primaryImage', 'game', 'category']);
 
         if ($request->game_id) {
             $query->where('game_id', $request->game_id);
@@ -30,6 +30,19 @@ class ProductController extends Controller
         }
         if ($request->search) {
             $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $sortDir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
+        $sortBy  = $request->sort_by;
+
+        if ($sortBy === 'game.name') {
+            $query->leftJoin('games', 'products.game_id', '=', 'games.id')
+                ->orderBy('games.name', $sortDir)
+                ->select('products.*');
+        } elseif (in_array($sortBy, ['name', 'price', 'stock', 'is_active'])) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->orderBy('sort_order');
         }
 
         return ProductResource::collection($query->paginate(50));
