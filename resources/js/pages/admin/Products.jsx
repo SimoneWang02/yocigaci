@@ -17,6 +17,8 @@ export default function AdminProducts() {
     const [stockDraft, setStockDraft] = useState("");
     const [editingNameId, setEditingNameId] = useState(null);
     const [nameDraft, setNameDraft] = useState("");
+    const [editingPriceId, setEditingPriceId] = useState(null);
+    const [priceDraft, setPriceDraft] = useState("");
 
     const search = searchParams.get("search") ?? "";
     const filterGame = searchParams.get("game_id") ?? "";
@@ -143,6 +145,13 @@ export default function AdminProducts() {
             setEditingNameId(null);
         },
     });
+    const setPrice = useMutation({
+        mutationFn: ({ id, price }) => adminUpdateProduct(id, { price }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-products"] });
+            setEditingPriceId(null);
+        },
+    });
 
     const startEditStock = (p) => {
         setEditingStockId(p.id);
@@ -152,6 +161,20 @@ export default function AdminProducts() {
     const startEditName = (p) => {
         setEditingNameId(p.id);
         setNameDraft(p.name);
+    };
+
+    const startEditPrice = (p) => {
+        setEditingPriceId(p.id);
+        setPriceDraft(Number(p.price).toFixed(2));
+    };
+
+    const commitPrice = (id) => {
+        const val = parseFloat(priceDraft.replace(",", "."));
+        if (!isNaN(val) && val >= 0) {
+            setPrice.mutate({ id, price: val.toFixed(2) });
+        } else {
+            setEditingPriceId(null);
+        }
     };
 
     const commitName = (id) => {
@@ -350,10 +373,32 @@ export default function AdminProducts() {
                                         {p.game?.name}
                                     </td>
                                     <td className="px-4 py-3 text-right font-semibold">
-                                        €{" "}
-                                        {Number(p.price)
-                                            .toFixed(2)
-                                            .replace(".", ",")}
+                                        {editingPriceId === p.id ? (
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                className="w-20 text-right text-sm font-semibold border border-blue-400 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                value={priceDraft}
+                                                onChange={(e) => setPriceDraft(e.target.value)}
+                                                onBlur={() => commitPrice(p.id)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") commitPrice(p.id);
+                                                    if (e.key === "Escape") setEditingPriceId(null);
+                                                }}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <span
+                                                className="cursor-text hover:bg-blue-50 hover:text-blue-700 rounded px-1 transition-colors"
+                                                onClick={() => startEditPrice(p)}
+                                                title="Clicca per modificare il prezzo"
+                                            >
+                                                €{" "}
+                                                {Number(p.price)
+                                                    .toFixed(2)
+                                                    .replace(".", ",")}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <div className="inline-flex items-center gap-1.5">
