@@ -142,8 +142,8 @@ HTML,
 <p><em>Ultimo aggiornamento: 7 giugno 2026</em></p>
 
 <h2>1. Prodotti non rimborsabili: TCG aperti</h2>
-<p>I prodotti TCG sigillati (booster box, display, buste, collezioni speciali) una volta aperti <strong>non possono essere restituiti né rimborsati</strong>. L'apertura del sigillo altera irreversibilmente il valore del prodotto e ne rende impossibile la rivendita. Questo limite si applica indipendentemente dal contenuto delle buste.</p>
-<p>L'esclusione si fonda sull'art. 59, comma 1, lett. e del D.Lgs. 206/2005, che consente di escludere il diritto di recesso per beni che per loro natura non possono essere restituiti o rischiano di deteriorarsi rapidamente.</p>
+<p>I prodotti TCG sigillati (booster box, display, buste, collezioni speciali) una volta aperti <strong>non possono essere restituiti né rimborsati</strong>. L'apertura del sigillo rivela il contenuto casuale delle buste e altera irreversibilmente l'integrità commerciale del prodotto, rendendo impossibile la rivendita. Questo limite si applica indipendentemente dal contenuto delle buste.</p>
+<p>Questa esclusione si fonda sull'art. 59, comma 1, D.Lgs. 206/2005, che consente di limitare il diritto di recesso per beni che, per loro stessa natura, non possono essere restituiti nelle condizioni originarie una volta aperti. Nel caso dei prodotti TCG, l'apertura costituisce un utilizzo sostanziale e irreversibile del prodotto: il valore del bene risiede nell'aleatorietà del contenuto, che cessa di esistere nel momento in cui viene aperto.</p>
 
 <h2>2. Condizioni per accettare un reso</h2>
 <p>Sono accettati resi esclusivamente per prodotti che rispettino tutte le seguenti condizioni:</p>
@@ -172,7 +172,7 @@ HTML,
 <h2>6. Prodotto difettoso o errato</h2>
 <p>Se hai ricevuto un prodotto con difetti di produzione o un prodotto diverso da quello ordinato:</p>
 <ul>
-  <li>Contattaci il prima possibile (preferibilmente entro 7 giorni dalla consegna) all'indirizzo <strong>assistenza.yocigaci@gmail.com</strong></li>
+  <li>Contattaci il prima possibile all'indirizzo <strong>assistenza.yocigaci@gmail.com</strong></li>
   <li>Allega foto chiare del prodotto e dell'imballo ricevuto</li>
   <li>Le spese di restituzione sono interamente a carico di Yocigaci Srl</li>
   <li>A scelta del cliente procederemo alla <strong>sostituzione</strong> con lo stesso prodotto (se disponibile) o al <strong>rimborso completo</strong></li>
@@ -191,8 +191,8 @@ HTML,
 <p>Ai sensi dell'art. 52 del D.Lgs. 206/2005 (Codice del Consumo), il consumatore ha il diritto di recedere dal contratto di vendita entro <strong>14 giorni</strong> dalla data di ricezione del prodotto, senza necessità di fornire alcuna motivazione.</p>
 
 <h2>2. Esclusioni: prodotti sigillati aperti</h2>
-<p>Il diritto di recesso <strong>non si applica</strong> ai prodotti TCG sigillati (booster box, display, buste, collezioni speciali) che siano stati aperti dall'acquirente. Tale esclusione è prevista dall'art. 59, comma 1, lett. e del D.Lgs. 206/2005, che esclude il recesso per i <em>"beni che per loro natura non possono essere restituiti o rischiano di deteriorarsi o alterarsi rapidamente"</em>.</p>
-<p>I prodotti TCG sigillati, una volta aperti, perdono irreversibilmente il loro valore commerciale e non possono essere rimessi in vendita.</p>
+<p>Il diritto di recesso <strong>non si applica</strong> ai prodotti TCG sigillati (booster box, display, buste, collezioni speciali) che siano stati aperti dall'acquirente. Questa esclusione si fonda sull'art. 59, comma 1, D.Lgs. 206/2005: i prodotti TCG, per loro stessa natura, non possono essere restituiti nelle condizioni originarie una volta aperti. Il valore del bene risiede nell'aleatorietà del contenuto; l'apertura costituisce un utilizzo sostanziale e irreversibile del prodotto, che cessa di possedere le caratteristiche per cui era stato acquistato.</p>
+<p>I prodotti TCG sigillati, una volta aperti, perdono irreversibilmente la propria integrità commerciale e non possono essere rimessi in vendita.</p>
 
 <h2>3. Come esercitare il recesso</h2>
 <p>Per esercitare il diritto di recesso il consumatore deve comunicare la propria decisione prima della scadenza del termine di 14 giorni inviando:</p>
@@ -208,7 +208,7 @@ HTML,
 <p>I prodotti devono essere restituiti integri, sigillati e nella confezione originale. Le spese di restituzione sono a carico del consumatore.</p>
 
 <h2>5. Rimborso</h2>
-<p>Yocigaci Srl rimborserà tutti i pagamenti ricevuti dal consumatore, incluse le eventuali spese di spedizione standard originali, entro <strong>14 giorni</strong> dalla ricezione del prodotto restituito. Il rimborso viene effettuato tramite lo stesso metodo di pagamento utilizzato per l'acquisto.</p>
+<p>Ai sensi dell'art. 56 D.Lgs. 206/2005, Yocigaci Srl rimborserà tutti i pagamenti ricevuti dal consumatore, incluse le eventuali spese di spedizione standard originali, entro <strong>14 giorni</strong> dalla ricezione della comunicazione di recesso. Yocigaci Srl si riserva la facoltà di trattenere il rimborso fino alla ricezione dei prodotti restituiti o fino a quando il consumatore non dimostri di aver rispedito i beni. Il rimborso viene effettuato tramite lo stesso metodo di pagamento utilizzato per l'acquisto.</p>
 
 <h2>6. Modulo di recesso standard</h2>
 <p>In conformità all'Allegato I, Parte B del D.Lgs. 206/2005, si mette a disposizione il seguente modulo standard:</p>
@@ -243,7 +243,7 @@ HTML,
 <p>In periodi di alta domanda (uscite di nuovi set, pre-ordini, festività) i tempi di preparazione potrebbero allungarsi; in tal caso verrà fornita comunicazione preventiva sul sito.</p>
 
 <h2>4. Costi e tempi di consegna</h2>
-<p>Il costo di spedizione viene calcolato automaticamente in base all'ordine e mostrato prima della conferma dell'acquisto. <strong>La spedizione è gratuita</strong> per ordini che superano la soglia indicata durante il checkout.</p>
+<p>Il costo di spedizione viene calcolato automaticamente in base all'ordine ed è visibile nel carrello prima della conferma dell'acquisto. <strong>La spedizione è gratuita</strong> per ordini che superano la soglia minima di importo, indicata nelle schede prodotto e nel carrello prima di qualsiasi conferma.</p>
 <p>I tempi di consegna stimati dal corriere sono indicati durante il processo d'ordine e dipendono dalla destinazione.</p>
 
 <h2>5. Imballaggio</h2>
@@ -260,6 +260,7 @@ HTML,
 
 <h2>7. Responsabilità durante il trasporto</h2>
 <p>Il rischio di perdita o danneggiamento dei prodotti si trasferisce al consumatore nel momento in cui il bene entra nel possesso fisico del destinatario o di un terzo designato dal consumatore, ai sensi dell'art. 63 D.Lgs. 206/2005.</p>
+<p>Qualora il consumatore scelga un vettore diverso da quelli proposti da Yocigaci Srl per la spedizione (ad esempio organizzando autonomamente il ritiro della merce), il rischio di perdita o danneggiamento si trasferisce al consumatore nel momento della consegna del bene al vettore da lui scelto, ai sensi dell'art. 63, comma 2, D.Lgs. 206/2005. In tal caso Yocigaci Srl non potrà essere ritenuta responsabile per danni o perdite avvenuti durante il trasporto.</p>
 HTML,
             ],
 
