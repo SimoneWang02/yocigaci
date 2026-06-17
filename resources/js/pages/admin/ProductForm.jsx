@@ -159,7 +159,10 @@ export default function ProductForm() {
                 return;
             }
             qc.invalidateQueries(["admin-products"]);
-            navigate("/admin/prodotti");
+            const editParams = new URLSearchParams();
+            if (form.game_id) editParams.set("game_id", form.game_id);
+            if (form.category_id) editParams.set("category_id", form.category_id);
+            navigate(`/admin/prodotti?${editParams.toString()}`);
         } catch (err) {
             const errors = err.response?.data?.errors;
             setError(
