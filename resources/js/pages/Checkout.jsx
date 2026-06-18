@@ -821,7 +821,7 @@ export default function Checkout() {
                         )}
 
                         {/* Coupon */}
-                        <div className="border-t border-gray-100 pt-3 mb-1">
+                        <div className="border-t border-gray-100 pt-3 mb-3">
                             {couponApplied ? (
                                 <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                                     <div className="flex items-center gap-2">
