@@ -54,8 +54,9 @@ export default function Home() {
                         <div className="bg-white">
                             <hr className="border-gray-200" />
                             <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col items-center gap-4 text-center">
-                                <p className="text-gray-500 text-sm">Hai visto solo una selezione</p>
-                                <h2 className="text-2xl font-bold text-gray-900">Scopri tutto il catalogo</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                    Scopri tutto il catalogo
+                                </h2>
                                 <Link
                                     to="/catalogo"
                                     className="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
