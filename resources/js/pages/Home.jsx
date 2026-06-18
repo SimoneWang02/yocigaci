@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { getHomepageSections, getCarouselBanners } from "../api/products";
 import { PageSpinner } from "../components/ui/Spinner";
 import HeroCarousel from "../components/home/HeroCarousel";
@@ -36,16 +38,35 @@ export default function Home() {
                     <PageSpinner />
                 </div>
             ) : (
-                sections.map((section, idx) => (
-                    <div key={section.id} className="bg-white">
-                        {idx > 0 && <hr className="border-gray-200" />}
-                        <ProductCarousel
-                            title={section.title}
-                            products={section.products ?? []}
-                            ctaLink={`/catalogo?sezione=${section.id}`}
-                        />
-                    </div>
-                ))
+                <>
+                    {sections.map((section, idx) => (
+                        <div key={section.id} className="bg-white">
+                            {idx > 0 && <hr className="border-gray-200" />}
+                            <ProductCarousel
+                                title={section.title}
+                                products={section.products ?? []}
+                                ctaLink={`/catalogo?sezione=${section.id}`}
+                            />
+                        </div>
+                    ))}
+
+                    {sections.length > 0 && (
+                        <div className="bg-white">
+                            <hr className="border-gray-200" />
+                            <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col items-center gap-4 text-center">
+                                <p className="text-gray-500 text-sm">Hai visto solo una selezione</p>
+                                <h2 className="text-2xl font-bold text-gray-900">Scopri tutto il catalogo</h2>
+                                <Link
+                                    to="/catalogo"
+                                    className="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
+                                >
+                                    Vai al catalogo
+                                    <ArrowRight className="w-4 h-4" />
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );
