@@ -37,10 +37,8 @@ export default function Home() {
                 </div>
             ) : (
                 sections.map((section, idx) => (
-                    <div
-                        key={section.id}
-                        className={idx % 2 === 1 ? "bg-gray-100" : "bg-white"}
-                    >
+                    <div key={section.id} className="bg-white">
+                        {idx > 0 && <hr className="border-gray-200" />}
                         <ProductCarousel
                             title={section.title}
                             products={section.products ?? []}
