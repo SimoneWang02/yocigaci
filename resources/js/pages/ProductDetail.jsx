@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Image as ImageIcon, Check, Frown, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -18,9 +18,6 @@ export default function ProductDetail() {
     const { addItem, openCart, items } = useCartStore();
     const { user } = useAuthStore();
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [slug]);
     const [selectedImage, setSelectedImage] = useState(0);
     const [qty, setQty] = useState(1);
     const [added, setAdded] = useState(false);

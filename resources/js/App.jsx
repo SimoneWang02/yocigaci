@@ -4,7 +4,9 @@ import {
     Route,
     Navigate,
     NavLink,
+    useLocation,
 } from "react-router-dom";
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import { Header } from "./components/layout/Header";
@@ -40,6 +42,14 @@ import OrderTracking from "./pages/OrderTracking";
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
+
+function ScrollToTop() {
+    const { pathname } = useLocation();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+    return null;
+}
 
 function ProtectedRoute({ children }) {
     const { user } = useAuthStore();
@@ -115,6 +125,7 @@ export default function App() {
         <HelmetProvider>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
+                    <ScrollToTop />
                     <Helmet>
                         <title>Yocigaci - TCG Store a Carpi</title>
                         <meta
