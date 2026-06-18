@@ -32,10 +32,33 @@ class Order extends Model
     protected static function booted(): void
     {
         static::creating(function (Order $order) {
-            $year = date('Y');
-            $count = Order::whereYear('created_at', $year)->count() + 1;
-            $order->order_number = 'ORD-' . $year . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+            if (! $order->order_number) {
+                $order->order_number = static::generateOrderNumber();
+            }
         });
+    }
+
+    /**
+     * Genera un numero d'ordine imprevedibile: ORD-{anno}-{8 caratteri casuali}.
+     *
+     * La parte casuale evita l'enumerazione (i progressivi tipo ORD-2026-0001 erano
+     * indovinabili). L'alfabeto esclude i caratteri ambigui (0/O, 1/I/L) per non creare
+     * errori quando il cliente digita il numero nel tracking pubblico.
+     */
+    public static function generateOrderNumber(): string
+    {
+        $alphabet = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+        $max = strlen($alphabet) - 1;
+
+        do {
+            $random = '';
+            for ($i = 0; $i < 8; $i++) {
+                $random .= $alphabet[random_int(0, $max)];
+            }
+            $number = 'ORD-' . date('Y') . '-' . $random;
+        } while (static::where('order_number', $number)->exists());
+
+        return $number;
     }
 
     public function items(): HasMany

@@ -23,22 +23,26 @@ Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);
 Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
 
-// Auth
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink']);
-Route::post('/auth/reset-password', [PasswordResetController::class, 'reset']);
+// Auth (rate limit dedicato contro brute force e spam account)
+Route::middleware('throttle:auth')->group(function () {
+    Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendLink']);
+    Route::post('/auth/reset-password', [PasswordResetController::class, 'reset']);
+});
 
 // Checkout (pubblico - funziona anche per guest)
-Route::post('/checkout/create-session', [CheckoutController::class, 'createSession']);
-Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']);
-Route::post('/coupons/validate', [\App\Http\Controllers\CouponController::class, 'validate']);
+Route::post('/checkout/create-session', [CheckoutController::class, 'createSession'])->middleware('throttle:checkout');
+Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->middleware('throttle:checkout');
+Route::post('/coupons/validate', [\App\Http\Controllers\CouponController::class, 'validate'])->middleware('throttle:coupon');
 
-// Stripe webhook - escluso da CSRF e auth
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+// Stripe webhook - escluso da CSRF, auth e rate limiting (burst legittimi da IP Stripe).
+// La firma del webhook viene comunque verificata nel controller.
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->withoutMiddleware('throttle:api');
 
-// Tracking pubblico
-Route::post('/orders/track', [\App\Http\Controllers\OrderTrackingController::class, 'track']);
+// Tracking pubblico (rate limit dedicato contro l'enumerazione degli ordini)
+Route::post('/orders/track', [\App\Http\Controllers\OrderTrackingController::class, 'track'])->middleware('throttle:tracking');
 
 // Autenticate
 Route::middleware('auth:sanctum')->group(function () {

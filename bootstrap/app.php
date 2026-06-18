@@ -26,6 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // Rate limit di default su tutta la superficie API (vedi AppServiceProvider).
+        $middleware->api(append: [
+            'throttle:api',
+        ]);
+
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
