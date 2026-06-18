@@ -19,7 +19,7 @@ class CarouselBannerController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $request->validate(['image' => ['required', 'image', 'max:5120']]);
+        $request->validate(['image' => ['required', 'image', 'max:20480']]);
 
         $lastOrder = CarouselBanner::max('sort_order') ?? -1;
         $path = $request->file('image')->store('banners', 'public');
