@@ -440,20 +440,34 @@ function OrderDrawer({ orderId, onClose }) {
                                                         cliente
                                                     </span>
                                                 </div>
-                                            ) : order.status ===
-                                              "ready_for_pickup" ? (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
-                                                        <Bell className="w-4 h-4 text-violet-600 flex-shrink-0" />
-                                                        <span className="text-sm text-violet-800">
-                                                            Cliente notificato -
-                                                            In attesa di ritiro
-                                                        </span>
-                                                    </div>
+                                            ) : (
+                                                <div className="flex items-stretch gap-2">
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="md"
+                                                        className="flex-1"
+                                                        disabled={
+                                                            notifyPickup.isPending ||
+                                                            order.status ===
+                                                                "ready_for_pickup"
+                                                        }
+                                                        onClick={() => {
+                                                            notifyPickup.mutate(
+                                                                order.id,
+                                                            );
+                                                        }}
+                                                    >
+                                                        {order.status ===
+                                                        "ready_for_pickup"
+                                                            ? "Cliente notificato"
+                                                            : notifyPickup.isPending
+                                                              ? "Invio notifica..."
+                                                              : "Notifica cliente"}
+                                                    </Button>
                                                     <Button
                                                         variant="primary"
                                                         size="md"
-                                                        className="w-full"
+                                                        className="flex-1"
                                                         disabled={
                                                             confirmPickup.isPending
                                                         }
@@ -468,24 +482,6 @@ function OrderDrawer({ orderId, onClose }) {
                                                             : "Conferma ritiro"}
                                                     </Button>
                                                 </div>
-                                            ) : (
-                                                <Button
-                                                    variant="primary"
-                                                    size="md"
-                                                    className="w-full"
-                                                    disabled={
-                                                        notifyPickup.isPending
-                                                    }
-                                                    onClick={() => {
-                                                        notifyPickup.mutate(
-                                                            order.id,
-                                                        );
-                                                    }}
-                                                >
-                                                    {notifyPickup.isPending
-                                                        ? "Invio notifica..."
-                                                        : "Notifica cliente"}
-                                                </Button>
                                             )}
                                         </div>
                                     ) : !order.tracking_code && (
