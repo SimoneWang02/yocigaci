@@ -41,7 +41,7 @@ export function ProductCard({ product }) {
                         <img
                             src={currentImage.url}
                             alt={product.name}
-                            className="relative max-h-32 w-auto object-contain transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-105 sm:max-h-48"
+                            className="relative max-h-32 w-auto max-w-full object-contain transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-105 sm:max-h-48"
                         />
                     ) : (
                         <div className="flex h-40 w-32 items-center justify-center rounded-lg bg-gray-100">

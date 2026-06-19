@@ -165,23 +165,21 @@ export default function Catalog() {
         </div>
         <button
           onClick={applySearch}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
           <Search size={16} />
-          Cerca
+          <span className="hidden sm:inline">Cerca</span>
         </button>
+        {!sectionId && (
+          <button
+            onClick={() => setShowFilters(true)}
+            aria-label="Filtri"
+            className="md:hidden flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <SlidersHorizontal size={18} />
+          </button>
+        )}
       </div>
-
-      {/* Filtri (mobile) */}
-      {!sectionId && (
-        <button
-          onClick={() => setShowFilters(true)}
-          className="md:hidden mb-4 inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          <SlidersHorizontal size={16} />
-          Filtri
-        </button>
-      )}
 
       <div className="flex gap-6">
         {/* Sidebar */}
@@ -194,7 +192,7 @@ export default function Catalog() {
         )}
 
         {/* Grid */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {isLoading ? (
             <PageSpinner />
           ) : isError ? (
@@ -215,7 +213,7 @@ export default function Catalog() {
 
               {/* Pagination */}
               {meta.last_page > 1 && (
-                <div className="flex justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
