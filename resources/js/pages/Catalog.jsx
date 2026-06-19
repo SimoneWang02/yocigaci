@@ -6,7 +6,7 @@ import { getProducts, getGames, getSearchSuggestions } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
-import { Package, Search } from 'lucide-react'
+import { Package, Search, SlidersHorizontal, X } from 'lucide-react'
 
 export default function Catalog() {
   const { gameSlug, categorySlug } = useParams()
@@ -18,6 +18,7 @@ export default function Catalog() {
   const [searchValue, setSearchValue] = useState(params.get('search') ?? '')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchValue), 300)
@@ -171,6 +172,17 @@ export default function Catalog() {
         </button>
       </div>
 
+      {/* Filtri (mobile) */}
+      {!sectionId && (
+        <button
+          onClick={() => setShowFilters(true)}
+          className="md:hidden mb-4 inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <SlidersHorizontal size={16} />
+          Filtri
+        </button>
+      )}
+
       <div className="flex gap-6">
         {/* Sidebar */}
         {!sectionId && (
@@ -223,6 +235,41 @@ export default function Catalog() {
           )}
         </div>
       </div>
+
+      {/* Modale filtri (mobile) */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowFilters(false)}
+          />
+          <div className="absolute inset-y-0 left-0 w-[85%] max-w-xs bg-white shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <SlidersHorizontal size={18} />
+                Filtri
+              </h2>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="p-1 text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <ProductFilters />
+            </div>
+            <div className="p-4 border-t border-gray-100">
+              <button
+                onClick={() => setShowFilters(false)}
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Mostra {meta.total ?? ''} prodotti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </div>
   )

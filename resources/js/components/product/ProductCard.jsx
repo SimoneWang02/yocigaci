@@ -36,12 +36,12 @@ export function ProductCard({ product }) {
                 onMouseEnter={() => images.length > 1 && setImageIdx(1)}
                 onMouseLeave={() => setImageIdx(0)}
             >
-                <div className="relative flex h-48 items-end justify-center">
+                <div className="relative flex h-32 items-end justify-center sm:h-48">
                     {currentImage?.url ? (
                         <img
                             src={currentImage.url}
                             alt={product.name}
-                            className="relative max-h-48 w-auto object-contain transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-105"
+                            className="relative max-h-32 w-auto object-contain transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-105 sm:max-h-48"
                         />
                     ) : (
                         <div className="flex h-40 w-32 items-center justify-center rounded-lg bg-gray-100">
@@ -66,7 +66,7 @@ export function ProductCard({ product }) {
             {/* Titolo, prezzo, CTA - senza riquadro */}
             <div className="flex flex-1 flex-col px-2 pt-4">
                 <Link to={`/prodotti/${product.slug}`}>
-                    <h3 className="mb-2 line-clamp-2 text-center text-sm font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600">
+                    <h3 className="mb-2 line-clamp-2 text-center text-xs font-semibold leading-tight text-gray-800 transition-colors hover:text-indigo-600 sm:text-sm">
                         {product.language && (
                             <span className="inline-flex align-middle mr-1.5">
                                 <LanguageBadge code={product.language} />
@@ -87,28 +87,28 @@ export function ProductCard({ product }) {
                     {isOutOfStock ? (
                         <button
                             disabled
-                            className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-2 text-sm text-gray-400"
+                            className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-1.5 text-xs text-gray-400 sm:py-2 sm:text-sm"
                         >
                             Esaurito
                         </button>
                     ) : limitedAlreadyBought ? (
                         <button
                             disabled
-                            className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-2 text-sm text-gray-400"
+                            className="w-full cursor-not-allowed rounded-lg border border-gray-200 py-1.5 text-xs text-gray-400 sm:py-2 sm:text-sm"
                         >
                             Già acquistato
                         </button>
                     ) : limitedNotLoggedIn ? (
                         <Link
                             to={`/prodotti/${product.slug}`}
-                            className="block w-full rounded-lg py-2 text-sm font-medium text-center bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                            className="block w-full rounded-lg py-1.5 text-xs sm:py-2 sm:text-sm font-medium text-center bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                         >
                             Accedi per acquistare
                         </Link>
                     ) : (
                         <button
                             onClick={handleAddToCart}
-                            className={`w-full rounded-lg py-2 text-sm font-medium transition-colors ${
+                            className={`w-full rounded-lg py-1.5 text-xs sm:py-2 sm:text-sm font-medium transition-colors ${
                                 added
                                     ? "bg-green-100 text-green-700"
                                     : product.is_preorder
