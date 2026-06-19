@@ -17,7 +17,7 @@ export function Toaster() {
     const { toasts, removeToast } = useToastStore();
 
     return (
-        <div className="fixed top-4 left-4 z-[100] flex flex-col gap-2 pointer-events-none">
+        <div className="fixed top-20 right-4 z-30 flex flex-col gap-2 pointer-events-none">
             {toasts.map((t) => {
                 const Icon = ICONS[t.type] ?? Info;
                 return (
