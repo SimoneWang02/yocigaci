@@ -136,7 +136,7 @@ export default function ProductCarousel({ title, products = [], ctaLink, itemCla
   return (
     <section className="max-w-7xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-5">
-        <div className="flex items-baseline gap-4">
+        <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-baseline sm:gap-4">
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
           {ctaLink && (
             <Link
