@@ -11,6 +11,7 @@ import { logout } from "../../api/auth";
 import { adminGetNewOrdersCount } from "../../api/admin";
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
+import { toast } from "../../store/toastStore";
 
 export function Header() {
     const { user, clearAuth } = useAuthStore();
@@ -133,6 +134,7 @@ export function Header() {
         clearAuth();
         setUserMenuOpen(false);
         navigate("/");
+        toast("Logout effettuato");
     };
 
     const closeSearch = () => {

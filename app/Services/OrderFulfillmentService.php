@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\AdminOrderNotification;
 use App\Mail\OrderConfirmed;
 use App\Mail\PreorderConfirmed;
 use App\Models\Coupon;
@@ -160,6 +161,7 @@ class OrderFulfillmentService
         }
 
         $this->sendConfirmationEmail($order, $shippingAddress, $userId);
+        $this->sendAdminNotification($order);
 
         return $order;
     }
@@ -264,6 +266,16 @@ class OrderFulfillmentService
             'preorder_release_date' => $product->preorder_release_date?->toDateString(),
             'image_url' => $product->primaryImage?->url,
         ];
+    }
+
+    private function sendAdminNotification(Order $order): void
+    {
+        $email = Setting::getValue('order_notification_email');
+        if (! $email) {
+            return;
+        }
+
+        Mail::to($email)->send(new AdminOrderNotification($order));
     }
 
     private function sendConfirmationEmail(Order $order, ?array $shippingAddress, ?int $userId): void

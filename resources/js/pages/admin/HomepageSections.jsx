@@ -896,6 +896,73 @@ function SupportEmailSection() {
     );
 }
 
+// ─── Email notifiche ordini ───────────────────────────────────────────────────────
+
+function OrderNotificationEmailSection() {
+    const qc = useQueryClient();
+    const [email, setEmail] = useState("");
+    const [hydrated, setHydrated] = useState(false);
+
+    const { data } = useQuery({
+        queryKey: ["admin-settings"],
+        queryFn: adminGetSettings,
+    });
+
+    if (data && !hydrated) {
+        setEmail(data.data?.order_notification_email ?? "");
+        setHydrated(true);
+    }
+
+    const save = useMutation({
+        mutationFn: () =>
+            adminUpdateSettings({ order_notification_email: email.trim() || null }),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["admin-settings"] });
+        },
+    });
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">
+                    Email notifiche ordini
+                </h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                    Indirizzo a cui inviare una notifica ad ogni nuovo ordine confermato.
+                    Lascia vuoto per disabilitare le notifiche al venditore.
+                </p>
+            </div>
+
+            <Input
+                label="Email venditore"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ordini@yocigaci.it"
+                maxLength={100}
+            />
+
+            <div className="flex items-center gap-3 mt-4">
+                <Button
+                    size="sm"
+                    onClick={() => save.mutate()}
+                    disabled={save.isPending}
+                >
+                    {save.isPending ? "Salvataggio…" : "Salva"}
+                </Button>
+                {save.isSuccess && (
+                    <span className="text-sm text-green-600">Salvato.</span>
+                )}
+                {save.isError && (
+                    <span className="text-sm text-red-600">
+                        Errore nel salvataggio.
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Spedizione ──────────────────────────────────────────────────────────────────
 
 function ShippingSettingsSection() {
@@ -1187,6 +1254,9 @@ export default function AdminHomepageSections() {
 
             {/* Email di assistenza */}
             <SupportEmailSection />
+
+            {/* Email notifiche ordini */}
+            <OrderNotificationEmailSection />
         </div>
     );
 }

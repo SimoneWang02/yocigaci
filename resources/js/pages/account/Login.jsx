@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "../../api/auth";
 import { useAuthStore } from "../../store/authStore";
+import { toast } from "../../store/toastStore";
 import { Input } from "../../components/ui/Input";
 
 export default function Login() {
@@ -29,6 +30,7 @@ export default function Login() {
         try {
             const data = await login(form);
             setAuth(data.user, data.token);
+            toast(`Accesso effettuato. Benvenuto${data.user?.name ? `, ${data.user.name}` : ""}!`);
         } catch (err) {
             setError(err.response?.data?.message ?? "Credenziali non valide.");
         } finally {

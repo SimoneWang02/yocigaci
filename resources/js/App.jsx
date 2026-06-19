@@ -12,6 +12,7 @@ import { HelmetProvider, Helmet } from "react-helmet-async";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import { CartDrawer } from "./components/cart/CartDrawer";
+import { Toaster } from "./components/ui/Toaster";
 import { useAuthStore } from "./store/authStore";
 
 import Home from "./pages/Home";
@@ -126,6 +127,7 @@ export default function App() {
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <ScrollToTop />
+                    <Toaster />
                     <Helmet>
                         <title>Yocigaci - TCG Store a Carpi</title>
                         <meta
