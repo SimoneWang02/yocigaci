@@ -87,19 +87,28 @@ function printOrder(order) {
         </tr>`
         : "";
 
+    const email = addr.email ?? order.user?.email ?? null;
+
     const deliveryBlock = isPickup
         ? `<div class="section">
             <div class="section-title">Ritiro in negozio</div>
-            <p>${addr.full_name ?? ""}</p>
+            <p class="name">${addr.full_name ?? ""}</p>
             ${addr.phone ? `<p>${addr.phone}</p>` : ""}
         </div>`
         : `<div class="section">
             <div class="section-title">Indirizzo di spedizione</div>
-            <p>${addr.full_name ?? ""}</p>
+            <p class="name">${addr.full_name ?? ""}</p>
             <p>${addr.address_line1 ?? ""}</p>
             <p>${addr.postal_code ?? ""} ${addr.city ?? ""}${addr.province ? ` (${addr.province})` : ""}</p>
             ${addr.phone ? `<p>${addr.phone}</p>` : ""}
         </div>`;
+
+    const customerBlock = email
+        ? `<div class="section">
+            <div class="section-title">Cliente</div>
+            <p class="email">${email}</p>
+        </div>`
+        : "";
 
     const html = `<!DOCTYPE html>
 <html lang="it">
@@ -108,34 +117,36 @@ function printOrder(order) {
 <title>Ordine ${order.order_number}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 12px; color: #111; padding: 28px 32px; }
-  h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #111; padding-bottom: 14px; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #111; padding: 32px 36px; line-height: 1.5; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 2px solid #111; padding-bottom: 16px; }
   .shop-name { font-size: 20px; font-weight: 800; color: #4338ca; }
   .meta { text-align: right; color: #555; font-size: 11px; margin-top: 4px; }
-  .meta strong { font-size: 14px; color: #111; display: block; font-family: monospace; }
-  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7280; margin-bottom: 6px; }
-  .section p { margin-bottom: 2px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-  thead th { background: #f3f4f6; padding: 7px 8px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+  .meta strong { font-size: 14px; color: #111; display: block; font-family: monospace; margin-bottom: 2px; }
+  .section { margin-bottom: 24px; }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7280; margin-bottom: 8px; }
+  .section p { margin-bottom: 3px; }
+  .section p.name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .section p.email { color: #6b7280; margin-top: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f3f4f6; padding: 9px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
   thead th:last-child, thead th:nth-child(3) { text-align: right; }
   thead th:nth-child(2) { text-align: center; }
-  tbody td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; }
+  tbody td { padding: 9px 10px; border-bottom: 1px solid #f3f4f6; }
   tbody tr:last-child td { border-bottom: none; }
   tr.discount td { color: #059669; }
   .totals { border-top: 2px solid #e5e7eb; }
-  .totals td { padding: 6px 8px; }
-  .total-row td { font-size: 14px; font-weight: 700; padding-top: 8px; }
-  .table-wrap { border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
-  .footer { text-align: center; margin-top: 24px; font-size: 11px; color: #9ca3af; border-top: 1px dashed #d1d5db; padding-top: 14px; }
-  @media print { body { padding: 0; } button { display: none; } }
+  .totals td { padding: 7px 10px; }
+  .total-row td { font-size: 14px; font-weight: 700; padding-top: 10px; }
+  .table-wrap { border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
+  .footer { text-align: center; margin-top: 28px; font-size: 11px; color: #9ca3af; border-top: 1px dashed #d1d5db; padding-top: 16px; }
+  @media print { body { padding: 16px 20px; } }
 </style>
 </head>
 <body>
 <div class="header">
   <div>
     <div class="shop-name">Yocigaci</div>
-    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Resoconto ordine</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:3px;">Resoconto ordine</div>
   </div>
   <div class="meta">
     <strong>${order.order_number}</strong>
@@ -144,6 +155,7 @@ function printOrder(order) {
 </div>
 
 ${deliveryBlock}
+${customerBlock}
 
 <div class="table-wrap">
   <table>
