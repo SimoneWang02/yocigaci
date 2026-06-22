@@ -13,6 +13,7 @@ import {
 } from "../../api/admin";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
@@ -113,7 +114,6 @@ function printOrder(order) {
   .shop-name { font-size: 20px; font-weight: 800; color: #4338ca; }
   .meta { text-align: right; color: #555; font-size: 11px; margin-top: 4px; }
   .meta strong { font-size: 14px; color: #111; display: block; font-family: monospace; }
-  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7280; margin-bottom: 6px; }
   .section p { margin-bottom: 2px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
@@ -135,7 +135,7 @@ function printOrder(order) {
 <div class="header">
   <div>
     <div class="shop-name">Yocigaci</div>
-    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Documento di spedizione</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Resoconto ordine</div>
   </div>
   <div class="meta">
     <strong>${order.order_number}</strong>
@@ -143,14 +143,7 @@ function printOrder(order) {
   </div>
 </div>
 
-<div class="columns">
-  ${deliveryBlock}
-  ${order.user ? `<div class="section">
-    <div class="section-title">Cliente</div>
-    <p>${order.user.name}</p>
-    <p>${order.user.email}</p>
-  </div>` : ""}
-</div>
+${deliveryBlock}
 
 <div class="table-wrap">
   <table>
@@ -187,6 +180,32 @@ function printOrder(order) {
     setTimeout(() => win.print(), 300);
 }
 
+function PrintButton({ orderId }) {
+    const [loading, setLoading] = useState(false);
+
+    async function handlePrint(e) {
+        e.stopPropagation();
+        setLoading(true);
+        try {
+            const res = await adminGetOrder(orderId);
+            printOrder(res.data);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <button
+            onClick={handlePrint}
+            disabled={loading}
+            title="Stampa documento di spedizione"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-40"
+        >
+            <Printer className="w-4 h-4" />
+        </button>
+    );
+}
+
 function SectionHeader({ icon: Icon, title }) {
     return (
         <div className="flex items-center gap-2 mb-3">
@@ -205,6 +224,8 @@ function OrderDrawer({ orderId, onClose }) {
     const [editTrackingValue, setEditTrackingValue] = useState("");
     const [refundAmount, setRefundAmount] = useState("");
     const [refundReason, setRefundReason] = useState("");
+    const [showConfirmPickupModal, setShowConfirmPickupModal] = useState(false);
+    const [showUnconfirmPickupModal, setShowUnconfirmPickupModal] = useState(false);
 
     const { data, isLoading } = useQuery({
         queryKey: ["admin-order", orderId],
@@ -584,18 +605,13 @@ function OrderDrawer({ orderId, onClose }) {
                                                         variant="secondary"
                                                         size="sm"
                                                         className="w-full"
-                                                        disabled={
-                                                            unconfirmPickup.isPending
+                                                        onClick={() =>
+                                                            setShowUnconfirmPickupModal(
+                                                                true,
+                                                            )
                                                         }
-                                                        onClick={() => {
-                                                            unconfirmPickup.mutate(
-                                                                order.id,
-                                                            );
-                                                        }}
                                                     >
-                                                        {unconfirmPickup.isPending
-                                                            ? "Annullamento..."
-                                                            : "Annulla ritiro"}
+                                                        Annulla ritiro
                                                     </Button>
                                                 </div>
                                             ) : (
@@ -626,18 +642,13 @@ function OrderDrawer({ orderId, onClose }) {
                                                         variant="primary"
                                                         size="md"
                                                         className="flex-1"
-                                                        disabled={
-                                                            confirmPickup.isPending
+                                                        onClick={() =>
+                                                            setShowConfirmPickupModal(
+                                                                true,
+                                                            )
                                                         }
-                                                        onClick={() => {
-                                                            confirmPickup.mutate(
-                                                                order.id,
-                                                            );
-                                                        }}
                                                     >
-                                                        {confirmPickup.isPending
-                                                            ? "Salvataggio..."
-                                                            : "Conferma ritiro"}
+                                                        Conferma ritiro
                                                     </Button>
                                                 </div>
                                             )}
@@ -823,21 +834,39 @@ function OrderDrawer({ orderId, onClose }) {
                                     )}
                                 </div>
 
-                                {/* Print */}
-                                <div className="border-t border-gray-100 pt-4">
-                                    <button
-                                        onClick={() => printOrder(order)}
-                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                                    >
-                                        <Printer className="w-4 h-4" />
-                                        Stampa documento di spedizione
-                                    </button>
-                                </div>
                             </div>
                         )
                     )}
                 </div>
             </div>
+            <ConfirmModal
+                open={showConfirmPickupModal}
+                title="Conferma ritiro"
+                description={`Segnare l'ordine ${order?.order_number} come ritirato dal cliente?`}
+                confirmLabel="Conferma ritiro"
+                confirmVariant="primary"
+                isPending={confirmPickup.isPending}
+                onConfirm={() => {
+                    confirmPickup.mutate(order.id, {
+                        onSuccess: () => setShowConfirmPickupModal(false),
+                    });
+                }}
+                onCancel={() => setShowConfirmPickupModal(false)}
+            />
+            <ConfirmModal
+                open={showUnconfirmPickupModal}
+                title="Annulla ritiro"
+                description={`Riportare l'ordine ${order?.order_number} allo stato "in attesa di ritiro"?`}
+                confirmLabel="Annulla ritiro"
+                confirmVariant="danger"
+                isPending={unconfirmPickup.isPending}
+                onConfirm={() => {
+                    unconfirmPickup.mutate(order.id, {
+                        onSuccess: () => setShowUnconfirmPickupModal(false),
+                    });
+                }}
+                onCancel={() => setShowUnconfirmPickupModal(false)}
+            />
         </>
     );
 }
@@ -964,6 +993,7 @@ export default function AdminOrders() {
                                 >
                                     Stato
                                 </SortTh>
+                                <th className="px-3 py-3 w-10" />
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -1052,6 +1082,9 @@ export default function AdminOrders() {
                                             <Badge variant={status.variant}>
                                                 {status.label}
                                             </Badge>
+                                        </td>
+                                        <td className="px-3 py-3 text-center">
+                                            <PrintButton orderId={order.id} />
                                         </td>
                                     </tr>
                                 );
