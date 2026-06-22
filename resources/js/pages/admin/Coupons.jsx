@@ -267,6 +267,7 @@ export default function AdminCoupons() {
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
                         <tr>
@@ -353,6 +354,7 @@ export default function AdminCoupons() {
                         ))}
                     </tbody>
                 </table>
+                </div>
                 {coupons.length === 0 && (
                     <p className="text-center py-12 text-gray-400">
                         Nessun coupon creato.

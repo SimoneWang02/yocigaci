@@ -7,6 +7,7 @@ import {
     adminAddTracking,
     adminNotifyPickupReady,
     adminConfirmPickup,
+    adminUnconfirmPickup,
     adminRefundOrder,
     adminMarkOrdersSeen,
 } from "../../api/admin";
@@ -27,6 +28,7 @@ import {
     AlertCircle,
     Bell,
     Pencil,
+    Printer,
 } from "lucide-react";
 import { useTableSort } from "../../hooks/useTableSort";
 import { SortTh } from "../../components/ui/SortTh";
@@ -52,6 +54,138 @@ const REFUND_REASONS = [
 ];
 
 const formatEur = (value) => Number(value).toFixed(2).replace(".", ",");
+
+function printOrder(order) {
+    const addr = order.shipping_address ?? {};
+    const isPickup = order.delivery_method === "pickup";
+
+    const itemsRows = (order.items ?? [])
+        .map(
+            (item) => `
+        <tr>
+            <td>${item.product_snapshot?.name ?? "-"}</td>
+            <td style="text-align:center">${item.quantity}</td>
+            <td style="text-align:right">€ ${formatEur(item.unit_price)}</td>
+            <td style="text-align:right">€ ${formatEur(item.total_price)}</td>
+        </tr>`,
+        )
+        .join("");
+
+    const discountRow =
+        Number(order.discount_amount) > 0
+            ? `<tr class="discount">
+            <td colspan="3">Sconto coupon${order.coupon_code ? ` (${order.coupon_code})` : ""}</td>
+            <td style="text-align:right">- € ${formatEur(order.discount_amount)}</td>
+        </tr>`
+            : "";
+
+    const shippingRow = !isPickup
+        ? `<tr>
+            <td colspan="3">Spedizione</td>
+            <td style="text-align:right">€ ${formatEur(order.shipping_cost)}</td>
+        </tr>`
+        : "";
+
+    const deliveryBlock = isPickup
+        ? `<div class="section">
+            <div class="section-title">Ritiro in negozio</div>
+            <p>${addr.full_name ?? ""}</p>
+            ${addr.phone ? `<p>${addr.phone}</p>` : ""}
+        </div>`
+        : `<div class="section">
+            <div class="section-title">Indirizzo di spedizione</div>
+            <p>${addr.full_name ?? ""}</p>
+            <p>${addr.address_line1 ?? ""}</p>
+            <p>${addr.postal_code ?? ""} ${addr.city ?? ""}${addr.province ? ` (${addr.province})` : ""}</p>
+            ${addr.phone ? `<p>${addr.phone}</p>` : ""}
+        </div>`;
+
+    const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Ordine ${order.order_number}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #111; padding: 28px 32px; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #111; padding-bottom: 14px; }
+  .shop-name { font-size: 20px; font-weight: 800; color: #4338ca; }
+  .meta { text-align: right; color: #555; font-size: 11px; margin-top: 4px; }
+  .meta strong { font-size: 14px; color: #111; display: block; font-family: monospace; }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6b7280; margin-bottom: 6px; }
+  .section p { margin-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+  thead th { background: #f3f4f6; padding: 7px 8px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+  thead th:last-child, thead th:nth-child(3) { text-align: right; }
+  thead th:nth-child(2) { text-align: center; }
+  tbody td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr.discount td { color: #059669; }
+  .totals { border-top: 2px solid #e5e7eb; }
+  .totals td { padding: 6px 8px; }
+  .total-row td { font-size: 14px; font-weight: 700; padding-top: 8px; }
+  .table-wrap { border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+  .footer { text-align: center; margin-top: 24px; font-size: 11px; color: #9ca3af; border-top: 1px dashed #d1d5db; padding-top: 14px; }
+  @media print { body { padding: 0; } button { display: none; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="shop-name">Yocigaci</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Documento di spedizione</div>
+  </div>
+  <div class="meta">
+    <strong>${order.order_number}</strong>
+    ${new Date(order.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}
+  </div>
+</div>
+
+<div class="columns">
+  ${deliveryBlock}
+  ${order.user ? `<div class="section">
+    <div class="section-title">Cliente</div>
+    <p>${order.user.name}</p>
+    <p>${order.user.email}</p>
+  </div>` : ""}
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Prodotto</th>
+        <th style="text-align:center">Qt.</th>
+        <th style="text-align:right">Prezzo unit.</th>
+        <th style="text-align:right">Totale</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${itemsRows}
+    </tbody>
+    <tfoot class="totals">
+      ${discountRow}
+      ${shippingRow}
+      <tr class="total-row">
+        <td colspan="3"><strong>Totale ordine</strong></td>
+        <td style="text-align:right"><strong>€ ${formatEur(order.total)}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="footer">Grazie per il tuo ordine! - yocigaci.com</div>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank", "width=800,height=900");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 300);
+}
 
 function SectionHeader({ icon: Icon, title }) {
     return (
@@ -95,6 +229,11 @@ function OrderDrawer({ orderId, onClose }) {
 
     const confirmPickup = useMutation({
         mutationFn: (id) => adminConfirmPickup(id),
+        onSuccess: invalidate,
+    });
+
+    const unconfirmPickup = useMutation({
+        mutationFn: (id) => adminUnconfirmPickup(id),
         onSuccess: invalidate,
     });
 
@@ -433,12 +572,31 @@ function OrderDrawer({ orderId, onClose }) {
                                                 title="Ritiro in negozio"
                                             />
                                             {order.status === "picked_up" ? (
-                                                <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                                                    <Store className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                                    <span className="text-sm text-green-800">
-                                                        Ordine ritirato dal
-                                                        cliente
-                                                    </span>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                                                        <Store className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                                        <span className="text-sm text-green-800">
+                                                            Ordine ritirato dal
+                                                            cliente
+                                                        </span>
+                                                    </div>
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        disabled={
+                                                            unconfirmPickup.isPending
+                                                        }
+                                                        onClick={() => {
+                                                            unconfirmPickup.mutate(
+                                                                order.id,
+                                                            );
+                                                        }}
+                                                    >
+                                                        {unconfirmPickup.isPending
+                                                            ? "Annullamento..."
+                                                            : "Annulla ritiro"}
+                                                    </Button>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-stretch gap-2">
@@ -664,6 +822,17 @@ function OrderDrawer({ orderId, onClose }) {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Print */}
+                                <div className="border-t border-gray-100 pt-4">
+                                    <button
+                                        onClick={() => printOrder(order)}
+                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                                    >
+                                        <Printer className="w-4 h-4" />
+                                        Stampa documento di spedizione
+                                    </button>
+                                </div>
                             </div>
                         )
                     )}
@@ -746,6 +915,7 @@ export default function AdminOrders() {
                 <PageSpinner />
             ) : (
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
                             <tr>
@@ -888,6 +1058,7 @@ export default function AdminOrders() {
                             })}
                         </tbody>
                     </table>
+                    </div>
                     {orders.length === 0 && (
                         <p className="text-center py-12 text-gray-400">
                             Nessun ordine trovato.

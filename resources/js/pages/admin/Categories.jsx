@@ -248,6 +248,7 @@ function DroppableColumn({
                     Colonna {column}
                 </span>
             </div>
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide border-b border-gray-100">
                     <tr>
@@ -289,6 +290,7 @@ function DroppableColumn({
                     </tbody>
                 </SortableContext>
             </table>
+            </div>
         </div>
     );
 }

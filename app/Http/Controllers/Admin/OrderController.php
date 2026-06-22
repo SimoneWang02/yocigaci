@@ -108,6 +108,16 @@ class OrderController extends Controller
         return new OrderResource($order->fresh()->load(['items', 'user']));
     }
 
+    public function unconfirmPickup(Order $order): OrderResource
+    {
+        abort_if($order->delivery_method !== 'pickup', 422, 'Questo ordine non è un ritiro in negozio.');
+        abort_if($order->status !== 'picked_up', 422, "L'ordine non risulta ritirato.");
+
+        $order->update(['status' => 'ready_for_pickup', 'picked_up_at' => null]);
+
+        return new OrderResource($order->fresh()->load(['items', 'user']));
+    }
+
     /**
      * Emette un rimborso Stripe (totale o parziale) per l'ordine.
      *

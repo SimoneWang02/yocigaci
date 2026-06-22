@@ -434,6 +434,7 @@ export default function AdminGames() {
             )}
 
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
                         <tr>
@@ -479,6 +480,7 @@ export default function AdminGames() {
                         </SortableContext>
                     </DndContext>
                 </table>
+                </div>
             </div>
         </div>
     );

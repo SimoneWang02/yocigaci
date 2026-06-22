@@ -69,6 +69,8 @@ export const adminNotifyPickupReady = (id) =>
   api.post(`/admin/orders/${id}/notify-pickup`).then((r) => r.data)
 export const adminConfirmPickup = (id) =>
   api.post(`/admin/orders/${id}/confirm-pickup`).then((r) => r.data)
+export const adminUnconfirmPickup = (id) =>
+  api.post(`/admin/orders/${id}/unconfirm-pickup`).then((r) => r.data)
 export const adminRefundOrder = (id, { amount, reason } = {}) =>
   api.post(`/admin/orders/${id}/refund`, { amount, reason }).then((r) => r.data)
 

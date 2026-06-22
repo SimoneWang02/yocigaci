@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::patch('/orders/{order}/tracking', [App\Http\Controllers\Admin\OrderController::class, 'addTracking']);
     Route::post('/orders/{order}/notify-pickup', [App\Http\Controllers\Admin\OrderController::class, 'notifyPickupReady']);
     Route::post('/orders/{order}/confirm-pickup', [App\Http\Controllers\Admin\OrderController::class, 'confirmPickup']);
+    Route::post('/orders/{order}/unconfirm-pickup', [App\Http\Controllers\Admin\OrderController::class, 'unconfirmPickup']);
     Route::post('/orders/{order}/refund', [App\Http\Controllers\Admin\OrderController::class, 'refund']);
     Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
     Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);

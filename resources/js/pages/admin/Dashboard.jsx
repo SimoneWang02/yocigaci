@@ -180,9 +180,27 @@ export default function AdminDashboard() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-start sm:ml-auto gap-3">
+                    <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
+                        {PERIODS.map((p) => (
+                            <button
+                                key={p.value}
+                                onClick={() => {
+                                    setPeriod(p.value);
+                                    setOffset(0);
+                                }}
+                                className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                                    period === p.value
+                                        ? "bg-white text-gray-900 shadow-sm"
+                                        : "text-gray-500 hover:text-gray-700"
+                                }`}
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
                     <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1">
                         <button
                             onClick={() => setOffset((o) => o - 1)}
@@ -190,7 +208,7 @@ export default function AdminDashboard() {
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
-                        <span className="text-sm font-medium text-gray-700 min-w-[140px] text-center">
+                        <span className="text-sm font-medium text-gray-700 min-w-[120px] sm:min-w-[140px] text-center">
                             {label}
                         </span>
                         <button
@@ -200,24 +218,6 @@ export default function AdminDashboard() {
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
-                    </div>
-                    <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
-                        {PERIODS.map((p) => (
-                            <button
-                                key={p.value}
-                                onClick={() => {
-                                    setPeriod(p.value);
-                                    setOffset(0);
-                                }}
-                                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                                    period === p.value
-                                        ? "bg-white text-gray-900 shadow-sm"
-                                        : "text-gray-500 hover:text-gray-700"
-                                }`}
-                            >
-                                {p.label}
-                            </button>
-                        ))}
                     </div>
                 </div>
             </div>
@@ -391,6 +391,7 @@ export default function AdminDashboard() {
                             Preordini scaduti
                         </p>
                     </div>
+                    <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <tbody>
                             {expired_preorders.map((p) => (
@@ -419,6 +420,7 @@ export default function AdminDashboard() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
         </div>
