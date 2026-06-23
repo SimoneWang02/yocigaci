@@ -6,12 +6,12 @@
     $allImages = $product->images->pluck('url')->filter()->values()->all();
 
     $langLabels = [
-        'ENG' => 'Inglese', 'ITA' => 'Italiano', 'JAP' => 'Giapponese',
+        'ENG' => 'Inglese', 'ITA' => 'Italiano', 'JPN' => 'Giapponese',
         'FRA' => 'Francese', 'DEU' => 'Tedesco', 'ESP' => 'Spagnolo',
         'KOR' => 'Coreano', 'CHN' => 'Cinese', 'POR' => 'Portoghese',
     ];
     $langBcp47 = [
-        'ENG' => 'en', 'ITA' => 'it', 'JAP' => 'ja',
+        'ENG' => 'en', 'ITA' => 'it', 'JPN' => 'ja',
         'FRA' => 'fr', 'DEU' => 'de', 'ESP' => 'es',
         'KOR' => 'ko', 'CHN' => 'zh', 'POR' => 'pt',
     ];

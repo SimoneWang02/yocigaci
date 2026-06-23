@@ -11,7 +11,7 @@ import PT from 'country-flag-icons/react/3x2/PT';
 export const LANGUAGES = [
     { code: 'ENG', label: 'English',    Flag: GB },
     { code: 'ITA', label: 'Italiano',   Flag: IT },
-    { code: 'JAP', label: 'Japanese',   Flag: JP },
+    { code: 'JPN', label: 'Japanese',   Flag: JP },
     { code: 'FRA', label: 'Français',   Flag: FR },
     { code: 'DEU', label: 'Deutsch',    Flag: DE },
     { code: 'ESP', label: 'Español',    Flag: ES },

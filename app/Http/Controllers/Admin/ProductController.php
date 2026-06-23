@@ -25,6 +25,9 @@ class ProductController extends Controller
         if ($request->category_id) {
             $query->where('category_id', $request->category_id);
         }
+        if ($request->language) {
+            $query->where('language', $request->language);
+        }
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
