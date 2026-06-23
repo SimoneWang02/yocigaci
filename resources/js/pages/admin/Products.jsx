@@ -19,6 +19,7 @@ export default function AdminProducts() {
     const [nameDraft, setNameDraft] = useState("");
     const [editingPriceId, setEditingPriceId] = useState(null);
     const [priceDraft, setPriceDraft] = useState("");
+    const [previewImage, setPreviewImage] = useState(null);
 
     const search = searchParams.get("search") ?? "";
     const filterGame = searchParams.get("game_id") ?? "";
@@ -399,13 +400,20 @@ export default function AdminProducts() {
                                 <tr key={p.id} className={`hover:bg-gray-50 ${stockRowClass(p)}`}>
                                     <td className="px-4 py-3">
                                         {p.primary_image?.url ? (
-                                            <img
-                                                src={p.primary_image.url}
-                                                alt=""
-                                                className="w-10 h-12 object-cover rounded"
-                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setPreviewImage({ url: p.primary_image.url, name: p.name })}
+                                                className="block w-12 h-12 rounded bg-gray-50 border border-gray-100 overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-shadow"
+                                                title="Clicca per ingrandire"
+                                            >
+                                                <img
+                                                    src={p.primary_image.url}
+                                                    alt=""
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            </button>
                                         ) : (
-                                            <div className="w-10 h-12 bg-gray-100 rounded" />
+                                            <div className="w-12 h-12 bg-gray-100 rounded" />
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
@@ -620,6 +628,29 @@ export default function AdminProducts() {
             )}
                 </div>
             </div>
+
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div className="relative max-w-lg max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={() => setPreviewImage(null)}
+                            className="absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-700 shadow-lg hover:bg-gray-100 transition-colors"
+                            aria-label="Chiudi"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <img
+                            src={previewImage.url}
+                            alt={previewImage.name}
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg bg-white"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
