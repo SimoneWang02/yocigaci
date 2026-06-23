@@ -629,7 +629,7 @@ export default function Checkout() {
                                 selected={!isPickup}
                                 onClick={() => chooseDelivery("shipping")}
                                 icon={Truck}
-                                title="Spedizione"
+                                title="Spedizione DHL Express"
                                 subtitle={
                                     !shippingConfigured
                                         ? "Non configurata"
@@ -894,7 +894,7 @@ export default function Checkout() {
                                 <span>
                                     {isPickup
                                         ? "Ritiro in negozio"
-                                        : "Spedizione"}
+                                        : "Spedizione DHL Express"}
                                 </span>
                                 <span
                                     className={
