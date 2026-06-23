@@ -1,7 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, GripVertical, Upload } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    SortableContext,
+    rectSortingStrategy,
+    useSortable,
+    arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
     adminGetProduct,
     adminCreateProduct,
@@ -18,6 +32,59 @@ import { Select } from "../../components/ui/Select";
 import { LANGUAGES } from "../../components/ui/LanguageBadge";
 import { PageSpinner } from "../../components/ui/Spinner";
 
+// ─── Sortable image thumbnail ────────────────────────────────────────────────
+
+function SortableImage({ id, url, isPrimary, onDelete, onPreview }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} className="relative group">
+            <button
+                type="button"
+                onClick={() => onPreview(url)}
+                className="block w-20 h-24 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-shadow"
+                title="Clicca per ingrandire"
+            >
+                <img src={url} alt="" className="w-full h-full object-contain" />
+            </button>
+            {isPrimary && (
+                <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded pointer-events-none">
+                    principale
+                </span>
+            )}
+            <button
+                {...attributes}
+                {...listeners}
+                type="button"
+                className="absolute bottom-1 left-1 p-0.5 rounded bg-white/80 text-gray-500 hover:text-gray-900 cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Trascina per riordinare"
+            >
+                <GripVertical className="w-4 h-4" />
+            </button>
+            <button
+                type="button"
+                onClick={() => onDelete(id)}
+                className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+                <X className="w-3 h-3" />
+            </button>
+        </div>
+    );
+}
+
 export default function ProductForm() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -25,6 +92,11 @@ export default function ProductForm() {
     const isEdit = !!id;
     const fileRef = useRef(null);
     const descriptionRef = useRef(null);
+    const pendingUid = useRef(0);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    );
 
     const [form, setForm] = useState({
         game_id: "",
@@ -44,6 +116,8 @@ export default function ProductForm() {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [dragActive, setDragActive] = useState(false);
 
     useEffect(() => {
         const el = descriptionRef.current;
@@ -92,13 +166,20 @@ export default function ProductForm() {
     const games = gamesData?.data ?? [];
     const categories = categoriesData?.data ?? [];
 
+    const imageItems = isEdit
+        ? images.map((i) => ({ id: i.id, url: i.url }))
+        : pendingFiles.map((p) => ({ id: p.id, url: p.previewUrl }));
+
     const handleGameChange = (gameId) => {
         setForm((f) => ({ ...f, game_id: gameId, category_id: "" }));
     };
 
     const handleUpload = async (files) => {
+        const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+        if (imageFiles.length === 0) return;
         if (!isEdit) {
-            const entries = files.map((file) => ({
+            const entries = imageFiles.map((file) => ({
+                id: `pending-${pendingUid.current++}`,
                 file,
                 previewUrl: URL.createObjectURL(file),
             }));
@@ -107,7 +188,7 @@ export default function ProductForm() {
         }
         setUploading(true);
         try {
-            for (const file of files) {
+            for (const file of imageFiles) {
                 const result = await adminUploadImage(id, file);
                 setImages((imgs) => [...imgs, result.data]);
             }
@@ -116,16 +197,43 @@ export default function ProductForm() {
         }
     };
 
-    const handleRemovePending = useCallback((index) => {
+    const handleRemovePending = useCallback((pendingId) => {
         setPendingFiles((prev) => {
-            URL.revokeObjectURL(prev[index].previewUrl);
-            return prev.filter((_, i) => i !== index);
+            const entry = prev.find((e) => e.id === pendingId);
+            if (entry) URL.revokeObjectURL(entry.previewUrl);
+            return prev.filter((e) => e.id !== pendingId);
         });
     }, []);
 
     const handleDeleteImage = async (imageId) => {
         await adminDeleteImage(id, imageId);
         setImages((imgs) => imgs.filter((i) => i.id !== imageId));
+    };
+
+    const handleReorder = ({ active, over }) => {
+        if (!over || active.id === over.id) return;
+        if (isEdit) {
+            setImages((imgs) => {
+                const ids = imgs.map((i) => i.id);
+                const oldIndex = ids.indexOf(active.id);
+                const newIndex = ids.indexOf(over.id);
+                const next = arrayMove(imgs, oldIndex, newIndex);
+                adminReorderImages(id, next.map((i) => i.id));
+                return next;
+            });
+        } else {
+            setPendingFiles((files) => {
+                const ids = files.map((f) => f.id);
+                return arrayMove(files, ids.indexOf(active.id), ids.indexOf(over.id));
+            });
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setDragActive(false);
+        const files = [...(e.dataTransfer?.files ?? [])];
+        if (files.length) handleUpload(files);
     };
 
     const handleSubmit = async (e) => {
@@ -365,80 +473,75 @@ export default function ProductForm() {
                     <h2 className="font-semibold text-gray-800">Immagini</h2>
                     <p className="text-xs text-gray-500">
                         {isEdit
-                            ? "La prima immagine (ordine più basso) è quella principale."
-                            : "Le immagini verranno caricate al salvataggio del prodotto."}
+                            ? "La prima immagine è quella principale. Trascina per riordinare, clicca per ingrandire."
+                            : "Le immagini verranno caricate al salvataggio del prodotto. Trascina per riordinare."}
                     </p>
-                    <div className="flex flex-wrap gap-3">
-                        {isEdit
-                            ? images.map((img, idx) => (
-                                  <div
-                                      key={img.id}
-                                      className="relative group"
-                                  >
-                                      <img
-                                          src={img.url}
-                                          alt=""
-                                          className="w-20 h-24 object-cover rounded-lg border border-gray-200"
-                                      />
-                                      {idx === 0 && (
-                                          <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded">
-                                              principale
-                                          </span>
-                                      )}
-                                      <button
-                                          type="button"
-                                          onClick={() =>
-                                              window.confirm("Eliminare?") &&
-                                              handleDeleteImage(img.id)
-                                          }
-                                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                          <X className="w-3 h-3" />
-                                      </button>
-                                  </div>
-                              ))
-                            : pendingFiles.map((entry, idx) => (
-                                  <div key={idx} className="relative group">
-                                      <img
-                                          src={entry.previewUrl}
-                                          alt=""
-                                          className="w-20 h-24 object-cover rounded-lg border border-gray-200"
-                                      />
-                                      {idx === 0 && (
-                                          <span className="absolute top-1 left-1 text-xs bg-indigo-600 text-white px-1 rounded">
-                                              principale
-                                          </span>
-                                      )}
-                                      <button
-                                          type="button"
-                                          onClick={() =>
-                                              handleRemovePending(idx)
-                                          }
-                                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                          <X className="w-3 h-3" />
-                                      </button>
-                                  </div>
-                              ))}
-                        <button
-                            type="button"
-                            onClick={() => fileRef.current?.click()}
-                            className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
-                            disabled={uploading}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleReorder}
+                    >
+                        <SortableContext
+                            items={imageItems.map((i) => i.id)}
+                            strategy={rectSortingStrategy}
                         >
-                            {uploading ? "..." : "+"}
-                        </button>
-                        <input
-                            ref={fileRef}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={(e) =>
-                                handleUpload([...e.target.files])
-                            }
-                        />
-                    </div>
+                            <div
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setDragActive(true);
+                                }}
+                                onDragLeave={(e) => {
+                                    if (e.currentTarget.contains(e.relatedTarget)) return;
+                                    setDragActive(false);
+                                }}
+                                onDrop={handleDrop}
+                                className={`flex flex-wrap gap-3 rounded-lg p-1 transition-colors ${dragActive ? "ring-2 ring-indigo-400 bg-indigo-50/50" : ""}`}
+                            >
+                                {imageItems.map((item, idx) => (
+                                    <SortableImage
+                                        key={item.id}
+                                        id={item.id}
+                                        url={item.url}
+                                        isPrimary={idx === 0}
+                                        onPreview={setPreviewImage}
+                                        onDelete={
+                                            isEdit
+                                                ? (imgId) =>
+                                                      window.confirm("Eliminare?") &&
+                                                      handleDeleteImage(imgId)
+                                                : handleRemovePending
+                                        }
+                                    />
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => fileRef.current?.click()}
+                                    className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
+                                    disabled={uploading}
+                                >
+                                    {uploading ? (
+                                        "..."
+                                    ) : (
+                                        <>
+                                            <Upload className="w-5 h-5" />
+                                            <span className="text-[10px]">Carica</span>
+                                        </>
+                                    )}
+                                </button>
+                                <input
+                                    ref={fileRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        handleUpload([...e.target.files]);
+                                        e.target.value = "";
+                                    }}
+                                />
+                            </div>
+                        </SortableContext>
+                    </DndContext>
                 </div>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
@@ -460,6 +563,32 @@ export default function ProductForm() {
                     </Button>
                 </div>
             </form>
+
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div
+                        className="relative max-w-lg max-h-[90vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setPreviewImage(null)}
+                            className="absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-700 shadow-lg hover:bg-gray-100 transition-colors"
+                            aria-label="Chiudi"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <img
+                            src={previewImage}
+                            alt=""
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg bg-white"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
