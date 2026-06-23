@@ -55,7 +55,7 @@ function SortableImage({ id, url, isPrimary, onDelete, onPreview }) {
             <button
                 type="button"
                 onClick={() => onPreview(url)}
-                className="block w-20 h-24 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-shadow"
+                className="block w-24 h-24 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-shadow"
                 title="Clicca per ingrandire"
             >
                 <img src={url} alt="" className="w-full h-full object-contain" />
@@ -516,7 +516,7 @@ export default function ProductForm() {
                                 <button
                                     type="button"
                                     onClick={() => fileRef.current?.click()}
-                                    className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
+                                    className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
                                     disabled={uploading}
                                 >
                                     {uploading ? (
