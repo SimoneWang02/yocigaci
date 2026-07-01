@@ -213,7 +213,7 @@ function CouponForm({ coupon, onSave, onCancel, saving }) {
     );
 }
 
-const formatDate = (d) => (d ? new Date(d).toLocaleDateString("it-IT") : "—");
+const formatDate = (d) => (d ? new Date(d).toLocaleDateString("it-IT") : "-");
 
 export default function AdminCoupons() {
     const qc = useQueryClient();
@@ -268,92 +268,100 @@ export default function AdminCoupons() {
 
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-                        <tr>
-                            <th className="text-left px-4 py-3">Codice</th>
-                            <th className="text-left px-4 py-3">Sconto</th>
-                            <th className="text-left px-4 py-3">Validità</th>
-                            <th className="text-left px-4 py-3">Utilizzi</th>
-                            <th className="text-center px-4 py-3">Stato</th>
-                            <th className="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {coupons.map((c) => (
-                            <tr key={c.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 font-mono font-semibold text-gray-800">
-                                    {c.code}
-                                </td>
-                                <td className="px-4 py-3 text-gray-700">
-                                    {c.type === "percentage"
-                                        ? `${Number(c.value).toFixed(0)}%`
-                                        : `€ ${Number(c.value).toFixed(2).replace(".", ",")}`}
-                                </td>
-                                <td className="px-4 py-3 text-gray-500">
-                                    {!c.valid_from && !c.valid_to
-                                        ? "Illimitata"
-                                        : `${formatDate(c.valid_from)} → ${formatDate(c.valid_to)}`}
-                                </td>
-                                <td className="px-4 py-3 text-gray-500">
-                                    {c.used_count}
-                                    {c.usage_limit ? ` / ${c.usage_limit}` : ""}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            toggleActive.mutate({
-                                                id: c.id,
-                                                is_active: !c.is_active,
-                                            })
-                                        }
-                                        className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${
-                                            c.is_active
-                                                ? "bg-green-100 text-green-800"
-                                                : "bg-gray-100 text-gray-600"
-                                        }`}
-                                        title={
-                                            c.is_active
-                                                ? "Clicca per disattivare"
-                                                : "Clicca per attivare"
-                                        }
-                                    >
-                                        {c.is_active ? "Attivo" : "Disattivo"}
-                                    </button>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex gap-2 justify-end">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            aria-label="Modifica"
-                                            title="Modifica"
-                                            className="!px-2"
-                                            onClick={() => setEditing(c)}
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            aria-label="Elimina"
-                                            title="Elimina"
-                                            className="!px-2"
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                            <tr>
+                                <th className="text-left px-4 py-3">Codice</th>
+                                <th className="text-left px-4 py-3">Sconto</th>
+                                <th className="text-left px-4 py-3">
+                                    Validità
+                                </th>
+                                <th className="text-left px-4 py-3">
+                                    Utilizzi
+                                </th>
+                                <th className="text-center px-4 py-3">Stato</th>
+                                <th className="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {coupons.map((c) => (
+                                <tr key={c.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 font-mono font-semibold text-gray-800">
+                                        {c.code}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-700">
+                                        {c.type === "percentage"
+                                            ? `${Number(c.value).toFixed(0)}%`
+                                            : `€ ${Number(c.value).toFixed(2).replace(".", ",")}`}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-500">
+                                        {!c.valid_from && !c.valid_to
+                                            ? "Illimitata"
+                                            : `${formatDate(c.valid_from)} → ${formatDate(c.valid_to)}`}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-500">
+                                        {c.used_count}
+                                        {c.usage_limit
+                                            ? ` / ${c.usage_limit}`
+                                            : ""}
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        <button
+                                            type="button"
                                             onClick={() =>
-                                                window.confirm(
-                                                    `Eliminare il coupon ${c.code}?`,
-                                                ) && destroy.mutate(c.id)
+                                                toggleActive.mutate({
+                                                    id: c.id,
+                                                    is_active: !c.is_active,
+                                                })
+                                            }
+                                            className={`inline-flex px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-75 ${
+                                                c.is_active
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-gray-100 text-gray-600"
+                                            }`}
+                                            title={
+                                                c.is_active
+                                                    ? "Clicca per disattivare"
+                                                    : "Clicca per attivare"
                                             }
                                         >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                            {c.is_active
+                                                ? "Attivo"
+                                                : "Disattivo"}
+                                        </button>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex gap-2 justify-end">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                aria-label="Modifica"
+                                                title="Modifica"
+                                                className="!px-2"
+                                                onClick={() => setEditing(c)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                aria-label="Elimina"
+                                                title="Elimina"
+                                                className="!px-2"
+                                                onClick={() =>
+                                                    window.confirm(
+                                                        `Eliminare il coupon ${c.code}?`,
+                                                    ) && destroy.mutate(c.id)
+                                                }
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
                 {coupons.length === 0 && (
                     <p className="text-center py-12 text-gray-400">

@@ -113,7 +113,7 @@ function ShippingMethodForm({ method, onSave, onCancel, saving }) {
 
                     <div>
                         <Input
-                            label="Soglia spedizione gratuita (€) — lascia vuoto se non applicabile"
+                            label="Soglia spedizione gratuita (€)"
                             type="number"
                             step="0.01"
                             min="0"
@@ -125,22 +125,26 @@ function ShippingMethodForm({ method, onSave, onCancel, saving }) {
                             placeholder="Es. 60.00"
                         />
                         <p className="mt-1 text-xs text-gray-400">
-                            Se il subtotale supera questa cifra, la spedizione
-                            sarà gratuita.
+                            Lascia vuoto se non applicabile. Se il subtotale
+                            supera questa cifra, la spedizione sarà gratuita.
                         </p>
                     </div>
 
-                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={form.is_active}
-                            onChange={(e) =>
-                                field("is_active", e.target.checked)
-                            }
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-gray-700">Attivo</span>
-                    </label>
+                    {method && (
+                        <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={form.is_active}
+                                onChange={(e) =>
+                                    field("is_active", e.target.checked)
+                                }
+                                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span className="text-sm text-gray-700">
+                                Attivo
+                            </span>
+                        </label>
+                    )}
 
                     <div className="flex gap-2 justify-end pt-2">
                         <Button
@@ -242,9 +246,7 @@ export default function AdminShippingMethods() {
                                 <th className="text-right px-4 py-3">
                                     Gratuita oltre
                                 </th>
-                                <th className="text-center px-4 py-3">
-                                    Stato
-                                </th>
+                                <th className="text-center px-4 py-3">Stato</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
@@ -255,7 +257,7 @@ export default function AdminShippingMethods() {
                                         {m.name}
                                     </td>
                                     <td className="px-4 py-3 text-gray-500">
-                                        {m.description || "—"}
+                                        {m.description || "-"}
                                     </td>
                                     <td className="px-4 py-3 text-right text-gray-700">
                                         {Number(m.cost) === 0
@@ -265,7 +267,7 @@ export default function AdminShippingMethods() {
                                     <td className="px-4 py-3 text-right text-gray-500">
                                         {m.free_threshold !== null
                                             ? `€ ${Number(m.free_threshold).toFixed(2).replace(".", ",")}`
-                                            : "—"}
+                                            : "-"}
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <button

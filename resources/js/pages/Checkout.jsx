@@ -386,26 +386,40 @@ function PickupForm({ initialValues, onSubmit, loading }) {
 }
 
 // Opzione selezionabile del metodo di consegna (spedizione / ritiro).
+function shippingMethodPriceLabel(method) {
+    if (method.free_threshold !== null) {
+        return `Gratuita oltre € ${Number(method.free_threshold).toFixed(2).replace(".", ",")}`;
+    }
+    return Number(method.cost) === 0
+        ? "Gratuita"
+        : `€ ${Number(method.cost).toFixed(2).replace(".", ",")}`;
+}
+
 function DeliveryOption({ selected, onClick, icon: Icon, title, subtitle }) {
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`flex-1 text-left rounded-xl border-2 px-4 py-3 transition-all ${
-                selected
-                    ? "border-indigo-500 bg-indigo-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+            className={`w-full flex items-center gap-3 text-left px-4 py-3 transition-colors ${
+                selected ? "bg-indigo-50" : "bg-white hover:bg-gray-50"
             }`}
         >
-            <div className="flex items-center gap-2">
-                <Icon
-                    className={`w-5 h-5 ${selected ? "text-indigo-600" : "text-gray-400"}`}
-                />
-                <span className="text-sm font-semibold text-gray-900">
-                    {title}
-                </span>
+            <span
+                className={`flex items-center justify-center w-4 h-4 rounded-full border-2 shrink-0 ${
+                    selected ? "border-indigo-600" : "border-gray-300"
+                }`}
+            >
+                {selected && (
+                    <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                )}
+            </span>
+            <Icon
+                className={`w-5 h-5 shrink-0 ${selected ? "text-indigo-600" : "text-gray-400"}`}
+            />
+            <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-gray-900">{title}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
         </button>
     );
 }
@@ -633,14 +647,14 @@ export default function Checkout() {
                                 Metodo di consegna
                             </h2>
                         </div>
-                        <div className="space-y-2">
-                            {shippingMethods.length === 0 && (
-                                <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                                    Nessun metodo di spedizione disponibile.
-                                    Contatta l&apos;amministratore o scegli il
-                                    ritiro in negozio.
-                                </p>
-                            )}
+                        {shippingMethods.length === 0 && (
+                            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
+                                Nessun metodo di spedizione disponibile.
+                                Contatta l&apos;amministratore o scegli il
+                                ritiro in negozio.
+                            </p>
+                        )}
+                        <div className="border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
                             {shippingMethods.map((method) => (
                                 <DeliveryOption
                                     key={method.id}
@@ -655,13 +669,20 @@ export default function Checkout() {
                                     icon={Truck}
                                     title={method.name}
                                     subtitle={
-                                        method.description
-                                            ? method.description
-                                            : method.free_threshold !== null
-                                              ? `Gratuita oltre € ${Number(method.free_threshold).toFixed(2).replace(".", ",")}`
-                                              : Number(method.cost) === 0
-                                                ? "Gratuita"
-                                                : `€ ${Number(method.cost).toFixed(2).replace(".", ",")}`
+                                        method.description ? (
+                                            <>
+                                                <span className="block">
+                                                    {method.description}
+                                                </span>
+                                                <span className="block mt-0.5">
+                                                    {shippingMethodPriceLabel(
+                                                        method,
+                                                    )}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            shippingMethodPriceLabel(method)
+                                        )
                                     }
                                 />
                             ))}
