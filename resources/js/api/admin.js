@@ -83,3 +83,9 @@ export const adminGetCoupons = () => api.get('/admin/coupons').then((r) => r.dat
 export const adminCreateCoupon = (data) => api.post('/admin/coupons', data).then((r) => r.data)
 export const adminUpdateCoupon = (id, data) => api.put(`/admin/coupons/${id}`, data).then((r) => r.data)
 export const adminDeleteCoupon = (id) => api.delete(`/admin/coupons/${id}`).then((r) => r.data)
+
+// Shipping methods
+export const adminGetShippingMethods = () => api.get('/admin/shipping-methods').then((r) => r.data)
+export const adminCreateShippingMethod = (data) => api.post('/admin/shipping-methods', data).then((r) => r.data)
+export const adminUpdateShippingMethod = (id, data) => api.patch(`/admin/shipping-methods/${id}`, data).then((r) => r.data)
+export const adminDeleteShippingMethod = (id) => api.delete(`/admin/shipping-methods/${id}`).then((r) => r.data)

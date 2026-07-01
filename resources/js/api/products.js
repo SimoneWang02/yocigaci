@@ -11,3 +11,4 @@ export const getCarouselBanners = () => api.get('/carousel-banners').then((r) =>
 export const getSettings = () => api.get('/settings').then((r) => r.data)
 export const getSearchSuggestions = (q) => api.get('/products/search-suggestions', { params: { q } }).then((r) => r.data)
 export const getProductFacets = (params) => api.get('/products/facets', { params }).then((r) => r.data)
+export const getShippingMethods = () => api.get('/shipping-methods').then((r) => r.data)

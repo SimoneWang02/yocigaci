@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\ShippingMethod;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,8 @@ class OrderFulfillmentService
         $deliveryMethod = $session->metadata->delivery_method ?? 'shipping';
         $couponCode = ($session->metadata->coupon_code ?? null) ?: null;
         $discountAmount = (float) ($session->metadata->discount_amount ?? 0);
+        $shippingMethodId = ($session->metadata->shipping_method_id ?? null) ? (int) $session->metadata->shipping_method_id : null;
+        $shippingMethodName = ($session->metadata->shipping_method_name ?? null) ?: null;
 
         // Stripe raccoglie sempre l'email nella sua pagina di pagamento: la recuperiamo
         // qui per conservarla sull'ordine e poter inviare la conferma anche agli ospiti.
@@ -102,18 +105,27 @@ class OrderFulfillmentService
         $cartItems = $this->resolveItemsForFulfillment($rawItems);
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
-        // Il ritiro in negozio non ha costi di spedizione.
-        $shipping = $deliveryMethod === 'pickup' ? 0.0 : self::shippingFor($subtotal);
+
+        if ($deliveryMethod === 'pickup') {
+            $shipping = 0.0;
+        } elseif ($shippingMethodId && $method = ShippingMethod::find($shippingMethodId)) {
+            $shipping = $method->shippingFor($subtotal);
+        } else {
+            // Fallback per sessioni create prima dell'introduzione dei metodi di spedizione.
+            $shipping = self::shippingCost() !== null ? self::shippingFor($subtotal) : 0.0;
+        }
         $total = max(0.0, $subtotal + $shipping - $discountAmount);
         $hasPreorder = collect($cartItems)->contains(fn ($i) => $i['is_preorder']);
 
         try {
-            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $notes, $subtotal, $shipping, $discountAmount, $total, $hasPreorder, $paymentIntentId, $userId, $couponCode) {
+            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $shippingMethodId, $shippingMethodName, $notes, $subtotal, $shipping, $discountAmount, $total, $hasPreorder, $paymentIntentId, $userId, $couponCode) {
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => $hasPreorder ? 'preorder_confirmed' : 'paid',
                     'type' => $hasPreorder ? 'preorder' : 'standard',
                     'delivery_method' => $deliveryMethod,
+                    'shipping_method_id' => $shippingMethodId,
+                    'shipping_method_name' => $shippingMethodName,
                     'subtotal' => $subtotal,
                     'shipping_cost' => $shipping,
                     'discount_amount' => $discountAmount,

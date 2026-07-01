@@ -10,6 +10,7 @@ class Order extends Model
 {
     protected $fillable = [
         'order_number', 'user_id', 'status', 'type', 'delivery_method',
+        'shipping_method_id', 'shipping_method_name',
         'subtotal', 'shipping_cost', 'discount_amount', 'total',
         'shipping_address', 'notes', 'coupon_code',
         'stripe_payment_intent_id', 'stripe_payment_status',

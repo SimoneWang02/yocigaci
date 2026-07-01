@@ -22,6 +22,7 @@ Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);
 Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
+Route::get('/shipping-methods', [\App\Http\Controllers\ShippingMethodController::class, 'index']);
 
 // Auth (rate limit dedicato contro brute force e spam account)
 Route::middleware('throttle:auth')->group(function () {
@@ -89,4 +90,5 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/pages', [App\Http\Controllers\Admin\PageController::class, 'index']);
     Route::patch('/pages/{slug}', [App\Http\Controllers\Admin\PageController::class, 'update']);
     Route::apiResource('/coupons', App\Http\Controllers\Admin\CouponController::class)->except(['show']);
+    Route::apiResource('/shipping-methods', App\Http\Controllers\Admin\ShippingMethodController::class)->except(['show']);
 });

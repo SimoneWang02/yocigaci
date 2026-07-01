@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
 use App\Models\Coupon;
+use App\Models\ShippingMethod;
 use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,11 +33,15 @@ class CheckoutController extends Controller
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
 
-        if ($deliveryMethod !== 'pickup' && (OrderFulfillmentService::shippingCost() === null || OrderFulfillmentService::shippingFreeThreshold() === null)) {
-            return response()->json(['message' => 'Spedizione non configurata. Contatta l\'amministratore.'], 422);
+        $shippingMethod = null;
+        if ($deliveryMethod !== 'pickup') {
+            $shippingMethod = ShippingMethod::find($validated['shipping_method_id']);
+            if (! $shippingMethod || ! $shippingMethod->is_active) {
+                return response()->json(['message' => 'Metodo di spedizione non disponibile.'], 422);
+            }
         }
 
-        $shipping = $deliveryMethod === 'pickup' ? 0.0 : OrderFulfillmentService::shippingFor($subtotal);
+        $shipping = $deliveryMethod === 'pickup' ? 0.0 : $shippingMethod->shippingFor($subtotal);
 
         // Coupon validation
         $couponCode = $validated['coupon_code'] ?? null;
@@ -67,7 +72,7 @@ class CheckoutController extends Controller
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
-                    'product_data' => ['name' => 'Spedizione standard'],
+                    'product_data' => ['name' => $shippingMethod?->name ?? 'Spedizione'],
                     'unit_amount' => (int) round($shipping * 100),
                 ],
                 'quantity' => 1,
@@ -89,6 +94,8 @@ class CheckoutController extends Controller
                 ),
                 'shipping_address' => json_encode($validated['shipping_address']),
                 'delivery_method' => $deliveryMethod,
+                'shipping_method_id' => $shippingMethod?->id,
+                'shipping_method_name' => $shippingMethod?->name,
                 'notes' => $validated['notes'] ?? null,
                 'user_id' => $user?->id,
                 'coupon_code' => $couponCode,

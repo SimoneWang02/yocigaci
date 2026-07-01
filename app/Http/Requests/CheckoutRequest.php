@@ -18,6 +18,7 @@ class CheckoutRequest extends FormRequest
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'delivery_method' => ['required', 'in:shipping,pickup'],
+            'shipping_method_id' => ['required_if:delivery_method,shipping', 'nullable', 'integer', 'exists:shipping_methods,id'],
             'shipping_address' => ['required', 'array'],
             'shipping_address.full_name' => ['required', 'string'],
             'shipping_address.phone' => ['required', 'string', 'max:20'],

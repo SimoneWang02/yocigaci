@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "../store/authStore";
 import { createSession, validateCoupon } from "../api/checkout";
-import { getSettings } from "../api/products";
+import { getShippingMethods } from "../api/products";
 import { getAddresses, saveAddress, deleteAddress } from "../api/addresses";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -37,6 +37,7 @@ const EMPTY_FORM = {
 };
 
 function ShippingProgress({ subtotal, threshold }) {
+    if (threshold === null || threshold === undefined) return null;
     const remaining = threshold - subtotal;
     const pct = Math.min((subtotal / threshold) * 100, 100);
     const free = subtotal >= threshold;
@@ -425,16 +426,22 @@ export default function Checkout() {
     const [couponApplied, setCouponApplied] = useState(null);
     const [couponError, setCouponError] = useState(null);
     const [couponLoading, setCouponLoading] = useState(false);
+    const [selectedShippingMethodId, setSelectedShippingMethodId] =
+        useState(null);
 
-    const { data: settingsData } = useQuery({
-        queryKey: ["public-settings"],
-        queryFn: getSettings,
+    const { data: shippingMethods = [] } = useQuery({
+        queryKey: ["shipping-methods"],
+        queryFn: getShippingMethods,
     });
-    const shippingThreshold =
-        settingsData?.data?.shipping_free_threshold ?? null;
-    const shippingCost = settingsData?.data?.shipping_cost ?? null;
-    const shippingConfigured =
-        shippingThreshold !== null && shippingCost !== null;
+
+    useEffect(() => {
+        if (shippingMethods.length > 0 && selectedShippingMethodId === null) {
+            setSelectedShippingMethodId(shippingMethods[0].id);
+        }
+    }, [shippingMethods, selectedShippingMethodId]);
+
+    const selectedMethod =
+        shippingMethods.find((m) => m.id === selectedShippingMethodId) ?? null;
 
     const isPickup = deliveryMethod === "pickup";
     const hasMixedCart =
@@ -442,10 +449,11 @@ export default function Checkout() {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
     const shipping = isPickup
         ? 0
-        : shippingConfigured
-          ? subtotal >= shippingThreshold
+        : selectedMethod
+          ? selectedMethod.free_threshold !== null &&
+            subtotal >= Number(selectedMethod.free_threshold)
               ? 0
-              : shippingCost
+              : Number(selectedMethod.cost)
           : null;
     const discount = couponApplied?.discount_amount ?? 0;
     const total = Math.max(0, subtotal + (shipping ?? 0) - discount);
@@ -522,8 +530,8 @@ export default function Checkout() {
     }
 
     const startCheckout = async (address, shouldSave) => {
-        if (!isPickup && !shippingConfigured) {
-            setError("Spedizione non configurata. Contatta l'amministratore.");
+        if (!isPickup && !selectedMethod) {
+            setError("Seleziona un metodo di spedizione.");
             return;
         }
         setLoading(true);
@@ -541,6 +549,7 @@ export default function Checkout() {
                     quantity: i.quantity,
                 })),
                 delivery_method: deliveryMethod,
+                shipping_method_id: isPickup ? null : selectedMethod.id,
                 shipping_address: address,
                 coupon_code: couponApplied?.code ?? null,
             });
@@ -624,20 +633,38 @@ export default function Checkout() {
                                 Metodo di consegna
                             </h2>
                         </div>
-                        <div className="flex gap-3">
-                            <DeliveryOption
-                                selected={!isPickup}
-                                onClick={() => chooseDelivery("shipping")}
-                                icon={Truck}
-                                title="Spedizione DHL Express"
-                                subtitle={
-                                    !shippingConfigured
-                                        ? "Non configurata"
-                                        : shippingCost === 0
-                                          ? "Spedizione gratuita"
-                                          : `Gratuita oltre € ${Number(shippingThreshold).toFixed(2).replace(".", ",")}`
-                                }
-                            />
+                        <div className="space-y-2">
+                            {shippingMethods.length === 0 && (
+                                <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                                    Nessun metodo di spedizione disponibile.
+                                    Contatta l&apos;amministratore o scegli il
+                                    ritiro in negozio.
+                                </p>
+                            )}
+                            {shippingMethods.map((method) => (
+                                <DeliveryOption
+                                    key={method.id}
+                                    selected={
+                                        !isPickup &&
+                                        selectedShippingMethodId === method.id
+                                    }
+                                    onClick={() => {
+                                        chooseDelivery("shipping");
+                                        setSelectedShippingMethodId(method.id);
+                                    }}
+                                    icon={Truck}
+                                    title={method.name}
+                                    subtitle={
+                                        method.description
+                                            ? method.description
+                                            : method.free_threshold !== null
+                                              ? `Gratuita oltre € ${Number(method.free_threshold).toFixed(2).replace(".", ",")}`
+                                              : Number(method.cost) === 0
+                                                ? "Gratuita"
+                                                : `€ ${Number(method.cost).toFixed(2).replace(".", ",")}`
+                                    }
+                                />
+                            ))}
                             <DeliveryOption
                                 selected={isPickup}
                                 onClick={() => chooseDelivery("pickup")}
@@ -764,12 +791,15 @@ export default function Checkout() {
                             </span>
                         </div>
 
-                        {!isPickup && shippingConfigured && (
-                            <ShippingProgress
-                                subtotal={subtotal}
-                                threshold={shippingThreshold}
-                            />
-                        )}
+                        {!isPickup &&
+                            selectedMethod?.free_threshold != null && (
+                                <ShippingProgress
+                                    subtotal={subtotal}
+                                    threshold={Number(
+                                        selectedMethod.free_threshold,
+                                    )}
+                                />
+                            )}
 
                         <div className="space-y-3 mb-4">
                             {items.map((item) => (
@@ -894,7 +924,7 @@ export default function Checkout() {
                                 <span>
                                     {isPickup
                                         ? "Ritiro in negozio"
-                                        : "Spedizione DHL Express"}
+                                        : (selectedMethod?.name ?? "Spedizione")}
                                 </span>
                                 <span
                                     className={
