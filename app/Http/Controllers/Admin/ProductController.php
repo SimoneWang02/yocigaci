@@ -45,7 +45,7 @@ class ProductController extends Controller
         } elseif (in_array($sortBy, ['name', 'price', 'stock', 'is_active'])) {
             $query->orderBy($sortBy, $sortDir);
         } else {
-            $query->orderBy('sort_order');
+            $query->orderBy('created_at', 'desc');
         }
 
         return ProductResource::collection($query->paginate(50));
