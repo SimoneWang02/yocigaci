@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
     Pencil,
     Trash2,
@@ -362,11 +363,6 @@ function CarouselSection() {
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     );
 
-    const { data: settingsData } = useQuery({
-        queryKey: ["admin-settings"],
-        queryFn: adminGetSettings,
-    });
-
     const { data: bannersData, isLoading } = useQuery({
         queryKey: ["admin-carousel-banners"],
         queryFn: adminGetCarouselBanners,
@@ -379,7 +375,6 @@ function CarouselSection() {
     });
     const catalogs = catalogsData?.data ?? [];
 
-    const carouselEnabled = settingsData?.data?.carousel_enabled === "1";
     const rawBanners = bannersData?.data ?? [];
     const banners = localOrder
         ? localOrder
@@ -391,12 +386,6 @@ function CarouselSection() {
         qc.invalidateQueries({ queryKey: ["admin-carousel-banners"] });
         qc.invalidateQueries({ queryKey: ["carousel-banners"] });
     };
-
-    const toggleCarousel = useMutation({
-        mutationFn: (enabled) =>
-            adminUpdateSettings({ carousel_enabled: enabled }),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-settings"] }),
-    });
 
     const upload = useMutation({
         mutationFn: adminUploadCarouselBanner,
@@ -456,28 +445,16 @@ function CarouselSection() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {/* toggle carousel visibilità */}
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <span className="text-sm text-gray-600">
-                            Mostra carousel
-                        </span>
-                        <button
-                            type="button"
-                            role="switch"
-                            aria-checked={carouselEnabled}
-                            onClick={() =>
-                                toggleCarousel.mutate(!carouselEnabled)
-                            }
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${carouselEnabled ? "bg-indigo-600" : "bg-gray-200"}`}
-                        >
-                            <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${carouselEnabled ? "translate-x-6" : "translate-x-1"}`}
-                            />
-                        </button>
-                    </label>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        as={Link}
+                        to="/admin/cataloghi"
+                    >
+                        Gestisci cataloghi
+                    </Button>
 
-                    {/* upload button */}
                     <input
                         ref={fileRef}
                         type="file"

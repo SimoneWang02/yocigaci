@@ -6,7 +6,8 @@ import {
     NavLink,
     useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import { Header } from "./components/layout/Header";
@@ -80,35 +81,86 @@ function Layout({ children }) {
 const ADMIN_LINKS = [
     { to: "/admin/dashboard", label: "Dashboard" },
     { to: "/admin/homepage", label: "Homepage" },
-    { to: "/admin/cataloghi", label: "Cataloghi" },
     { to: "/admin/giochi", label: "Giochi" },
     { to: "/admin/categorie", label: "Categorie" },
     { to: "/admin/prodotti", label: "Prodotti" },
     { to: "/admin/ordini", label: "Ordini" },
+];
+
+const ADMIN_MORE_LINKS = [
     { to: "/admin/coupon", label: "Coupon" },
     { to: "/admin/spedizioni", label: "Spedizioni" },
-    { to: "/admin/pagine", label: "Pagine" },
+    { to: "/admin/pagine", label: "Pagine Legali" },
 ];
 
 function AdminNav() {
+    const location = useLocation();
+    const [moreOpen, setMoreOpen] = useState(false);
+    const isMoreActive = ADMIN_MORE_LINKS.some((link) =>
+        location.pathname.startsWith(link.to),
+    );
+
     return (
         <nav className="bg-white border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-4 flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {ADMIN_LINKS.map((link) => (
-                    <NavLink
-                        key={link.to}
-                        to={link.to}
-                        className={({ isActive }) =>
-                            `flex-shrink-0 px-4 md:flex-1 md:px-0 md:text-center py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                                isActive
-                                    ? "border-indigo-600 text-indigo-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-800"
-                            }`
-                        }
+            <div className="max-w-6xl mx-auto px-4 flex items-stretch">
+                <div className="flex flex-1 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {ADMIN_LINKS.map((link) => (
+                        <NavLink
+                            key={link.to}
+                            to={link.to}
+                            className={({ isActive }) =>
+                                `flex-shrink-0 px-4 md:flex-1 md:px-0 md:text-center py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                                    isActive
+                                        ? "border-indigo-600 text-indigo-600"
+                                        : "border-transparent text-gray-500 hover:text-gray-800"
+                                }`
+                            }
+                        >
+                            {link.label}
+                        </NavLink>
+                    ))}
+                </div>
+                <div className="relative flex-shrink-0">
+                    <button
+                        onClick={() => setMoreOpen((o) => !o)}
+                        className={`flex items-center justify-center gap-1 h-full px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                            isMoreActive
+                                ? "border-indigo-600 text-indigo-600"
+                                : "border-transparent text-gray-500 hover:text-gray-800"
+                        }`}
                     >
-                        {link.label}
-                    </NavLink>
-                ))}
+                        Altro
+                        <ChevronDown
+                            className={`w-4 h-4 transition-transform ${moreOpen ? "rotate-180" : ""}`}
+                        />
+                    </button>
+                    {moreOpen && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setMoreOpen(false)}
+                            />
+                            <div className="absolute right-0 top-full z-50 w-44 bg-white border border-gray-200 shadow-lg rounded-lg py-2">
+                                {ADMIN_MORE_LINKS.map((link) => (
+                                    <NavLink
+                                        key={link.to}
+                                        to={link.to}
+                                        onClick={() => setMoreOpen(false)}
+                                        className={({ isActive }) =>
+                                            `block px-4 py-2 text-sm ${
+                                                isActive
+                                                    ? "text-indigo-600 font-medium"
+                                                    : "text-gray-700 hover:bg-gray-50"
+                                            }`
+                                        }
+                                    >
+                                        {link.label}
+                                    </NavLink>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );

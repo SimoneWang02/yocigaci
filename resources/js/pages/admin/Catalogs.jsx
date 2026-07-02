@@ -153,21 +153,20 @@ export default function AdminCatalogs() {
         (c) => !search || c.title.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const invalidate = () => {
+    const invalidate = () =>
         qc.invalidateQueries({ queryKey: ["admin-catalogs"] });
-    };
 
     const create = useMutation({
         mutationFn: adminCreateCatalog,
-        onSuccess: () => {
-            invalidate();
+        onSuccess: async () => {
+            await invalidate();
             setCreating(false);
         },
     });
     const update = useMutation({
         mutationFn: ({ id, data }) => adminUpdateCatalog(id, data),
-        onSuccess: () => {
-            invalidate();
+        onSuccess: async () => {
+            await invalidate();
             setEditing(null);
         },
     });
