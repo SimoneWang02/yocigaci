@@ -23,7 +23,9 @@ export default function Home() {
         id: String(b.id),
         image: b.url,
         alt: "",
-        href: b.link ?? undefined,
+        href: b.catalog_id
+            ? `/catalogo?catalogo=${b.catalog_id}`
+            : b.link ?? undefined,
     }));
 
     return (

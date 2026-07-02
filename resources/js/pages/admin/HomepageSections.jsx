@@ -29,7 +29,7 @@ import {
     adminUpdateHomepageSection,
     adminDeleteHomepageSection,
     adminReorderHomepageSections,
-    adminGetProducts,
+    adminGetCatalogs,
     adminGetCarouselBanners,
     adminUploadCarouselBanner,
     adminUpdateCarouselBanner,
@@ -39,148 +39,9 @@ import {
     adminUpdateSettings,
 } from "../../api/admin";
 import { Button } from "../../components/ui/Button";
-import { ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { PageSpinner } from "../../components/ui/Spinner";
-
-// ─── Product picker ────────────────────────────────────────────────────────────
-
-function ProductPicker({ selected, onChange }) {
-    const [search, setSearch] = useState("");
-    const { data, isFetching } = useQuery({
-        queryKey: ["admin-product-search", search],
-        queryFn: () => adminGetProducts({ search, per_page: 20 }),
-        enabled: search.length >= 2,
-    });
-
-    const results = data?.data ?? [];
-    const selectedIds = new Set(selected.map((p) => p.id));
-
-    const add = (product) => {
-        if (selectedIds.has(product.id)) return;
-        onChange([...selected, product]);
-    };
-    const remove = (id) => onChange(selected.filter((p) => p.id !== id));
-    const move = (index, dir) => {
-        const next = [...selected];
-        const target = index + dir;
-        if (target < 0 || target >= next.length) return;
-        [next[index], next[target]] = [next[target], next[index]];
-        onChange(next);
-    };
-
-    return (
-        <div className="space-y-3">
-            <div>
-                <label className="text-sm font-medium text-gray-700">
-                    Prodotti associati
-                </label>
-                {selected.length === 0 ? (
-                    <p className="text-sm text-gray-400 mt-1">
-                        Nessun prodotto. Cercane uno qui sotto.
-                    </p>
-                ) : (
-                    <ul className="mt-2 space-y-1.5">
-                        {selected.map((p, i) => (
-                            <li
-                                key={p.id}
-                                className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2 py-1.5"
-                            >
-                                <div className="w-8 h-8 rounded bg-gray-100 overflow-hidden shrink-0">
-                                    {p.primary_image?.url && (
-                                        <img
-                                            src={p.primary_image.url}
-                                            alt=""
-                                            className="w-full h-full object-cover"
-                                        />
-                                    )}
-                                </div>
-                                <span className="flex-1 text-sm text-gray-800 truncate">
-                                    {p.name}
-                                </span>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => move(i, -1)}
-                                        disabled={i === 0}
-                                        className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30"
-                                    >
-                                        <ArrowUp className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => move(i, 1)}
-                                        disabled={i === selected.length - 1}
-                                        className="px-1.5 text-gray-500 hover:text-gray-900 disabled:opacity-30"
-                                    >
-                                        <ArrowDown className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => remove(p.id)}
-                                        className="px-1.5 text-red-500 hover:text-red-700"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            <div>
-                <Input
-                    label="Cerca prodotti da aggiungere"
-                    placeholder="Digita almeno 2 caratteri…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                {search.length >= 2 && (
-                    <div className="mt-2 border border-gray-200 rounded-lg max-h-56 overflow-y-auto divide-y divide-gray-100">
-                        {isFetching ? (
-                            <p className="text-sm text-gray-400 px-3 py-2">
-                                Ricerca…
-                            </p>
-                        ) : results.length === 0 ? (
-                            <p className="text-sm text-gray-400 px-3 py-2">
-                                Nessun risultato.
-                            </p>
-                        ) : (
-                            results.map((p) => (
-                                <button
-                                    type="button"
-                                    key={p.id}
-                                    onClick={() => add(p)}
-                                    disabled={selectedIds.has(p.id)}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    <div className="w-8 h-8 rounded bg-gray-100 overflow-hidden shrink-0">
-                                        {p.primary_image?.url && (
-                                            <img
-                                                src={p.primary_image.url}
-                                                alt=""
-                                                className="w-full h-full object-cover"
-                                            />
-                                        )}
-                                    </div>
-                                    <span className="flex-1 text-sm text-gray-800 truncate">
-                                        {p.name}
-                                    </span>
-                                    <span className="text-xs text-gray-400">
-                                        {selectedIds.has(p.id)
-                                            ? "Aggiunto"
-                                            : "+ Aggiungi"}
-                                    </span>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
+import { ProductPicker } from "../../components/admin/ProductPicker";
 
 // ─── Section form ──────────────────────────────────────────────────────────────
 
@@ -337,7 +198,15 @@ function SortableRow({
 
 // ─── Sortable banner card ──────────────────────────────────────────────────────
 
-function SortableBannerCard({ banner, onToggleActive, onDelete }) {
+function SortableBannerCard({
+    banner,
+    catalogs,
+    editing,
+    onToggleEdit,
+    onSaveTarget,
+    onToggleActive,
+    onDelete,
+}) {
     const {
         attributes,
         listeners,
@@ -352,6 +221,9 @@ function SortableBannerCard({ banner, onToggleActive, onDelete }) {
         transition,
         opacity: isDragging ? 0.4 : 1,
     };
+
+    const [catalogId, setCatalogId] = useState(banner.catalog_id ?? "");
+    const [link, setLink] = useState(banner.link ?? "");
 
     return (
         <div
@@ -404,6 +276,15 @@ function SortableBannerCard({ banner, onToggleActive, onDelete }) {
                 </button>
                 <button
                     type="button"
+                    onClick={() => onToggleEdit(banner.id)}
+                    className={`p-1 rounded hover:bg-white ${editing ? "bg-white text-indigo-600" : "bg-white/90 text-gray-600"}`}
+                    aria-label="Modifica destinazione"
+                    title="Modifica destinazione"
+                >
+                    <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                    type="button"
                     onClick={() =>
                         window.confirm("Eliminare questo banner?") &&
                         onDelete(banner.id)
@@ -414,6 +295,57 @@ function SortableBannerCard({ banner, onToggleActive, onDelete }) {
                     <Trash2 className="w-4 h-4" />
                 </button>
             </div>
+
+            {editing && (
+                <div className="p-3 bg-white space-y-2 border-t border-gray-100">
+                    <div>
+                        <label className="text-xs font-medium text-gray-700">
+                            Catalogo di destinazione
+                        </label>
+                        <select
+                            value={catalogId}
+                            onChange={(e) => setCatalogId(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                            <option value="">Nessuno (usa link esterno)</option>
+                            {catalogs.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    {!catalogId && (
+                        <Input
+                            label="Link esterno (opzionale)"
+                            placeholder="https://... oppure /catalogo"
+                            value={link}
+                            onChange={(e) => setLink(e.target.value)}
+                        />
+                    )}
+                    <div className="flex justify-end gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onToggleEdit(null)}
+                        >
+                            Annulla
+                        </Button>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() =>
+                                onSaveTarget(banner.id, {
+                                    catalog_id: catalogId || null,
+                                    link: catalogId ? null : link,
+                                })
+                            }
+                        >
+                            Salva
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -424,6 +356,7 @@ function CarouselSection() {
     const qc = useQueryClient();
     const fileRef = useRef(null);
     const [localOrder, setLocalOrder] = useState(null);
+    const [editingId, setEditingId] = useState(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -439,6 +372,12 @@ function CarouselSection() {
         queryFn: adminGetCarouselBanners,
         onSuccess: () => setLocalOrder(null),
     });
+
+    const { data: catalogsData } = useQuery({
+        queryKey: ["admin-catalogs"],
+        queryFn: adminGetCatalogs,
+    });
+    const catalogs = catalogsData?.data ?? [];
 
     const carouselEnabled = settingsData?.data?.carousel_enabled === "1";
     const rawBanners = bannersData?.data ?? [];
@@ -468,6 +407,14 @@ function CarouselSection() {
         mutationFn: ({ id, is_active }) =>
             adminUpdateCarouselBanner(id, { is_active }),
         onSuccess: invalidate,
+    });
+
+    const saveTarget = useMutation({
+        mutationFn: ({ id, data }) => adminUpdateCarouselBanner(id, data),
+        onSuccess: () => {
+            invalidate();
+            setEditingId(null);
+        },
     });
 
     const del = useMutation({
@@ -573,6 +520,16 @@ function CarouselSection() {
                                 <SortableBannerCard
                                     key={banner.id}
                                     banner={banner}
+                                    catalogs={catalogs}
+                                    editing={editingId === banner.id}
+                                    onToggleEdit={(id) =>
+                                        setEditingId((current) =>
+                                            current === id ? null : id,
+                                        )
+                                    }
+                                    onSaveTarget={(id, data) =>
+                                        saveTarget.mutate({ id, data })
+                                    }
                                     onToggleActive={(b) =>
                                         toggleActive.mutate({
                                             id: b.id,

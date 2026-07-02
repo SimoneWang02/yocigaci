@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CarouselBanner extends Model
 {
-    protected $fillable = ['path', 'link', 'sort_order', 'is_active'];
+    protected $fillable = ['path', 'link', 'catalog_id', 'sort_order', 'is_active'];
 
     protected $casts = ['is_active' => 'boolean'];
 
@@ -16,5 +16,10 @@ class CarouselBanner extends Model
     public function getUrlAttribute(): string
     {
         return Storage::disk('public')->url($this->path);
+    }
+
+    public function catalog(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Catalog::class);
     }
 }

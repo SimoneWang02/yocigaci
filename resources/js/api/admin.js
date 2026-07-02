@@ -39,6 +39,12 @@ export const adminUpdateHomepageSection = (id, data) => api.put(`/admin/homepage
 export const adminDeleteHomepageSection = (id) => api.delete(`/admin/homepage-sections/${id}`).then((r) => r.data)
 export const adminReorderHomepageSections = (ids) => api.post('/admin/homepage-sections/reorder', { ids }).then((r) => r.data)
 
+// Catalogs
+export const adminGetCatalogs = () => api.get('/admin/catalogs').then((r) => r.data)
+export const adminCreateCatalog = (data) => api.post('/admin/catalogs', data).then((r) => r.data)
+export const adminUpdateCatalog = (id, data) => api.put(`/admin/catalogs/${id}`, data).then((r) => r.data)
+export const adminDeleteCatalog = (id) => api.delete(`/admin/catalogs/${id}`).then((r) => r.data)
+
 // Carousel banners
 export const adminGetCarouselBanners = () => api.get('/admin/carousel-banners').then((r) => r.data)
 export const adminUploadCarouselBanner = (file) => {

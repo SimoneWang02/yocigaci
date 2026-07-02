@@ -21,6 +21,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);
+Route::get('/catalogs/{catalog}', [\App\Http\Controllers\CatalogController::class, 'show']);
 Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
 Route::get('/shipping-methods', [\App\Http\Controllers\ShippingMethodController::class, 'index']);
 
@@ -71,6 +72,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('/homepage-sections', App\Http\Controllers\Admin\HomepageSectionController::class)
         ->parameters(['homepage-sections' => 'homepageSection']);
     Route::post('/homepage-sections/reorder', [App\Http\Controllers\Admin\HomepageSectionController::class, 'reorder']);
+    Route::apiResource('/catalogs', App\Http\Controllers\Admin\CatalogController::class);
     Route::get('/carousel-banners', [App\Http\Controllers\Admin\CarouselBannerController::class, 'index']);
     Route::post('/carousel-banners', [App\Http\Controllers\Admin\CarouselBannerController::class, 'store']);
     Route::post('/carousel-banners/reorder', [App\Http\Controllers\Admin\CarouselBannerController::class, 'reorder']);

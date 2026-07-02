@@ -34,6 +34,7 @@ import AdminOrders from "./pages/admin/Orders";
 import AdminGames from "./pages/admin/Games";
 import AdminCategories from "./pages/admin/Categories";
 import AdminHomepageSections from "./pages/admin/HomepageSections";
+import AdminCatalogs from "./pages/admin/Catalogs";
 import AdminPages from "./pages/admin/Pages";
 import AdminCoupons from "./pages/admin/Coupons";
 import AdminShippingMethods from "./pages/admin/ShippingMethods";
@@ -79,6 +80,7 @@ function Layout({ children }) {
 const ADMIN_LINKS = [
     { to: "/admin/dashboard", label: "Dashboard" },
     { to: "/admin/homepage", label: "Homepage" },
+    { to: "/admin/cataloghi", label: "Cataloghi" },
     { to: "/admin/giochi", label: "Giochi" },
     { to: "/admin/categorie", label: "Categorie" },
     { to: "/admin/prodotti", label: "Prodotti" },
@@ -332,6 +334,16 @@ export default function App() {
                                 <AdminRoute>
                                     <AdminLayout>
                                         <AdminHomepageSections />
+                                    </AdminLayout>
+                                </AdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/cataloghi"
+                            element={
+                                <AdminRoute>
+                                    <AdminLayout>
+                                        <AdminCatalogs />
                                     </AdminLayout>
                                 </AdminRoute>
                             }

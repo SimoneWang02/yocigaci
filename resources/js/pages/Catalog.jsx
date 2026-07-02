@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate, useParams } from 'react-router-dom'
+import { useSearchParams, useNavigate, useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
-import { getProducts, getGames, getSearchSuggestions } from '../api/products'
+import { getProducts, getGames, getSearchSuggestions, getCatalog } from '../api/products'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductFilters } from '../components/product/ProductFilters'
 import { PageSpinner } from '../components/ui/Spinner'
-import { Package, Search, SlidersHorizontal, X } from 'lucide-react'
+import { Package, Search, SlidersHorizontal, X, ArrowRight } from 'lucide-react'
 
 export default function Catalog() {
   const { gameSlug, categorySlug } = useParams()
@@ -14,6 +14,8 @@ export default function Catalog() {
   const navigate = useNavigate()
 
   const sectionId = params.get('sezione') || undefined
+  const catalogoId = params.get('catalogo') || undefined
+  const hideSidebar = Boolean(sectionId || catalogoId)
 
   const [searchValue, setSearchValue] = useState(params.get('search') ?? '')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -43,8 +45,16 @@ export default function Catalog() {
   const currentGame = games.find((g) => g.slug === gameSlug)
   const currentCategory = currentGame?.categories?.find((c) => c.slug === categorySlug)
 
+  const { data: catalogData } = useQuery({
+    queryKey: ['catalog', catalogoId],
+    queryFn: () => getCatalog(catalogoId),
+    enabled: Boolean(catalogoId),
+  })
+  const currentCatalog = catalogData?.data
+
   const filters = {
     section_id: sectionId,
+    catalog_id: catalogoId,
     game: gameSlug || undefined,
     category: categorySlug || undefined,
     language: params.get('language') || undefined,
@@ -62,13 +72,17 @@ export default function Catalog() {
   const products = data?.data ?? []
   const meta = data?.meta ?? {}
 
-  const metaTitle = currentCategory
+  const metaTitle = currentCatalog
+    ? `${currentCatalog.title} a Carpi - Yocigaci`
+    : currentCategory
     ? `${currentCategory.name} ${currentGame.name} a Carpi - Yocigaci`
     : currentGame
     ? `${currentGame.name} a Carpi - Yocigaci`
     : 'Catalogo TCG a Carpi - Yocigaci'
 
-  const metaDescription = currentCategory
+  const metaDescription = currentCatalog
+    ? `Scopri ${currentCatalog.title} tra i prodotti Yocigaci a Carpi: carte, buste, mazzi e accessori.`
+    : currentCategory
     ? `Acquista ${currentCategory.name} di ${currentGame.name} a Carpi. Yocigaci è il negozio TCG di Carpi con carte, buste, mazzi e accessori.`
     : currentGame
     ? `Acquista prodotti ${currentGame.name} a Carpi. Yocigaci è il negozio TCG di riferimento a Carpi con carte, buste, mazzi e accessori.`
@@ -107,7 +121,9 @@ export default function Catalog() {
       </Helmet>
 
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        {currentCategory
+        {currentCatalog
+          ? currentCatalog.title
+          : currentCategory
           ? `${currentGame.name} – ${currentCategory.name}`
           : currentGame
           ? currentGame.name
@@ -170,7 +186,7 @@ export default function Catalog() {
           <Search size={16} />
           <span className="hidden sm:inline">Cerca</span>
         </button>
-        {!sectionId && (
+        {!hideSidebar && (
           <button
             onClick={() => setShowFilters(true)}
             aria-label="Filtri"
@@ -183,7 +199,7 @@ export default function Catalog() {
 
       <div className="flex gap-6">
         {/* Sidebar */}
-        {!sectionId && (
+        {!hideSidebar && (
           <aside className="hidden md:block w-60 flex-shrink-0">
             <div>
               <ProductFilters />
@@ -230,6 +246,21 @@ export default function Catalog() {
                 </div>
               )}
             </>
+          )}
+
+          {catalogoId && (
+            <div className="flex flex-col items-center gap-4 text-center py-12 mt-4 border-t border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Scopri tutto il catalogo
+              </h2>
+              <Link
+                to="/catalogo"
+                className="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
+              >
+                Esplora il catalogo
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           )}
         </div>
       </div>
