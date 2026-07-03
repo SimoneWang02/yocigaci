@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,6 +28,8 @@ class ProductResource extends JsonResource
             ),
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
+            'click_count' => $this->when($this->click_count !== null, fn () => (int) $this->click_count),
+            'is_trending' => in_array($this->id, Product::trendingIds(), true),
             'game' => new GameResource($this->whenLoaded('game')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'primary_image' => new ProductImageResource($this->whenLoaded('primaryImage')),

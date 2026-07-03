@@ -4,6 +4,7 @@ export const getProducts = (params) => api.get('/products', { params }).then((r)
 export const getProduct = (slug) => api.get(`/products/${slug}`).then((r) => r.data)
 export const getRelatedProducts = (slug) =>
   api.get(`/products/${slug}/related`).then((r) => r.data)
+export const trackProductClick = (slug) => api.post(`/products/${slug}/track-click`).then((r) => r.data)
 export const getGames = (withCategories = false) =>
   api.get('/games', { params: withCategories ? { with: 'categories' } : {} }).then((r) => r.data)
 export const getHomepageSections = () => api.get('/homepage-sections').then((r) => r.data)

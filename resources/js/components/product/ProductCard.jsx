@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Image as ImageIcon, Check } from "lucide-react";
+import { Image as ImageIcon, Check, Flame } from "lucide-react";
 import { useCartStore } from "../../store/cartStore";
 import { useAuthStore } from "../../store/authStore";
 import { Badge } from "../ui/Badge";
@@ -60,6 +60,18 @@ export function ProductCard({ product }) {
                             <Badge variant="preorder">Preordine</Badge>
                         )}
                     </div>
+
+                    {product.is_trending && (
+                        <div
+                            className="absolute right-0 bottom-0 flex items-center gap-1 rounded bg-orange-500 px-2 py-0.5 text-white shadow-sm"
+                            title="Prodotto in tendenza"
+                        >
+                            <Flame className="h-3 w-3 shrink-0" fill="currentColor" strokeWidth={0} />
+                            <span className="text-xs font-semibold whitespace-nowrap">
+                                Popolare
+                            </span>
+                        </div>
+                    )}
                 </div>
             </Link>
 

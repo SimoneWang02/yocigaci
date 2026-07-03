@@ -391,6 +391,7 @@ export default function AdminProducts() {
                                 <SortTh column="game.name" sort={sort} onSort={onSort}>Gioco</SortTh>
                                 <SortTh column="price" sort={sort} onSort={onSort} align="right">Prezzo</SortTh>
                                 <SortTh column="stock" sort={sort} onSort={onSort} align="center">Stock</SortTh>
+                                <SortTh column="click_count" sort={sort} onSort={onSort} align="center">Click</SortTh>
                                 <SortTh column="is_active" sort={sort} onSort={onSort} align="center">Stato</SortTh>
                                 <th className="px-4 py-3"></th>
                             </tr>
@@ -521,6 +522,9 @@ export default function AdminProducts() {
                                                 +
                                             </button>
                                         </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-center text-gray-600">
+                                        {p.click_count ?? 0}
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <button

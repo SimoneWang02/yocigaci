@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Image as ImageIcon, Check, Frown, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
-import { getProduct, getRelatedProducts } from "../api/products";
+import { getProduct, getRelatedProducts, trackProductClick } from "../api/products";
 import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "../store/authStore";
 import { Badge } from "../components/ui/Badge";
@@ -32,6 +32,13 @@ export default function ProductDetail() {
         queryKey: ["product-related", slug],
         queryFn: () => getRelatedProducts(slug),
     });
+
+    const trackedSlugRef = useRef(null);
+    useEffect(() => {
+        if (trackedSlugRef.current === slug) return;
+        trackedSlugRef.current = slug;
+        trackProductClick(slug).catch(() => {});
+    }, [slug]);
 
     const product = data?.data;
     const related = relatedData?.data ?? [];

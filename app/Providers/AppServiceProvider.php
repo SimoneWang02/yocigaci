@@ -42,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
         // Tracking ordini pubblico: previene l'enumerazione dei numeri d'ordine.
         RateLimiter::for('tracking', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 
+        // Tracciamento click prodotto: previene il gonfiamento artificiale dei contatori.
+        RateLimiter::for('click', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+
         // Validazione coupon: previene il brute force dei codici.
         RateLimiter::for('coupon', fn (Request $request) => Limit::perMinute(15)->by($request->ip()));
 

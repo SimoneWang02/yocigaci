@@ -18,6 +18,7 @@ Route::get('/products/search-suggestions', [ProductController::class, 'suggestio
 Route::get('/products/facets', [ProductController::class, 'facets']);
 Route::get('/products/{slug}/related', [ProductController::class, 'related']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
+Route::post('/products/{slug}/track-click', [ProductController::class, 'trackClick'])->middleware('throttle:click');
 Route::get('/games', [ProductController::class, 'games']);
 Route::get('/homepage-sections', [HomepageSectionController::class, 'index']);
 Route::get('/carousel-banners', [\App\Http\Controllers\CarouselBannerController::class, 'index']);

@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -66,6 +67,15 @@ class ProductController extends Controller
             ->firstOrFail();
 
         return new ProductResource($product);
+    }
+
+    public function trackClick(string $slug): JsonResponse
+    {
+        $product = Product::active()->where('slug', $slug)->firstOrFail();
+        $product->clicks()->create([]);
+        Cache::forget('trending_product_ids');
+
+        return response()->json(null, 204);
     }
 
     public function suggestions(Request $request): JsonResponse

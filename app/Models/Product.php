@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\Cache;
 
 class Product extends Model
 {
+    private static ?array $trendingIdsCache = null;
     protected $fillable = [
         'game_id', 'category_id', 'language', 'name', 'slug', 'description',
         'price', 'stock', 'is_preorder', 'is_limited', 'preorder_release_date',
@@ -43,6 +45,30 @@ class Product extends Model
     public function primaryImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->orderBy('sort_order');
+    }
+
+    public function clicks(): HasMany
+    {
+        return $this->hasMany(ProductClick::class);
+    }
+
+    /**
+     * ID dei 10 prodotti più visualizzati negli ultimi 7 giorni, per il badge "in tendenza".
+     * Cache di 5 minuti: evita di ricalcolare l'aggregazione ad ogni richiesta.
+     */
+    public static function trendingIds(): array
+    {
+        return self::$trendingIdsCache ??= Cache::remember('trending_product_ids', 300, function () {
+            return ProductClick::join('products', 'products.id', '=', 'product_clicks.product_id')
+                ->where('products.is_active', true)
+                ->where('product_clicks.created_at', '>=', now()->subDays(7))
+                ->selectRaw('product_clicks.product_id, count(*) as clicks')
+                ->groupBy('product_clicks.product_id')
+                ->orderByDesc('clicks')
+                ->limit(10)
+                ->pluck('product_clicks.product_id')
+                ->all();
+        });
     }
 
     public function scopeActive(Builder $q): Builder

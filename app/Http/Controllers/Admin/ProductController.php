@@ -42,11 +42,13 @@ class ProductController extends Controller
             $query->leftJoin('games', 'products.game_id', '=', 'games.id')
                 ->orderBy('games.name', $sortDir)
                 ->select('products.*');
-        } elseif (in_array($sortBy, ['name', 'price', 'stock', 'is_active'])) {
+        } elseif (in_array($sortBy, ['name', 'price', 'stock', 'is_active', 'click_count'])) {
             $query->orderBy($sortBy, $sortDir);
         } else {
             $query->orderBy('created_at', 'desc');
         }
+
+        $query->withCount(['clicks as click_count']);
 
         return ProductResource::collection($query->paginate(50));
     }
