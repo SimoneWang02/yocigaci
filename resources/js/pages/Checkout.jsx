@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 import { createSession, validateCoupon } from "../api/checkout";
 import { getShippingMethods } from "../api/products";
 import { getAddresses, saveAddress, deleteAddress } from "../api/addresses";
+import { loadCheckoutInfo, saveCheckoutInfo } from "../utils/checkoutStorage";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LanguageBadge } from "../components/ui/LanguageBadge";
@@ -550,6 +551,7 @@ export default function Checkout() {
         }
         setLoading(true);
         setError(null);
+        saveCheckoutInfo(address);
         try {
             if (shouldSave) {
                 await saveAddress({
@@ -600,6 +602,7 @@ export default function Checkout() {
     };
 
     const hasSaved = savedAddresses.length > 0;
+    const savedCheckoutInfo = loadCheckoutInfo();
     const formInitialValues = selectedAddress
         ? {
               full_name: selectedAddress.full_name,
@@ -611,7 +614,9 @@ export default function Checkout() {
               province: selectedAddress.province,
               country: selectedAddress.country,
           }
-        : EMPTY_FORM;
+        : savedCheckoutInfo
+          ? { ...EMPTY_FORM, ...savedCheckoutInfo }
+          : EMPTY_FORM;
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-10">
@@ -703,9 +708,13 @@ export default function Checkout() {
                                 initialValues={{
                                     full_name:
                                         selectedAddress?.full_name ??
+                                        savedCheckoutInfo?.full_name ??
                                         user?.name ??
                                         "",
-                                    phone: selectedAddress?.phone ?? "",
+                                    phone:
+                                        selectedAddress?.phone ??
+                                        savedCheckoutInfo?.phone ??
+                                        "",
                                 }}
                                 onSubmit={(address) =>
                                     startCheckout(address, false)
