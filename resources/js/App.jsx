@@ -194,7 +194,7 @@ export default function App() {
                         <meta property="og:type" content="website" />
                         <meta
                             property="og:image"
-                            content="https://yocigaci.com/images/square_logo.svg"
+                            content="https://yocigaci.com/images/og-image.jpg"
                         />
                     </Helmet>
                     <Routes>

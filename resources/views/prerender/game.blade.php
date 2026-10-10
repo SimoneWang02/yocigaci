@@ -41,6 +41,10 @@
     <meta property="og:url" content="{{ $base }}/catalogo/{{ $game->slug }}">
     <meta property="og:locale" content="it_IT">
     <meta property="og:site_name" content="Yocigaci">
+    <meta property="og:image" content="{{ $base }}/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
 
     <script type="application/ld+json">{!! json_encode($jsonLdBreadcrumb, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     <script type="application/ld+json">{!! json_encode($jsonLdItemList, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
