@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Services\OrderFulfillmentService;
 use App\Services\RefundService;
+use App\Services\StockReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session as StripeSession;
@@ -17,6 +18,7 @@ class StripeWebhookController extends Controller
     public function __construct(
         private readonly OrderFulfillmentService $fulfillment,
         private readonly RefundService $refunds,
+        private readonly StockReservationService $reservations,
     ) {
     }
 
@@ -39,6 +41,9 @@ class StripeWebhookController extends Controller
             // torna sul sito (es. abbandono del redirect, frequente con PayPal).
             'checkout.session.completed',
             'checkout.session.async_payment_succeeded' => $this->handleCheckoutCompleted($event),
+            // Sessione abbandonata o pagamento fallito: restituisce lo stock trattenuto.
+            'checkout.session.expired',
+            'checkout.session.async_payment_failed' => $this->handleCheckoutReleased($event),
             'charge.refunded' => $this->handleChargeRefunded($event),
             default => null,
         };
@@ -52,6 +57,15 @@ class StripeWebhookController extends Controller
 
         if ($session instanceof StripeSession) {
             $this->fulfillment->fulfillFromSession($session);
+        }
+    }
+
+    private function handleCheckoutReleased(Event $event): void
+    {
+        $session = $event->data->object;
+
+        if ($session instanceof StripeSession && $reservation = $this->reservations->forSession($session)) {
+            $this->reservations->release($reservation);
         }
     }
 

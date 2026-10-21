@@ -17,3 +17,24 @@ export function saveCheckoutInfo(data) {
         // storage non disponibile (es. navigazione privata): ignora
     }
 }
+
+const PENDING_SESSION_KEY = "checkout_pending_session";
+
+// Ultima sessione Stripe avviata da questo browser: se il cliente torna indietro e
+// riprova, il backend la annulla e ne libera lo stock prenotato.
+export function loadPendingSession() {
+    try {
+        return localStorage.getItem(PENDING_SESSION_KEY);
+    } catch {
+        return null;
+    }
+}
+
+export function savePendingSession(sessionId) {
+    try {
+        if (sessionId) localStorage.setItem(PENDING_SESSION_KEY, sessionId);
+        else localStorage.removeItem(PENDING_SESSION_KEY);
+    } catch {
+        // storage non disponibile (es. navigazione privata): ignora
+    }
+}

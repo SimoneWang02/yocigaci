@@ -121,6 +121,11 @@ export default function AdminProducts() {
     const del = useMutation({
         mutationFn: adminDeleteProduct,
         onSuccess: () => qc.invalidateQueries(["admin-products"]),
+        onError: (err) =>
+            window.alert(
+                err.response?.data?.message ??
+                    "Errore durante l'eliminazione del prodotto.",
+            ),
     });
     const toggleActive = useMutation({
         mutationFn: ({ id, is_active }) => adminUpdateProduct(id, { is_active }),

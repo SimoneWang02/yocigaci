@@ -6,7 +6,12 @@ import { useAuthStore } from "../store/authStore";
 import { createSession, validateCoupon } from "../api/checkout";
 import { getShippingMethods } from "../api/products";
 import { getAddresses, saveAddress, deleteAddress } from "../api/addresses";
-import { loadCheckoutInfo, saveCheckoutInfo } from "../utils/checkoutStorage";
+import {
+    loadCheckoutInfo,
+    saveCheckoutInfo,
+    loadPendingSession,
+    savePendingSession,
+} from "../utils/checkoutStorage";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LanguageBadge } from "../components/ui/LanguageBadge";
@@ -568,7 +573,9 @@ export default function Checkout() {
                 shipping_method_id: isPickup ? null : selectedMethod.id,
                 shipping_address: address,
                 coupon_code: couponApplied?.code ?? null,
+                previous_session_id: loadPendingSession(),
             });
+            savePendingSession(data.session_id);
             window.location.href = data.url;
         } catch (err) {
             setError(err.response?.data?.message ?? "Errore. Riprova.");

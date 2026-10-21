@@ -32,6 +32,8 @@ class CheckoutRequest extends FormRequest
             'shipping_address.country' => ['required_if:delivery_method,shipping', 'nullable', 'string'],
             'notes'        => ['nullable', 'string'],
             'coupon_code'  => ['nullable', 'string', 'max:50'],
+            // Sessione Stripe precedente dello stesso browser, da annullare per liberarne lo stock.
+            'previous_session_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

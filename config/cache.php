@@ -18,6 +18,14 @@ return [
     'default' => env('CACHE_STORE', 'database'),
 
     /*
+    | Store del rate limiter (middleware throttle). Separato dalla cache su database:
+    | con il driver database richieste concorrenti dallo stesso IP andavano in
+    | deadlock sull'insert ignore della tabella cache, restituendo un 500.
+    */
+
+    'limiter' => env('CACHE_LIMITER', 'file'),
+
+    /*
     |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------

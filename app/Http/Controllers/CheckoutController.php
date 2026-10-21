@@ -6,16 +6,20 @@ use App\Http\Requests\CheckoutRequest;
 use App\Models\Coupon;
 use App\Models\ShippingMethod;
 use App\Services\OrderFulfillmentService;
+use App\Services\StockReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Coupon as StripeCoupon;
 use Stripe\Stripe;
 
 class CheckoutController extends Controller
 {
-    public function __construct(private readonly OrderFulfillmentService $fulfillment)
-    {
+    public function __construct(
+        private readonly OrderFulfillmentService $fulfillment,
+        private readonly StockReservationService $reservations,
+    ) {
     }
 
     public function createSession(CheckoutRequest $request): JsonResponse
@@ -26,6 +30,22 @@ class CheckoutController extends Controller
         // auth:sanctum il token Bearer non viene interpretato, quindi risolviamo l'utente
         // esplicitamente dal guard sanctum per collegare ordine ed email se e' loggato.
         $user = $request->user('sanctum');
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        // Il cliente e' tornato indietro da Stripe e riprova: libera la vecchia
+        // prenotazione prima di validare, altrimenti gli conterebbe contro lo stock.
+        if ($previousSessionId = $validated['previous_session_id'] ?? null) {
+            try {
+                $this->reservations->cancelSession($previousSessionId);
+            } catch (\Throwable $e) {
+                // Non blocca il nuovo checkout: la prenotazione scade comunque da sola.
+                Log::warning('Annullamento sessione checkout precedente fallito.', [
+                    'session_id' => $previousSessionId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         $cartItems = $this->fulfillment->validateCartItems($validated['items'], $user);
 
@@ -53,8 +73,6 @@ class CheckoutController extends Controller
             }
             $discountAmount = $coupon->calculateDiscount($subtotal);
         }
-
-        Stripe::setApiKey(config('services.stripe.secret'));
 
         $lineItems = collect($cartItems)->map(fn ($item) => [
             'price_data' => [
@@ -103,23 +121,37 @@ class CheckoutController extends Controller
             ],
         ];
 
-        if ($discountAmount > 0) {
-            $stripeCoupon = StripeCoupon::create([
-                'amount_off' => (int) round($discountAmount * 100),
-                'currency'   => 'eur',
-                'duration'   => 'once',
-                'name'       => 'Coupon: ' . strtoupper($couponCode),
-            ]);
-            $sessionParams['discounts'] = [['coupon' => $stripeCoupon->id]];
-        }
-
         if ($email = $user?->email) {
             $sessionParams['customer_email'] = $email;
         }
 
-        $session = StripeSession::create($sessionParams);
+        // Lo stock viene scalato ora e trattenuto finche' la sessione non viene pagata
+        // o scade (webhook checkout.session.expired / comando stock:release-expired).
+        $reservation = $this->reservations->reserve($cartItems);
+        $sessionParams['metadata']['reservation_id'] = (string) $reservation->id;
+        $sessionParams['expires_at'] = $reservation->expires_at->timestamp;
 
-        return response()->json(['url' => $session->url]);
+        try {
+            if ($discountAmount > 0) {
+                $stripeCoupon = StripeCoupon::create([
+                    'amount_off' => (int) round($discountAmount * 100),
+                    'currency'   => 'eur',
+                    'duration'   => 'once',
+                    'name'       => 'Coupon: ' . strtoupper($couponCode),
+                ]);
+                $sessionParams['discounts'] = [['coupon' => $stripeCoupon->id]];
+            }
+
+            $session = StripeSession::create($sessionParams);
+        } catch (\Throwable $e) {
+            $this->reservations->release($reservation);
+
+            throw $e;
+        }
+
+        $reservation->update(['stripe_session_id' => $session->id]);
+
+        return response()->json(['url' => $session->url, 'session_id' => $session->id]);
     }
 
     public function confirm(Request $request): JsonResponse

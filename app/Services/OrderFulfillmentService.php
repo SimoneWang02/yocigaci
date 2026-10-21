@@ -11,6 +11,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\ShippingMethod;
+use App\Models\StockReservation;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,7 @@ class OrderFulfillmentService
         $discountAmount = (float) ($session->metadata->discount_amount ?? 0);
         $shippingMethodId = ($session->metadata->shipping_method_id ?? null) ? (int) $session->metadata->shipping_method_id : null;
         $shippingMethodName = ($session->metadata->shipping_method_name ?? null) ?: null;
+        $reservationId = ($session->metadata->reservation_id ?? null) ?: null;
 
         // Stripe raccoglie sempre l'email nella sua pagina di pagamento: la recuperiamo
         // qui per conservarla sull'ordine e poter inviare la conferma anche agli ospiti.
@@ -101,7 +103,9 @@ class OrderFulfillmentService
 
         // A differenza di validateCartItems() (pre-pagamento), qui il cliente ha gia'
         // pagato: prodotti disattivati o stock insufficiente NON devono mai bloccare
-        // la creazione dell'ordine. Eventuali scoperti restano visibili come stock negativo.
+        // la creazione dell'ordine. Lo stock e' gia' stato trattenuto alla creazione della
+        // sessione (StockReservationService); solo le sessioni senza prenotazione attiva
+        // lo scalano qui, e un eventuale scoperto resta visibile come stock negativo.
         $cartItems = $this->resolveItemsForFulfillment($rawItems);
 
         $subtotal = collect($cartItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
@@ -118,7 +122,12 @@ class OrderFulfillmentService
         $hasPreorder = collect($cartItems)->contains(fn ($i) => $i['is_preorder']);
 
         try {
-            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $shippingMethodId, $shippingMethodName, $notes, $subtotal, $shipping, $discountAmount, $total, $hasPreorder, $paymentIntentId, $userId, $couponCode) {
+            $order = DB::transaction(function () use ($cartItems, $shippingAddress, $deliveryMethod, $shippingMethodId, $shippingMethodName, $notes, $subtotal, $shipping, $discountAmount, $total, $hasPreorder, $paymentIntentId, $userId, $couponCode, $reservationId) {
+                $reservation = $reservationId
+                    ? StockReservation::whereKey($reservationId)->lockForUpdate()->first()
+                    : null;
+                $stockReserved = $reservation?->status === StockReservation::PENDING;
+
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => $hasPreorder ? 'preorder_confirmed' : 'paid',
@@ -153,8 +162,12 @@ class OrderFulfillmentService
                         'total_price' => $item['price'] * $item['quantity'],
                     ]);
 
-                    Product::where('id', $item['id'])->decrement('stock', $item['quantity']);
+                    if (! $stockReserved) {
+                        Product::where('id', $item['id'])->decrement('stock', $item['quantity']);
+                    }
                 }
+
+                $reservation?->update(['status' => StockReservation::COMPLETED]);
 
                 return $order;
             });

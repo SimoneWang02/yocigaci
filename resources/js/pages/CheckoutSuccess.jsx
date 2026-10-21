@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { confirmCheckout } from '../api/checkout'
 import { useCartStore } from '../store/cartStore'
+import { savePendingSession } from '../utils/checkoutStorage'
 import { Button } from '../components/ui/Button'
 import { Loader2 } from 'lucide-react'
 
@@ -21,6 +22,7 @@ export default function CheckoutSuccess() {
         confirmCheckout({ session_id: sessionId })
             .then((data) => {
                 clear()
+                savePendingSession(null)
                 navigate(`/ordine-confermato/${data.order_number}`, { replace: true })
             })
             .catch((err) => {

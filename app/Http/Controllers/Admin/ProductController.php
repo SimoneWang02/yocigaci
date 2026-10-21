@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Resources\ProductImageResource;
 use App\Http\Resources\ProductResource;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -103,10 +104,17 @@ class ProductController extends Controller
 
     public function destroy(Product $product): JsonResponse
     {
-        foreach ($product->images as $image) {
-            Storage::disk('public')->delete($image->path);
+        // order_items ha restrictOnDelete: senza questo controllo la delete fallisce
+        // con un 500 e le immagini, gia' cancellate dal disco, andrebbero perse.
+        if (OrderItem::where('product_id', $product->id)->exists()) {
+            return response()->json([
+                'message' => 'Il prodotto compare in degli ordini e non puo\' essere eliminato: disattivalo per nasconderlo dal catalogo.',
+            ], 422);
         }
+
+        $paths = $product->images->pluck('path')->all();
         $product->delete();
+        Storage::disk('public')->delete($paths);
 
         return response()->json(['message' => 'Prodotto eliminato.']);
     }
